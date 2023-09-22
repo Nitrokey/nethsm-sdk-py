@@ -33,3 +33,22 @@ dev = [
   "pytest",
   "pytest-reporter-html1",
 ]
+
+[[tool.mypy.overrides]]
+module = "nethsm.client.*"
+ignore_errors = true
+
+[tool.black]
+target-version = ["py39"]
+extend-exclude = 'nethsm/client'
+
+[tool.isort]
+py_version = "39"
+profile = "black"
+extend_skip = ["nethsm/client"]
+
+[tool.mypy]
+show_error_codes = true
+python_version = "3.9"
+warn_unused_configs = true
+warn_redundant_casts = true

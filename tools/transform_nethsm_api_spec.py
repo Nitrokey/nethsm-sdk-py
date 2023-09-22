@@ -7,7 +7,6 @@ import argparse
 # common path parameters. See https://github.com/openapi-json-schema-tools/openapi-json-schema-generator/issues/237
 
 
-
 # read cli arguments
 parser = argparse.ArgumentParser()
 parser.add_argument("input_file", help="input file")

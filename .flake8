@@ -1,0 +1,10 @@
+# template suggested by `black`
+
+[flake8]
+ignore = E203, E266, E501, W503
+max-line-length = 80
+# max-complexity = 18
+# temporary increase due to solo.key.update complexity
+max-complexity = 30
+select = B,C,E,F,W,T4,B9
+extend-exclude = nethsm/client,venv,tmp
