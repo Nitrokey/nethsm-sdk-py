@@ -1,0 +1,16 @@
+[build-system]
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "nethsm"
+authors = [{ name = "Nitrokey", email = "pypi@nitrokey.com" },]
+readme = "README.md"
+requires-python = ">=3.9"
+license = {file = "LICENSE"}
+classifiers = ["License :: OSI Approved :: Apache Software License"]
+dynamic = ["version", "description"]
+
+
+[project.urls]
+Source = "https://github.com/Nitrokey/nethsm-sdk-py"
