@@ -19,7 +19,6 @@ import enum
 import json
 import re
 
-import click
 import requests
 
 from . import client
@@ -305,14 +304,14 @@ class NetHSM:
         location = self.get_location(headers)
         key_id_match = re.fullmatch(f"/api/{self.version}/keys/(.*)", location)
         if not key_id_match:
-            raise click.ClickException("Could not determine the ID of the new key")
+            raise NetHSMError("Could not determine the ID of the new key")
         return key_id_match[1]
 
     def get_user_id_from_location(self, headers):
         location = self.get_location(headers)
         user_id_match = re.fullmatch(f"/api/{self.version}/users/(.*)", location)
         if not user_id_match:
-            raise click.ClickException("Could not determine the ID of the new user")
+            raise NetHSMError("Could not determine the ID of the new user")
         return user_id_match[1]
 
     def unlock(self, passphrase):

@@ -10,7 +10,25 @@ requires-python = ">=3.9"
 license = {file = "LICENSE"}
 classifiers = ["License :: OSI Approved :: Apache Software License"]
 dynamic = ["version", "description"]
-
+dependencies = [
+  "urllib3 >=2.0,<2.1",
+  "typing_extensions ~= 4.3.0",
+]
 
 [project.urls]
 Source = "https://github.com/Nitrokey/nethsm-sdk-py"
+
+
+[project.optional-dependencies]
+dev = [
+  "black >=22.1.0,<23",
+  "flake8",
+  "flit >=3.2,<4",
+  "ipython",
+  "isort",
+  "mypy >=1.4,<1.5",
+  "pyinstaller ==5.9.0",
+  "pyinstaller-versionfile ==2.1.1; sys_platform=='win32'",
+  "pytest",
+  "pytest-reporter-html1",
+]
