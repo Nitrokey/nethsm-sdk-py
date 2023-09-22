@@ -9,8 +9,8 @@ import uuid
 import functools
 import typing_extensions
 
-from pynitrokey.nethsm.client import exceptions
-from pynitrokey.nethsm.client.configurations import schema_configuration
+from nethsm.client import exceptions
+from nethsm.client.configurations import schema_configuration
 
 from . import validation
 

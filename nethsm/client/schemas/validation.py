@@ -19,8 +19,8 @@ import uuid
 
 import typing_extensions
 
-from pynitrokey.nethsm.client import exceptions
-from pynitrokey.nethsm.client.configurations import schema_configuration
+from nethsm.client import exceptions
+from nethsm.client.configurations import schema_configuration
 
 from . import format, original_immutabledict
 
@@ -262,7 +262,6 @@ def validate_types(
     validation_metadata: ValidationMetadata,
 ) -> None:
     if type(arg) not in allowed_types:
-        print("arg: ", arg)
         raise __get_type_error(
             arg,
             validation_metadata.path_to_item,

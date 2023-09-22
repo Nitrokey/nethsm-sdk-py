@@ -9,7 +9,7 @@
 
 import typing
 
-from pynitrokey.nethsm.client import exceptions
+from nethsm.client import exceptions
 
 
 PYTHON_KEYWORD_TO_JSON_SCHEMA_KEYWORD = {

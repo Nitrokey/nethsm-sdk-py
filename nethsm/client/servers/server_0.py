@@ -4,8 +4,8 @@
 """
 
 from __future__ import annotations
-from pynitrokey.nethsm.client.shared_imports.schema_imports import *  # pyright: ignore [reportWildcardImportFromLibrary]
-from pynitrokey.nethsm.client.shared_imports.server_imports import *  # pyright: ignore [reportWildcardImportFromLibrary]
+from nethsm.client.shared_imports.schema_imports import *  # pyright: ignore [reportWildcardImportFromLibrary]
+from nethsm.client.shared_imports.server_imports import *  # pyright: ignore [reportWildcardImportFromLibrary]
 AdditionalProperties: typing_extensions.TypeAlias = schemas.NotAnyTypeSchema
 
 

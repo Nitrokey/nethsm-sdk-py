@@ -8,12 +8,12 @@
 """
 
 from __future__ import annotations
-from pynitrokey.nethsm.client.shared_imports.schema_imports import *  # pyright: ignore [reportWildcardImportFromLibrary]
+from nethsm.client.shared_imports.schema_imports import *  # pyright: ignore [reportWildcardImportFromLibrary]
 
 IpAddress: typing_extensions.TypeAlias = schemas.StrSchema
 Port: typing_extensions.TypeAlias = schemas.IntSchema
 
-from pynitrokey.nethsm.client.components.schema import log_level
+from nethsm.client.components.schema import log_level
 Properties = typing.TypedDict(
     'Properties',
     {

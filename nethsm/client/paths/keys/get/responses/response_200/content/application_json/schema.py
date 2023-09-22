@@ -8,6 +8,6 @@
 """
 
 
-from pynitrokey.nethsm.client.shared_imports.schema_imports import *  # pyright: ignore [reportWildcardImportFromLibrary]
-from pynitrokey.nethsm.client.components.schema import key_list
+from nethsm.client.shared_imports.schema_imports import *  # pyright: ignore [reportWildcardImportFromLibrary]
+from nethsm.client.components.schema import key_list
 Schema: typing_extensions.TypeAlias = key_list.KeyList

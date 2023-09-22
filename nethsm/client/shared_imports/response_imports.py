@@ -8,7 +8,7 @@ import uuid
 import typing_extensions
 import urllib3
 
-from pynitrokey.nethsm.client import api_client, schemas, api_response
+from nethsm.client import api_client, schemas, api_response
 
 __all__ = [
     'dataclasses',

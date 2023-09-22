@@ -18,7 +18,7 @@ from urllib3 import fields
 from urllib3 import exceptions as urllib3_exceptions
 from urllib3._collections import HTTPHeaderDict
 
-from pynitrokey.nethsm.client import exceptions
+from nethsm.client import exceptions
 
 
 logger = logging.getLogger(__name__)

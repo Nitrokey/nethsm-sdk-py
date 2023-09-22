@@ -3,7 +3,7 @@ import io
 import typing
 import typing_extensions
 
-from pynitrokey.nethsm.client import api_client, schemas
+from nethsm.client import api_client, schemas
 
 __all__ = [
     'decimal',

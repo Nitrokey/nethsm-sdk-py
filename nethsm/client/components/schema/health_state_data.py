@@ -8,10 +8,10 @@
 """
 
 from __future__ import annotations
-from pynitrokey.nethsm.client.shared_imports.schema_imports import *  # pyright: ignore [reportWildcardImportFromLibrary]
+from nethsm.client.shared_imports.schema_imports import *  # pyright: ignore [reportWildcardImportFromLibrary]
 
 
-from pynitrokey.nethsm.client.components.schema import system_state
+from nethsm.client.components.schema import system_state
 Properties = typing.TypedDict(
     'Properties',
     {

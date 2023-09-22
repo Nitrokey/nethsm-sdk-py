@@ -27,8 +27,8 @@ import urllib3
 from urllib3 import _collections, fields
 
 
-from pynitrokey.nethsm.client import exceptions, rest, schemas, security_schemes, api_response
-from pynitrokey.nethsm.client.configurations import api_configuration, schema_configuration as schema_configuration_
+from nethsm.client import exceptions, rest, schemas, security_schemes, api_response
+from nethsm.client.configurations import api_configuration, schema_configuration as schema_configuration_
 
 
 class JSONEncoder(json.JSONEncoder):

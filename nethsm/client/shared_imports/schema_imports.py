@@ -8,8 +8,8 @@ import typing
 import typing_extensions
 import uuid
 
-from pynitrokey.nethsm.client import schemas
-from pynitrokey.nethsm.client.configurations import schema_configuration
+from nethsm.client import schemas
+from nethsm.client.configurations import schema_configuration
 
 U = typing.TypeVar('U')
 

@@ -17,10 +17,10 @@ import typing_extensions
 
 import urllib3
 
-from pynitrokey.nethsm.client import exceptions
-from pynitrokey.nethsm.client import security_schemes
-from pynitrokey.nethsm.client.components.security_schemes import security_scheme_basic
-from pynitrokey.nethsm.client.servers import server_0
+from nethsm.client import exceptions
+from nethsm.client import security_schemes
+from nethsm.client.components.security_schemes import security_scheme_basic
+from nethsm.client.servers import server_0
 
 # security scheme key identifier to security scheme instance
 SecuritySchemeInfo = typing.TypedDict(
@@ -163,7 +163,7 @@ class ApiConfiguration(object):
         self.logger = {}
         """Logging Settings
         """
-        self.logger["package_logger"] = logging.getLogger("pynitrokey.nethsm.client")
+        self.logger["package_logger"] = logging.getLogger("nethsm.client")
         self.logger["urllib3_logger"] = logging.getLogger("urllib3")
         self.logger_format = '%(asctime)s %(levelname)s %(message)s'
         """Log format

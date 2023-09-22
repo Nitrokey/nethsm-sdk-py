@@ -5,7 +5,7 @@ import typing
 import typing_extensions
 import uuid
 
-from pynitrokey.nethsm.client import schemas, api_response
+from nethsm.client import schemas, api_response
 
 __all__ = [
     'decimal',

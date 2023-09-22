@@ -8,6 +8,6 @@
 """
 
 
-from pynitrokey.nethsm.client.shared_imports.schema_imports import *  # pyright: ignore [reportWildcardImportFromLibrary]
-from pynitrokey.nethsm.client.components.schema import health_state_data
+from nethsm.client.shared_imports.schema_imports import *  # pyright: ignore [reportWildcardImportFromLibrary]
+from nethsm.client.components.schema import health_state_data
 Schema: typing_extensions.TypeAlias = health_state_data.HealthStateData

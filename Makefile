@@ -48,6 +48,9 @@ update-venv: $(VENV)
 	$(PYTHON3_VENV) -m pip install flit
 	$(PYTHON3_VENV) -m flit install --symlink
 
+
+OPENAPI_OUTPUT_DIR=${PWD}/tmp/openapi-client
+
 nethsm-api.yaml:
 	curl "https://nethsmdemo.nitrokey.com/api_docs/nethsm-api.yaml" --output nethsm-api.yaml
 
@@ -57,7 +60,7 @@ nethsm-client: nethsm-api.yaml
 	mkdir -p "${OPENAPI_OUTPUT_DIR}"
 	python tools/transform_nethsm_api_spec.py nethsm-api.yaml "${OPENAPI_OUTPUT_DIR}/nethsm-api.json"
 	docker run --rm -ti -v "${OPENAPI_OUTPUT_DIR}:/out" \
-		openapijsonschematools/openapi-json-schema-generator-cli:3.0.0 generate \
+		openapijsonschematools/openapi-json-schema-generator-cli:latest generate \
 		-i=/out/nethsm-api.json \
 		-g=python -o=/out/python --package-name=nethsm.client
 	cp -r "${OPENAPI_OUTPUT_DIR}/python/src/nethsm/client" nethsm

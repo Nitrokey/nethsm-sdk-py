@@ -16,7 +16,7 @@ import uuid
 
 import typing_extensions
 
-from pynitrokey.nethsm.client.configurations import schema_configuration
+from nethsm.client.configurations import schema_configuration
 
 from . import schema, validation
 

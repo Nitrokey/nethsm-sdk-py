@@ -8,6 +8,6 @@
 """
 
 
-from pynitrokey.nethsm.client.shared_imports.schema_imports import *  # pyright: ignore [reportWildcardImportFromLibrary]
-from pynitrokey.nethsm.client.components.schema import backup_passphrase_config
+from nethsm.client.shared_imports.schema_imports import *  # pyright: ignore [reportWildcardImportFromLibrary]
+from nethsm.client.components.schema import backup_passphrase_config
 Schema: typing_extensions.TypeAlias = backup_passphrase_config.BackupPassphraseConfig

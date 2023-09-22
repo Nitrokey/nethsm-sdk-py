@@ -8,12 +8,12 @@
 """
 
 from __future__ import annotations
-from pynitrokey.nethsm.client.shared_imports.schema_imports import *  # pyright: ignore [reportWildcardImportFromLibrary]
+from nethsm.client.shared_imports.schema_imports import *  # pyright: ignore [reportWildcardImportFromLibrary]
 
 AdditionalProperties: typing_extensions.TypeAlias = schemas.NotAnyTypeSchema
 
-from pynitrokey.nethsm.client.paths.keys_key_id_restrictions_tags_tag.delete.parameters.parameter_0 import schema as schema_2
-from pynitrokey.nethsm.client.paths.keys_key_id_restrictions_tags_tag.delete.parameters.parameter_1 import schema
+from nethsm.client.paths.keys_key_id_restrictions_tags_tag.delete.parameters.parameter_0 import schema as schema_2
+from nethsm.client.paths.keys_key_id_restrictions_tags_tag.delete.parameters.parameter_1 import schema
 Properties = typing.TypedDict(
     'Properties',
     {

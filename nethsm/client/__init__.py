@@ -12,15 +12,15 @@
 __version__ = "1.0.0"
 
 # import ApiClient
-from pynitrokey.nethsm.client.api_client import ApiClient
+from nethsm.client.api_client import ApiClient
 
 # import Configuration
-from pynitrokey.nethsm.client.configurations.api_configuration import ApiConfiguration
+from nethsm.client.configurations.api_configuration import ApiConfiguration
 
 # import exceptions
-from pynitrokey.nethsm.client.exceptions import OpenApiException
-from pynitrokey.nethsm.client.exceptions import ApiAttributeError
-from pynitrokey.nethsm.client.exceptions import ApiTypeError
-from pynitrokey.nethsm.client.exceptions import ApiValueError
-from pynitrokey.nethsm.client.exceptions import ApiKeyError
-from pynitrokey.nethsm.client.exceptions import ApiException
+from nethsm.client.exceptions import OpenApiException
+from nethsm.client.exceptions import ApiAttributeError
+from nethsm.client.exceptions import ApiTypeError
+from nethsm.client.exceptions import ApiValueError
+from nethsm.client.exceptions import ApiKeyError
+from nethsm.client.exceptions import ApiException

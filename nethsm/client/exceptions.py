@@ -10,7 +10,7 @@
 import dataclasses
 import typing
 
-from pynitrokey.nethsm.client import api_response
+from nethsm.client import api_response
 
 
 class OpenApiException(Exception):

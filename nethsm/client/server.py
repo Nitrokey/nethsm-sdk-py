@@ -11,7 +11,7 @@ import abc
 import dataclasses
 import typing
 
-from pynitrokey.nethsm.client.schemas import validation, schema
+from nethsm.client.schemas import validation, schema
 
 
 @dataclasses.dataclass

@@ -2,7 +2,7 @@ import dataclasses
 import typing
 import typing_extensions
 
-from pynitrokey.nethsm.client import security_schemes
+from nethsm.client import security_schemes
 
 __all__ = [
     'dataclasses',

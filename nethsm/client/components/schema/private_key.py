@@ -8,13 +8,13 @@
 """
 
 from __future__ import annotations
-from pynitrokey.nethsm.client.shared_imports.schema_imports import *  # pyright: ignore [reportWildcardImportFromLibrary]
+from nethsm.client.shared_imports.schema_imports import *  # pyright: ignore [reportWildcardImportFromLibrary]
 
 
-from pynitrokey.nethsm.client.components.schema import key_mechanisms
-from pynitrokey.nethsm.client.components.schema import key_private_data
-from pynitrokey.nethsm.client.components.schema import key_restrictions
-from pynitrokey.nethsm.client.components.schema import key_type
+from nethsm.client.components.schema import key_mechanisms
+from nethsm.client.components.schema import key_private_data
+from nethsm.client.components.schema import key_restrictions
+from nethsm.client.components.schema import key_type
 Properties = typing.TypedDict(
     'Properties',
     {

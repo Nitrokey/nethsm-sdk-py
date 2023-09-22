@@ -8,11 +8,11 @@
 """
 
 from __future__ import annotations
-from pynitrokey.nethsm.client.shared_imports.schema_imports import *  # pyright: ignore [reportWildcardImportFromLibrary]
+from nethsm.client.shared_imports.schema_imports import *  # pyright: ignore [reportWildcardImportFromLibrary]
 
 
-from pynitrokey.nethsm.client.components.schema import base64
-from pynitrokey.nethsm.client.components.schema import decrypt_mode
+from nethsm.client.components.schema import base64
+from nethsm.client.components.schema import decrypt_mode
 Properties = typing.TypedDict(
     'Properties',
     {

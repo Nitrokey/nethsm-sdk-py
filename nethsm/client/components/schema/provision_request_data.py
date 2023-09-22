@@ -8,11 +8,11 @@
 """
 
 from __future__ import annotations
-from pynitrokey.nethsm.client.shared_imports.schema_imports import *  # pyright: ignore [reportWildcardImportFromLibrary]
+from nethsm.client.shared_imports.schema_imports import *  # pyright: ignore [reportWildcardImportFromLibrary]
 
 SystemTime: typing_extensions.TypeAlias = schemas.DateTimeSchema
 
-from pynitrokey.nethsm.client.components.schema import passphrase
+from nethsm.client.components.schema import passphrase
 Properties = typing.TypedDict(
     'Properties',
     {

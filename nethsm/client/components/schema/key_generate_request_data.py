@@ -8,7 +8,7 @@
 """
 
 from __future__ import annotations
-from pynitrokey.nethsm.client.shared_imports.schema_imports import *  # pyright: ignore [reportWildcardImportFromLibrary]
+from nethsm.client.shared_imports.schema_imports import *  # pyright: ignore [reportWildcardImportFromLibrary]
 
 
 
@@ -23,10 +23,10 @@ class Length(
     inclusive_maximum: typing.Union[int, float] = 8192
     inclusive_minimum: typing.Union[int, float] = 128
 
-from pynitrokey.nethsm.client.components.schema import id
-from pynitrokey.nethsm.client.components.schema import key_mechanisms
-from pynitrokey.nethsm.client.components.schema import key_restrictions
-from pynitrokey.nethsm.client.components.schema import key_type
+from nethsm.client.components.schema import id
+from nethsm.client.components.schema import key_mechanisms
+from nethsm.client.components.schema import key_restrictions
+from nethsm.client.components.schema import key_type
 Properties = typing.TypedDict(
     'Properties',
     {

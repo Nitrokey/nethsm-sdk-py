@@ -1,7 +1,7 @@
 import typing
 import typing_extensions
 
-from pynitrokey.nethsm.client.apis.tags.default_api import DefaultApi
+from nethsm.client.apis.tags.default_api import DefaultApi
 
 TagToApi = typing.TypedDict(
     'TagToApi',

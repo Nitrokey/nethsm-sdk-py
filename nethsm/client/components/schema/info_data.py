@@ -8,7 +8,7 @@
 """
 
 from __future__ import annotations
-from pynitrokey.nethsm.client.shared_imports.schema_imports import *  # pyright: ignore [reportWildcardImportFromLibrary]
+from nethsm.client.shared_imports.schema_imports import *  # pyright: ignore [reportWildcardImportFromLibrary]
 
 Vendor: typing_extensions.TypeAlias = schemas.StrSchema
 Product: typing_extensions.TypeAlias = schemas.StrSchema

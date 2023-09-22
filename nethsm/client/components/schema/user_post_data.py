@@ -8,12 +8,12 @@
 """
 
 from __future__ import annotations
-from pynitrokey.nethsm.client.shared_imports.schema_imports import *  # pyright: ignore [reportWildcardImportFromLibrary]
+from nethsm.client.shared_imports.schema_imports import *  # pyright: ignore [reportWildcardImportFromLibrary]
 
 RealName: typing_extensions.TypeAlias = schemas.StrSchema
 
-from pynitrokey.nethsm.client.components.schema import passphrase
-from pynitrokey.nethsm.client.components.schema import user_role
+from nethsm.client.components.schema import passphrase
+from nethsm.client.components.schema import user_role
 Properties = typing.TypedDict(
     'Properties',
     {

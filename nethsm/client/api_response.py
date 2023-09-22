@@ -11,7 +11,7 @@ import typing
 
 import urllib3
 
-from pynitrokey.nethsm.client import schemas
+from nethsm.client import schemas
 
 
 @dataclasses.dataclass
