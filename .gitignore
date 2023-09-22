@@ -2,3 +2,5 @@ __pycache__
 venv
 .vscode
 tmp
+.pytest_cache
+backupNethsm.bin

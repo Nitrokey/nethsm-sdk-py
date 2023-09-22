@@ -32,7 +32,15 @@ dev = [
   "pyinstaller-versionfile ==2.1.1; sys_platform=='win32'",
   "pytest",
   "pytest-reporter-html1",
+  "docker",
+  "pycryptodome",
 ]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# ignore InsecureRequestWarning from urllib3
+filterwarnings = ["ignore::urllib3.exceptions.InsecureRequestWarning"]
+
 
 [[tool.mypy.overrides]]
 module = "nethsm.client.*"

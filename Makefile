@@ -36,8 +36,8 @@ clean: semi-clean
 
 # automatic code fixes
 fix:
-	$(PYTHON3_VENV) -m black $(BLACK_FLAGS) $(PACKAGE_NAME)/
-	$(PYTHON3_VENV) -m isort $(ISORT_FLAGS) $(PACKAGE_NAME)/
+	$(PYTHON3_VENV) -m black $(BLACK_FLAGS) $(PACKAGE_NAME)/ tests/
+	$(PYTHON3_VENV) -m isort $(ISORT_FLAGS) $(PACKAGE_NAME)/ tests/
 
 $(VENV):
 	$(PYTHON3) -m venv $(VENV)
