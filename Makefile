@@ -1,4 +1,4 @@
-PACKAGE_NAME=nethsm-sdk-py
+PACKAGE_NAME=nethsm
 VENV=venv
 PYTHON3=python3
 PYTHON3_VENV=venv/bin/python3
