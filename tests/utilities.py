@@ -1,6 +1,7 @@
 import base64
 import contextlib
 import datetime
+import socket
 from os import environ
 from time import sleep
 
@@ -12,7 +13,6 @@ from Crypto.Cipher import PKCS1_v1_5 as PKCS115_Cipher
 from Crypto.Hash import SHA256
 from Crypto.PublicKey import RSA
 from Crypto.Signature import PKCS1_PSS
-import socket
 
 import nethsm as nethsm_module
 
@@ -59,8 +59,6 @@ def docker_container():
     container = client.containers.run(
         C.IMAGE,
         "",
-        name="nethsm",
-        hostname="nethsm",
         ports={"8443": 8443},
         remove=True,
         detach=True,

@@ -127,7 +127,7 @@ def test_add_get_key_by_public_key(nethsm):
     nethsm.get_key_public_key(C.KEY_ID_ADDED)
 
 
-def test_generate_get_key_by_id(nethsm):
+def test_generate_get_key_by_id(nethsm: nethsm_module.NetHSM):
     """Get information about a key on the NetHSM.
 
     This command requires authentication as a user with the Administrator or
@@ -136,7 +136,7 @@ def test_generate_get_key_by_id(nethsm):
 
     key = nethsm.get_key(C.KEY_ID_GENERATED)
     # mechanisms = ", ".join(key.mechanisms) Todo: test with multiple mech.
-    assert key.type == C.TYPE
+    assert key.type.value == C.TYPE
     for mechanism in key.mechanisms:
         assert mechanism in C.MECHANISM
     assert key.operations >= 0
@@ -180,7 +180,7 @@ def test_delete_key_tag_get_key(nethsm):
     assert C.TAG3 in key.tags
 
 
-def test_list_get_keys(nethsm):
+def test_list_get_keys(nethsm: nethsm_module.NetHSM):
     """List all keys on the NetHSM.
 
     This command requires authentication as a user with the Administrator or
@@ -191,7 +191,7 @@ def test_list_get_keys(nethsm):
     key_ids = nethsm.list_keys(None)
     for key_id in key_ids:
         key = nethsm.get_key(key_id=key_id)
-        assert key.type == C.TYPE
+        assert key.type.value == C.TYPE
         for mechanism in key.mechanisms:
             assert mechanism in C.MECHANISM
         assert key.operations >= 0
@@ -215,7 +215,7 @@ def test_delete_key(nethsm):
     nethsm.delete_key(C.KEY_ID_ADDED)
 
 
-def test_set_get_key_certificate(nethsm):
+def test_set_get_key_certificate(nethsm: nethsm_module.NetHSM):
 
     add_key(nethsm)
     with open(C.CERTIFICATE_FILE, "rb") as f:
