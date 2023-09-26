@@ -1,4 +1,4 @@
-import base64
+from os import environ
 
 
 class Constants:
@@ -9,7 +9,9 @@ class Constants:
     CERTIFICATE_FILE = "tests/certificate.pem"
 
     # all test_nethsm
-    HOST = "localhost:8443"
+
+    # READ env variables
+    HOST = environ.get("NETHSM_HOST", "127.0.0.1:8443")
     VERSION = "v1"
     VERIFY_TLS = False
 

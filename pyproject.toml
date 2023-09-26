@@ -34,6 +34,8 @@ dev = [
   "pytest-reporter-html1",
   "docker",
   "pycryptodome",
+  "requests",
+  "types-requests"
 ]
 
 [tool.pytest.ini_options]

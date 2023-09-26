@@ -4,3 +4,4 @@ venv
 tmp
 .pytest_cache
 backupNethsm.bin
+.mypy_cache
