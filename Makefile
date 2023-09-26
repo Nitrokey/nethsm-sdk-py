@@ -2,6 +2,7 @@ PACKAGE_NAME=nethsm
 VENV=venv
 PYTHON3=python3
 PYTHON3_VENV=venv/bin/python3
+FLAKE8_DIRS=$(PACKAGE_NAME)/
 
 all: init
 
@@ -21,10 +22,7 @@ check-typing:
 	@echo "Note: run semi-clean target in case this fails without any proper reason"
 	$(PYTHON3_VENV) -m mypy $(PACKAGE_NAME)/
 
-check-doctest:
-	$(PYTHON3_VENV) -m doctest $(PACKAGE_NAME)/nk3/utils.py
-
-check: check-format check-import-sorting check-style check-typing check-doctest
+check: check-format check-import-sorting check-style check-typing test 
 
 semi-clean:
 	rm -rf ./**/__pycache__
@@ -65,3 +63,6 @@ nethsm-client: nethsm-api.yaml
 		-g=python -o=/out/python --package-name=nethsm.client
 	cp -r "${OPENAPI_OUTPUT_DIR}/python/src/nethsm/client" nethsm
 
+.PHONY: test
+test:
+	$(PYTHON3_VENV) -m pytest -s
