@@ -1,15 +1,18 @@
 import base64
 import contextlib
 import datetime
-import os
+from os import environ
+from time import sleep
 
 import docker
 import pytest
+import urllib3
 from conftest import Constants as C
 from Crypto.Cipher import PKCS1_v1_5 as PKCS115_Cipher
 from Crypto.Hash import SHA256
 from Crypto.PublicKey import RSA
 from Crypto.Signature import PKCS1_PSS
+import socket
 
 import nethsm as nethsm_module
 
@@ -37,37 +40,54 @@ def nethsm():
 def docker_container():
     client = docker.from_env()
 
-    containers = client.containers.list(
-        {"ancestor": C.IMAGE, "status": "running"}, ignore_removed=True
-    )
-    for container in containers:
-        try:
-            container.kill()
-        except docker.errors.APIError:
-            pass
+    while True:
+        containers = client.containers.list(
+            filters={"ancestor": C.IMAGE}, ignore_removed=True
+        )
+        print(containers)
+        if len(containers) == 0:
+            break
+
+        for container in containers:
+            try:
+                container.remove(force=True)
+            except docker.errors.APIError as e:
+                print(e)
+                pass
+        sleep(1)
 
     container = client.containers.run(
         C.IMAGE,
         "",
-        cap_add="NET_ADMIN",
+        name="nethsm",
+        hostname="nethsm",
         ports={"8443": 8443},
-        devices=["/dev/kvm:/dev/kvm", "dev/net/tun:/dev/net/tun"],
         remove=True,
         detach=True,
     )
+
+    http = urllib3.PoolManager(cert_reqs="CERT_NONE")
+    print("Waiting for container to be ready")
+    while True:
+        try:
+            response = http.request("GET", f"https://{C.HOST}/api/v1/health/alive")
+            print(f"Response: {response.status}")
+            if response.status == 200:
+                break
+        except Exception as e:
+            print(e)
+            pass
+        sleep(0.5)
+
     return container
 
 
 @contextlib.contextmanager
 def connect(username):
-    """Todo: Edit following example into connect() so it checks for
-    username and password:"""
-    """username = ctx.obj["NETHSM_USERNAME"]
-    password = ctx.obj["NETHSM_PASSWORD"]"""
     with nethsm_module.connect(
         C.HOST, C.VERSION, username.USER_ID, C.PASSWORD, C.VERIFY_TLS
-    ) as nethsm:
-        yield nethsm
+    ) as nethsm_out:
+        yield nethsm_out
 
 
 def provision(nethsm):
@@ -111,14 +131,12 @@ def generate_rsa_key_pair(length_in_bit):
     return p, q, e
 
 
-def verify_rsa_signature(
-    public_key: str | bytes, message: SHA256.SHA256Hash, signature: bytes
-):
+def verify_rsa_signature(public_key: str, message: SHA256.SHA256Hash, signature: bytes):
     key = RSA.importKey(public_key)
     return PKCS1_PSS.new(key).verify(message, signature)
 
 
-def encrypt_rsa(public_key: str | bytes, message: str):
+def encrypt_rsa(public_key: str, message: str):
     public_key = RSA.importKey(public_key)
     cipher = PKCS115_Cipher.new(public_key)
     return cipher.encrypt(bytes(message, "utf-8"))

@@ -4,23 +4,20 @@ import os
 import docker
 import pytest
 from conftest import Constants as C
-from test_nethsm_keys import add_key
+from utilities import nethsm  # noqa: F401
 from utilities import (
     add_user,
     connect,
     docker_container,
-    nethsm,
     provision,
     set_backup_passphrase,
     update,
 )
 
-import nethsm as nethsm_module
-
 """######################### Preparation for the Tests #########################
 
 To run these test on Ubuntu like systems in Terminal you need sudo rights.
-If you want to run these tests on Ubuntu like systems in Pycharm follow this 
+If you want to run these tests on Ubuntu like systems in Pycharm follow this
 instruction to run the script as root:
 https://stackoverflow.com/questions/36530082/running-pycharm-as-root-from-launcher
 """
@@ -37,10 +34,10 @@ def test_provision_system_info(nethsm):
     TODO: do not rely on string constants, as nethsm:testing version changes
     """
     info = nethsm.get_system_info()
-    assert type(info.firmware_version) == str
-    assert type(info.software_version) == str
-    assert type(info.hardware_version) == str
-    assert type(info.build_tag) == str
+    assert type(info.firmware_version) is str
+    assert type(info.software_version) is str
+    assert type(info.hardware_version) is str
+    assert type(info.build_tag) is str
     assert len(info.build_tag) == C.BUILD_TAG_LEN
 
     # fixme: this changes between the NetHSM instances

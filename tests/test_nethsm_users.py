@@ -1,13 +1,14 @@
 import pytest
 from conftest import Constants as C
-from utilities import add_user, connect, nethsm
+from utilities import nethsm  # noqa: F401
+from utilities import add_user, connect
 
 import nethsm as nethsm_module
 
 """######################### Preparation for the Tests #########################
 
 To run these test on Ubuntu like systems in Terminal you need sudo rights.
-If you want to run these tests on Ubuntu like systems in Pycharm follow this 
+If you want to run these tests on Ubuntu like systems in Pycharm follow this
 instruction to run the script as root:
 https://stackoverflow.com/questions/36530082/running-pycharm-as-root-from-launcher
 """

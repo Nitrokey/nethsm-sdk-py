@@ -1,16 +1,13 @@
-import base64
-
 import docker
 import pytest
 from conftest import Constants as C
+from utilities import nethsm  # noqa: F401
 from utilities import add_user, connect, docker_container, lock, provision, unlock
-
-import nethsm as nethsm_module
 
 """######################### Preparation for the Tests #########################
 
 To run these test on Ubuntu like systems in Terminal you need sudo rights.
-If you want to run these tests on Ubuntu like systems in Pycharm follow this 
+If you want to run these tests on Ubuntu like systems in Pycharm follow this
 instruction to run the script as root:
 https://stackoverflow.com/questions/36530082/running-pycharm-as-root-from-launcher
 """
@@ -72,13 +69,6 @@ def test_state_provision_add_user_metrics_get_metrics(nethsm_no_provision):
     with connect(C.MetricsUser) as nethsm:
         data = nethsm.get_metrics()
         metrics = [
-            "client connections",
-            "established state",
-            "external.received bytes",
-            "external.received packets",
-            "external.transmitted bytes",
-            "external.transmitted packets",
-            "free chunk count",
             "gc compactions",
             "gc major bytes",
             "gc major collections",
@@ -88,28 +78,9 @@ def test_state_provision_add_user_metrics_get_metrics(nethsm_no_provision):
             "http response 204",
             "http response time",
             "http response total",
-            "internal.received bytes",
-            "internal.received packets",
-            "internal.transmitted bytes",
-            "internal.transmitted packets",
             "kv write",
             "log errors",
             "log warnings",
-            "maximum allocated space",
-            "maximum releasable bytes",
-            "mmapped region count",
-            "new sleeper size",
-            "non-mmapped allocated bytes",
-            "sleep queue size",
-            "syn-rcvd state",
-            "timers",
-            "total allocated space",
-            "total client",
-            "total established",
-            "total free space",
-            "total sleeper size",
-            "total syn-rcvd",
-            "total timers",
             "uptime",
         ]
         for metric in metrics:
