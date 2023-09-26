@@ -21,7 +21,7 @@ jobs:
       - name: Check if version tag and package version are equal
         run: |
           TAG_VERSION="${{ github.event.release.tag_name }}"
-          if [ ${TAG_VERSION:1} == $(cat pynitrokey/VERSION) ]; then exit 0; else exit 1; fi
+          if [ ${TAG_VERSION:1} == $(cat nethsm/VERSION) ]; then exit 0; else exit 1; fi
   build:
     name: Build
     runs-on: ubuntu-latest
