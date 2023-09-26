@@ -5,3 +5,5 @@ tmp
 .pytest_cache
 backupNethsm.bin
 .mypy_cache
+.coverage
+coverage.xml

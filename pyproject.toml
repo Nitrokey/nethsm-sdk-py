@@ -35,7 +35,8 @@ dev = [
   "docker",
   "pycryptodome",
   "requests",
-  "types-requests"
+  "types-requests",
+  "pytest-cov"
 ]
 
 [tool.pytest.ini_options]
