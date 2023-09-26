@@ -23,7 +23,6 @@ from io import BufferedReader
 from typing import Any, List, Literal, Optional, Tuple, Union, cast
 from urllib.parse import urlencode
 
-import requests
 from urllib3 import HTTPResponse, _collections
 from urllib3._collections import HTTPHeaderDict
 
@@ -339,13 +338,8 @@ class NetHSM:
         config.verify_ssl = verify_tls
         self.client = client.ApiClient(configuration=config)
 
-        self.session = requests.Session()
-        self.session.auth = (self.username, self.password)
-        self.session.verify = verify_tls
-
     def close(self):
         self.client.close()
-        self.session.close()
 
     def request(
         self,
