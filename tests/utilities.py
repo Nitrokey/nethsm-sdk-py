@@ -5,13 +5,6 @@ import socket
 from os import environ
 from time import sleep
 
-from cryptography import x509
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.asymmetric import rsa
-from cryptography.x509.oid import NameOID
-from cryptography.hazmat.primitives.serialization import Encoding, PrivateFormat, NoEncryption
-
-
 import docker
 import pytest
 import urllib3
@@ -20,6 +13,15 @@ from Crypto.Cipher import PKCS1_v1_5 as PKCS115_Cipher
 from Crypto.Hash import SHA256
 from Crypto.PublicKey import RSA
 from Crypto.Signature import PKCS1_PSS
+from cryptography import x509
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.primitives.serialization import (
+    Encoding,
+    NoEncryption,
+    PrivateFormat,
+)
+from cryptography.x509.oid import NameOID
 
 import nethsm as nethsm_module
 
@@ -184,14 +186,12 @@ def update(nethsm):
         print(e, type(e))
         assert False
 
-def self_sign_csr(csr : str):
+
+def self_sign_csr(csr: str):
     # Generate a private key
-    private_key = rsa.generate_private_key(
-        public_exponent=65537,
-        key_size=2048
-    )
-    parsed_csr = x509.load_pem_x509_csr(csr.encode("utf-8"))    
-    
+    private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+    parsed_csr = x509.load_pem_x509_csr(csr.encode("utf-8"))
+
     subject = parsed_csr.subject
     issuer = subject
     public_key = parsed_csr.public_key()
@@ -205,8 +205,13 @@ def self_sign_csr(csr : str):
         .not_valid_before(now)
         .not_valid_after(now + datetime.timedelta(days=365))
         .add_extension(x509.BasicConstraints(ca=False, path_length=None), critical=True)
-        .add_extension(x509.SubjectKeyIdentifier.from_public_key(public_key), critical=False)
-        .add_extension(x509.AuthorityKeyIdentifier.from_issuer_public_key(public_key), critical=False)
+        .add_extension(
+            x509.SubjectKeyIdentifier.from_public_key(public_key), critical=False
+        )
+        .add_extension(
+            x509.AuthorityKeyIdentifier.from_issuer_public_key(public_key),
+            critical=False,
+        )
         .sign(private_key, hashes.SHA256())
     )
     return cert.public_bytes(Encoding.PEM)
