@@ -2,6 +2,9 @@ from os import environ
 
 
 class Constants:
+    # test mode (ci, docker)
+    TEST_MODE = environ.get("TEST_MODE", "docker")
+
     # docker
     IMAGE = environ.get("NETHSM_IMAGE", "nitrokey/nethsm:testing")
 

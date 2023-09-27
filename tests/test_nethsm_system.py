@@ -8,7 +8,7 @@ from utilities import nethsm  # noqa: F401
 from utilities import (
     add_user,
     connect,
-    docker_container,
+    start_nethsm,
     provision,
     set_backup_passphrase,
     update,
@@ -79,7 +79,7 @@ def test_state_restore(nethsm):
     """Restore a backup of a NetHSM instance from a file.
 
     If the system time is not set, the current system time is used."""
-    docker_container().start()
+    start_nethsm()
 
     system_time = datetime.datetime.now(datetime.timezone.utc)
     if nethsm.get_state().value == "Unprovisioned":
@@ -99,7 +99,7 @@ def test_state_provision_update(nethsm):
 
     This command requires authentication as a user with the Administrator
     role."""
-    docker_container().start()
+    start_nethsm()
 
     provision(nethsm)
 
@@ -111,7 +111,7 @@ def test_state_provision_update_cancel_update(nethsm):
 
     This command requires authentication as a user with the Administrator
     role."""
-    docker_container().start()
+    start_nethsm()
 
     provision(nethsm)
 
@@ -124,7 +124,7 @@ def test_update_commit_update(nethsm):
 
     This command requires authentication as a user with the Administrator
     role."""
-    docker_container().start()
+    start_nethsm()
 
     provision(nethsm)
 
@@ -137,14 +137,14 @@ def test_provision_reboot(nethsm):
 
     This command requires authentication as a user with the Administrator
     role."""
-    docker_container().start()
+    start_nethsm()
 
     provision(nethsm)
 
     nethsm.reboot()
 
     try:
-        docker_container().start()
+        start_nethsm()
     except docker.errors.APIError:
         pass
 
@@ -154,13 +154,13 @@ def test_provision_shutdown(nethsm):
 
     This command requires authentication as a user with the Administrator
     role."""
-    docker_container().start()
+    start_nethsm()
 
     provision(nethsm)
 
     nethsm.shutdown()
 
     try:
-        docker_container().start()
+        start_nethsm()
     except docker.errors.APIError:
         pass

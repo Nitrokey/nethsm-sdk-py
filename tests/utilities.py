@@ -1,8 +1,8 @@
 import base64
 import contextlib
 import datetime
-import socket
-from os import environ
+import os
+import subprocess
 from time import sleep
 
 import docker
@@ -18,8 +18,6 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives.serialization import (
     Encoding,
-    NoEncryption,
-    PrivateFormat,
 )
 from cryptography.x509.oid import NameOID
 
@@ -34,7 +32,7 @@ def nethsm():
     a nethsm instance via Docker container, also the first provision of the
     NetHSM will be done in here"""
 
-    container = docker_container()
+    container = start_nethsm()
 
     with connect(C.AdminUser) as nethsm:
         provision(nethsm)
@@ -46,32 +44,76 @@ def nethsm():
         pass
 
 
-def docker_container():
-    client = docker.from_env()
+class KeyfenderManager:
+    def __init__():
+        ...
 
-    while True:
-        containers = client.containers.list(
-            filters={"ancestor": C.IMAGE}, ignore_removed=True
+    def kill():
+        ...
+
+
+class KeyfenderDockerManager(KeyfenderManager):
+    def __init__(self):
+        client = docker.from_env()
+
+        while True:
+            containers = client.containers.list(
+                filters={"ancestor": C.IMAGE}, ignore_removed=True
+            )
+            print(containers)
+            if len(containers) == 0:
+                break
+
+            for container in containers:
+                try:
+                    container.remove(force=True)
+                except docker.errors.APIError as e:
+                    print(e)
+                    pass
+            sleep(1)
+
+        container = client.containers.run(
+            C.IMAGE,
+            "",
+            ports={"8443": 8443},
+            remove=True,
+            detach=True,
         )
-        print(containers)
-        if len(containers) == 0:
-            break
+        self.container = container
 
-        for container in containers:
-            try:
-                container.remove(force=True)
-            except docker.errors.APIError as e:
-                print(e)
-                pass
-        sleep(1)
+    def kill(self):
+        try:
+            self.container.kill()
+        except docker.errors.APIError:
+            pass
 
-    container = client.containers.run(
-        C.IMAGE,
-        "",
-        ports={"8443": 8443},
-        remove=True,
-        detach=True,
-    )
+
+class KeyfenderCIManager(KeyfenderManager):
+    def __init__(self):
+        os.system("pkill keyfender.unix")
+        os.system("pkill etcd")
+        os.system("rm -rf /data")
+
+        self.process = subprocess.Popen(
+            [
+                "/bin/sh",
+                "-c",
+                "/start.sh",
+            ]
+        )
+
+    def kill(self):
+        self.process.kill()
+
+
+def start_nethsm():
+
+    if C.TEST_MODE == "docker":
+        context = KeyfenderDockerManager()
+    elif C.TEST_MODE == "ci":
+        context = KeyfenderCIManager()
+    else:
+        raise Exception("Invalid Test Mode")
 
     http = urllib3.PoolManager(cert_reqs="CERT_NONE")
     print("Waiting for container to be ready")
@@ -86,7 +128,7 @@ def docker_container():
             pass
         sleep(0.5)
 
-    return container
+    return context
 
 
 @contextlib.contextmanager

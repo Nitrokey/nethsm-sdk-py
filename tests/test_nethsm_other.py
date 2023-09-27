@@ -2,7 +2,7 @@ import docker
 import pytest
 from conftest import Constants as C
 from utilities import nethsm  # noqa: F401
-from utilities import add_user, connect, docker_container, lock, provision, unlock
+from utilities import add_user, connect, start_nethsm, lock, provision, unlock
 
 """######################### Preparation for the Tests #########################
 
@@ -19,7 +19,7 @@ def nethsm_no_provision():
 
     This Pytest Fixture will run before the tests to provide the tests with
     a nethsm instance via Docker container"""
-    container = docker_container()
+    container = start_nethsm()
 
     with connect(C.AdminUser) as nethsm:
         yield nethsm
