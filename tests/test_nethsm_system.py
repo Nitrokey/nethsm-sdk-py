@@ -8,9 +8,9 @@ from utilities import nethsm  # noqa: F401
 from utilities import (
     add_user,
     connect,
-    start_nethsm,
     provision,
     set_backup_passphrase,
+    start_nethsm,
     update,
 )
 

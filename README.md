@@ -64,7 +64,5 @@ To work around this, some functions are written manually, using ``NetHSM.request
 
 The current list of such functions is:
 
-- ``NetHSM.restore()`` : ``/system/restore``
 - ``NetHSM.set_key_certificate()`` : ``/keys/{KeyID}/cert``
 - ``NetHSM.set_certificate()`` : ``/config/tls/cert.pem``
-- ``NetHSM.update()`` : ``/system/update``

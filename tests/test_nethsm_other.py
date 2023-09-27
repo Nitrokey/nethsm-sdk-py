@@ -2,7 +2,7 @@ import docker
 import pytest
 from conftest import Constants as C
 from utilities import nethsm  # noqa: F401
-from utilities import add_user, connect, start_nethsm, lock, provision, unlock
+from utilities import add_user, connect, lock, provision, start_nethsm, unlock
 
 """######################### Preparation for the Tests #########################
 

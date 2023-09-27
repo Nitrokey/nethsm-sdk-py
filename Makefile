@@ -53,6 +53,8 @@ nethsm-api.yaml:
 	curl "https://nethsmdemo.nitrokey.com/api_docs/nethsm-api.yaml" --output nethsm-api.yaml
 
 # Generates the OpenAPI client for the NetHSM REST API
+# Currently using tag latest because the 3.0.0 tag has problem.
+# Hash of the current latest tag (19/09/2023): 880ff39e9610bc379e68da03de91f20af51d5242f19bc9c29ac04f763c480f82
 .PHONY: nethsm-client
 nethsm-client: nethsm-api.yaml
 	mkdir -p "${OPENAPI_OUTPUT_DIR}"

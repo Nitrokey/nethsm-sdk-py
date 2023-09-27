@@ -1275,11 +1275,14 @@ class NetHSM:
 
     def restore(self, backup: BufferedReader, passphrase: str, time: datetime):
         try:
-            params = {
-                "backupPassphrase": passphrase,
-                "systemTime": time.isoformat(),
-            }
-            self.request("POST", "system/restore", params=params, data=backup)
+            from .client.paths.system_restore.post.query_parameters import (
+                QueryParametersDict,
+            )
+
+            params = QueryParametersDict(
+                backupPassphrase=passphrase, systemTime=time.isoformat()
+            )
+            self.get_api().system_restore_post(body=backup, query_params=params)
         except ApiException as e:
             _handle_api_exception(
                 e,
@@ -1291,11 +1294,11 @@ class NetHSM:
 
     def update(self, image: BufferedReader):
         try:
-            response = self.request(
-                "POST",
-                "system/update",
-                data=image,
-                mime_type="application/octet-stream",
+            # Currently the deserialisation doesn't work because of a bug where the api sends the content-type header twice
+            # https://git.nitrokey.com/nitrokey/nethsm/nethsm/-/issues/245
+
+            response = self.get_api().system_update_post(
+                body=image, skip_deserialization=True
             )
         except ApiException as e:
             _handle_api_exception(
@@ -1308,9 +1311,12 @@ class NetHSM:
                 },
             )
 
-        # read releaseNotes
-        json_str = response.data.decode("utf-8")
+        # Manually read the release notes from the response body
+        json_str = response.response.data.decode("utf-8")
         return json.loads(json_str)["releaseNotes"]
+
+        # # Use this one when the bug is fixed:
+        # return response.body.releaseNotes
 
     def cancel_update(self):
         try:

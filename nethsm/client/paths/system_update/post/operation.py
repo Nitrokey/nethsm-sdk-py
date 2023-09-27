@@ -68,7 +68,12 @@ class BaseApi(api_client.Api):
     @typing.overload
     def _system_update_post(
         self,
-        body: str,
+        body: typing.Union[
+            bytes,
+            io.FileIO,
+            io.BufferedReader,
+            schemas.FileIO
+        ],
         *,
         skip_deserialization: typing.Literal[False] = False,
         content_type: typing.Literal["application/octet-stream"] = "application/octet-stream",
@@ -82,7 +87,12 @@ class BaseApi(api_client.Api):
     @typing.overload
     def _system_update_post(
         self,
-        body: str,
+        body: typing.Union[
+            bytes,
+            io.FileIO,
+            io.BufferedReader,
+            schemas.FileIO
+        ],
         *,
         skip_deserialization: typing.Literal[True],
         content_type: typing.Literal["application/octet-stream"] = "application/octet-stream",
@@ -95,7 +105,12 @@ class BaseApi(api_client.Api):
 
     def _system_update_post(
         self,
-        body: str,
+        body: typing.Union[
+            bytes,
+            io.FileIO,
+            io.BufferedReader,
+            schemas.FileIO
+        ],
         *,
         skip_deserialization: bool = False,
         content_type: typing.Literal["application/octet-stream"] = "application/octet-stream",

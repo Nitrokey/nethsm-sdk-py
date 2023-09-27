@@ -56,7 +56,12 @@ class BaseApi(api_client.Api):
     @typing.overload
     def _system_restore_post(
         self,
-        body: str,
+        body: typing.Union[
+            bytes,
+            io.FileIO,
+            io.BufferedReader,
+            schemas.FileIO
+        ],
         query_params: typing.Union[
             QueryParametersDictInput,
             QueryParametersDict
@@ -72,7 +77,12 @@ class BaseApi(api_client.Api):
     @typing.overload
     def _system_restore_post(
         self,
-        body: str,
+        body: typing.Union[
+            bytes,
+            io.FileIO,
+            io.BufferedReader,
+            schemas.FileIO
+        ],
         query_params: typing.Union[
             QueryParametersDictInput,
             QueryParametersDict
@@ -87,7 +97,12 @@ class BaseApi(api_client.Api):
 
     def _system_restore_post(
         self,
-        body: str,
+        body: typing.Union[
+            bytes,
+            io.FileIO,
+            io.BufferedReader,
+            schemas.FileIO
+        ],
         query_params: typing.Union[
             QueryParametersDictInput,
             QueryParametersDict
