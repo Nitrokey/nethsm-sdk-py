@@ -3,7 +3,7 @@ from os import environ
 
 class Constants:
     # docker
-    IMAGE = "nitrokey/nethsm:testing"
+    IMAGE = environ.get("NETHSM_IMAGE", "nitrokey/nethsm:testing")
 
     TLS_PEM = "tests/tls.pem"
     CERTIFICATE_FILE = "tests/certificate.pem"

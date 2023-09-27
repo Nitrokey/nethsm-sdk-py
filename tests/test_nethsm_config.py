@@ -3,8 +3,7 @@ from io import BytesIO
 
 import pytest
 from conftest import Constants as C
-from utilities import nethsm, self_sign_csr  # noqa: F401
-from utilities import lock, unlock
+from utilities import lock, nethsm, self_sign_csr, unlock  # noqa: F401
 
 import nethsm as nethsm_module
 
@@ -79,9 +78,9 @@ def test_set_certificate(nethsm: nethsm_module.NetHSM) -> None:
     )
     cert = self_sign_csr(csr)
     nethsm.set_certificate(BytesIO(cert))
-    
+
     remote_cert = nethsm.get_certificate()
-    assert cert.decode('utf-8') == remote_cert
+    assert cert.decode("utf-8") == remote_cert
 
 
 def generate_tls_key(nethsm):
