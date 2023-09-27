@@ -59,10 +59,11 @@ Be sure to run the linter, tests and check that everything is working as expecte
 
 ### Custom functions
 
-The generator doesn't support upload of binary files and custom ``Content-Type`` headers (fails to serialize).
-To work around this, some functions are written manually, using ``NetHSM.request()`` to send the request.
+The generator doesn't support upload of binary files and custom `Content-Type` headers (fails to serialize).
+To work around this, some functions are written manually, using `NetHSM.request()` to send the request.
 
 The current list of such functions is:
 
-- ``NetHSM.set_key_certificate()`` : ``/keys/{KeyID}/cert``
-- ``NetHSM.set_certificate()`` : ``/config/tls/cert.pem``
+- `NetHSM.set_key_certificate()` : `/keys/{KeyID}/cert`
+- `NetHSM.set_certificate()` : `/config/tls/cert.pem`
+- `NetHSM.update()`: `/system/update`, manual deserialization because the content-type header is sent twice, see [#245 on the NetHSM repo](https://git.nitrokey.com/nitrokey/nethsm/nethsm/-/issues/245)
