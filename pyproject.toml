@@ -36,7 +36,9 @@ dev = [
   "pycryptodome",
   "requests",
   "types-requests",
-  "pytest-cov"
+  "pytest-cov",
+  "cryptography",
+  "pyyaml",
 ]
 
 [tool.pytest.ini_options]

@@ -43,7 +43,7 @@ class Constants:
     FILENAME_UPDATE_IN_TEST = "tests/update.img.bin"
 
     # test_nethsm_config
-    COUNTRY = "Germany"
+    COUNTRY = "DE"
     STATE_OR_PROVINCE = "Brandenburg"
     LOCALITY = "Teltow"
     ORGANIZATION = "NitroKey"

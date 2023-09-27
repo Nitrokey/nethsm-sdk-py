@@ -1,8 +1,9 @@
 import datetime
+from io import BytesIO
 
 import pytest
 from conftest import Constants as C
-from utilities import nethsm  # noqa: F401
+from utilities import nethsm, self_sign_csr  # noqa: F401
 from utilities import lock, unlock
 
 import nethsm as nethsm_module
@@ -65,11 +66,22 @@ def test_csr(nethsm):
     print(csr)
 
 
-@pytest.mark.skip(reason="Need to generate a cert from the csr")
-def test_set_certificate(nethsm):
+def test_set_certificate(nethsm: nethsm_module.NetHSM) -> None:
 
-    with open(C.TLS_PEM, "rb") as f:
-        nethsm.set_certificate(f)
+    csr = nethsm.csr(
+        C.COUNTRY,
+        C.STATE_OR_PROVINCE,
+        C.LOCALITY,
+        C.ORGANIZATION,
+        C.ORGANIZATIONAL_UNIT,
+        C.COMMON_NAME,
+        C.EMAIL_ADDRESS,
+    )
+    cert = self_sign_csr(csr)
+    nethsm.set_certificate(BytesIO(cert))
+    
+    remote_cert = nethsm.get_certificate()
+    assert cert.decode('utf-8') == remote_cert
 
 
 def generate_tls_key(nethsm):
