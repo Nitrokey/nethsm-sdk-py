@@ -67,3 +67,9 @@ The current list of such functions is:
 - `NetHSM.set_key_certificate()` : `/keys/{KeyID}/cert`
 - `NetHSM.set_certificate()` : `/config/tls/cert.pem`
 - `NetHSM.update()`: `/system/update`, manual deserialization because the content-type header is sent twice, see [#245 on the NetHSM repo](https://git.nitrokey.com/nitrokey/nethsm/nethsm/-/issues/245)
+
+### Publishing a new version
+
+- change the version in `nethsm/VERSION`. Example : 0.1.0
+- create a new tag, prepending `v` to the version. Example : v0.1.0
+- create a new release on GitHub to trigger the ci that will publish the new version.
