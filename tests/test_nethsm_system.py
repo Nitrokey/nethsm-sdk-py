@@ -143,11 +143,6 @@ def test_provision_reboot(nethsm):
 
     nethsm.reboot()
 
-    try:
-        start_nethsm()
-    except docker.errors.APIError:
-        pass
-
 
 def test_provision_shutdown(nethsm):
     """Shutdown a NetHSM instance.
@@ -159,8 +154,3 @@ def test_provision_shutdown(nethsm):
     provision(nethsm)
 
     nethsm.shutdown()
-
-    try:
-        start_nethsm()
-    except docker.errors.APIError:
-        pass

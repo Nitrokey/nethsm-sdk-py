@@ -90,6 +90,10 @@ class KeyfenderCIManager(KeyfenderManager):
     def __init__(self):
         os.system("pkill keyfender.unix")
         os.system("pkill etcd")
+
+        # Wait for everything to shut down, creates problems otherwise on the gitlab ci
+        sleep(1)
+
         os.system("rm -rf /data")
 
         self.process = subprocess.Popen(
