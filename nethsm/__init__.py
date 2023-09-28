@@ -11,6 +11,8 @@
 import pathlib
 from base64 import b64encode
 
+import urllib3
+
 __version_path__ = pathlib.Path(__file__).parent.resolve().absolute() / "VERSION"
 __version__ = open(__version_path__).read().strip()
 
@@ -242,6 +244,22 @@ class Key:
         self.data = data
 
 
+def _handle_exception(
+    e: Exception,
+    messages: dict[int, str] = {},
+    roles: list[Role] = [],
+    state: Optional[State] = None,
+):
+    if isinstance(e, ApiException):
+        _handle_api_exception(e, messages, roles, state)
+    elif isinstance(e, urllib3.exceptions.MaxRetryError):
+        if isinstance(e.reason, urllib3.exceptions.SSLError):
+            raise NetHSMRequestError(RequestErrorType.SSL_ERROR, e)
+        raise NetHSMRequestError(RequestErrorType.OTHER, e)
+    else:
+        raise e
+
+
 def _handle_api_exception(
     e: ApiException,
     messages: dict[int, str] = {},
@@ -300,6 +318,16 @@ def _handle_api_exception(
 class NetHSMError(Exception):
     def __init__(self, message: str):
         super().__init__(message)
+
+
+class RequestErrorType(enum.Enum):
+    SSL_ERROR = "SSL_ERROR"
+    OTHER = "OTHER"
+
+
+class NetHSMRequestError(Exception):
+    def __init__(self, type: RequestErrorType, reason: Exception):
+        super().__init__(f"NetHSM API request error: {type.value} {reason}")
 
 
 class NetHSM:
@@ -418,8 +446,8 @@ class NetHSM:
         )
         try:
             self.get_api().unlock_post(request_body)
-        except ApiException as e:
-            _handle_api_exception(
+        except Exception as e:
+            _handle_exception(
                 e,
                 state=State.LOCKED,
                 messages={
@@ -432,8 +460,8 @@ class NetHSM:
     def lock(self):
         try:
             self.get_api().lock_post()
-        except ApiException as e:
-            _handle_api_exception(
+        except Exception as e:
+            _handle_exception(
                 e,
                 state=State.OPERATIONAL,
                 roles=[Role.ADMINISTRATOR],
@@ -456,8 +484,8 @@ class NetHSM:
         )
         try:
             self.get_api().provision_post(request_body)
-        except ApiException as e:
-            _handle_api_exception(
+        except Exception as e:
+            _handle_exception(
                 e,
                 state=State.UNPROVISIONED,
                 messages={
@@ -469,8 +497,8 @@ class NetHSM:
         try:
             response = self.get_api().users_get()
             return [str(item["user"]) for item in response.body]
-        except ApiException as e:
-            _handle_api_exception(
+        except Exception as e:
+            _handle_exception(
                 e,
                 state=State.OPERATIONAL,
                 roles=[Role.ADMINISTRATOR],
@@ -483,8 +511,8 @@ class NetHSM:
         path_params = PathParametersDict(UserID=user_id)
         try:
             response = self.get_api().users_user_id_get(path_params=path_params)
-        except ApiException as e:
-            _handle_api_exception(
+        except Exception as e:
+            _handle_exception(
                 e,
                 state=State.OPERATIONAL,
                 roles=[Role.ADMINISTRATOR, Role.OPERATOR],
@@ -520,8 +548,8 @@ class NetHSM:
             else:
                 response = self.get_api().users_post(body=body)
                 user_id = self.get_user_id_from_location(response.response.getheaders())
-        except ApiException as e:
-            _handle_api_exception(
+        except Exception as e:
+            _handle_exception(
                 e,
                 state=State.OPERATIONAL,
                 roles=[Role.ADMINISTRATOR],
@@ -542,8 +570,8 @@ class NetHSM:
         try:
             path_params = PathParametersDict(UserID=user_id)
             self.get_api().users_user_id_delete(path_params=path_params)
-        except ApiException as e:
-            _handle_api_exception(
+        except Exception as e:
+            _handle_exception(
                 e,
                 state=State.OPERATIONAL,
                 roles=[Role.ADMINISTRATOR],
@@ -566,8 +594,8 @@ class NetHSM:
             self.get_api().users_user_id_passphrase_post(
                 path_params=path_params, body=body
             )
-        except ApiException as e:
-            _handle_api_exception(
+        except Exception as e:
+            _handle_exception(
                 e,
                 state=State.OPERATIONAL,
                 roles=[Role.ADMINISTRATOR, Role.OPERATOR],
@@ -586,8 +614,8 @@ class NetHSM:
         try:
             response = self.get_api().users_user_id_tags_get(path_params=path_params)
             return response.body
-        except ApiException as e:
-            _handle_api_exception(
+        except Exception as e:
+            _handle_exception(
                 e,
                 state=State.OPERATIONAL,
                 roles=[Role.ADMINISTRATOR],
@@ -604,8 +632,8 @@ class NetHSM:
         path_params = PathParametersDict(UserID=user_id, Tag=tag)
         try:
             return self.get_api().users_user_id_tags_tag_put(path_params=path_params)
-        except ApiException as e:
-            _handle_api_exception(
+        except Exception as e:
+            _handle_exception(
                 e,
                 state=State.OPERATIONAL,
                 roles=[Role.ADMINISTRATOR],
@@ -624,8 +652,8 @@ class NetHSM:
         path_params = PathParametersDict(UserID=user_id, Tag=tag)
         try:
             return self.get_api().users_user_id_tags_tag_delete(path_params=path_params)
-        except ApiException as e:
-            _handle_api_exception(
+        except Exception as e:
+            _handle_exception(
                 e,
                 state=State.OPERATIONAL,
                 roles=[Role.ADMINISTRATOR],
@@ -644,8 +672,8 @@ class NetHSM:
             return self.get_api().keys_key_id_restrictions_tags_tag_put(
                 path_params=path_params
             )
-        except ApiException as e:
-            _handle_api_exception(
+        except Exception as e:
+            _handle_exception(
                 e,
                 state=State.OPERATIONAL,
                 roles=[Role.ADMINISTRATOR],
@@ -666,8 +694,8 @@ class NetHSM:
             return self.get_api().keys_key_id_restrictions_tags_tag_delete(
                 path_params=path_params
             )
-        except ApiException as e:
-            _handle_api_exception(
+        except Exception as e:
+            _handle_exception(
                 e,
                 state=State.OPERATIONAL,
                 roles=[Role.ADMINISTRATOR],
@@ -679,16 +707,16 @@ class NetHSM:
     def get_info(self) -> tuple[str, str]:
         try:
             response = self.get_api().info_get()
-        except ApiException as e:
-            _handle_api_exception(e)
+        except Exception as e:
+            _handle_exception(e)
         return (str(response.body["vendor"]), str(response.body["product"]))
 
     def get_state(self):
         try:
             response = self.get_api().health_state_get()
             return State.from_string(response.body["state"])
-        except ApiException as e:
-            _handle_api_exception(e)
+        except Exception as e:
+            _handle_exception(e)
 
     def get_random_data(self, n: int) -> str:
         from .client.components.schema.random_request_data import RandomRequestDataDict
@@ -696,8 +724,8 @@ class NetHSM:
         body = RandomRequestDataDict(length=n)
         try:
             response = self.get_api().random_post(body=body)
-        except ApiException as e:
-            _handle_api_exception(
+        except Exception as e:
+            _handle_exception(
                 e,
                 state=State.OPERATIONAL,
                 roles=[Role.OPERATOR],
@@ -710,8 +738,8 @@ class NetHSM:
     def get_metrics(self) -> immutabledict[str, OUTPUT_BASE_TYPES]:
         try:
             response = self.get_api().metrics_get()
-        except ApiException as e:
-            _handle_api_exception(e, state=State.OPERATIONAL, roles=[Role.METRICS])
+        except Exception as e:
+            _handle_exception(e, state=State.OPERATIONAL, roles=[Role.METRICS])
         return response.body
 
     def list_keys(self, filter: Optional[str] = None) -> list[str]:
@@ -723,8 +751,8 @@ class NetHSM:
                 response = self.get_api().keys_get(query_params=query_params)
             else:
                 response = self.get_api().keys_get()
-        except ApiException as e:
-            _handle_api_exception(
+        except Exception as e:
+            _handle_exception(
                 e,
                 state=State.OPERATIONAL,
                 roles=[Role.ADMINISTRATOR, Role.OPERATOR],
@@ -738,8 +766,8 @@ class NetHSM:
         try:
             response = self.get_api().keys_key_id_get(path_params=path_params)
             key = response.body
-        except ApiException as e:
-            _handle_api_exception(
+        except Exception as e:
+            _handle_exception(
                 e,
                 state=State.OPERATIONAL,
                 roles=[Role.ADMINISTRATOR, Role.OPERATOR],
@@ -771,8 +799,8 @@ class NetHSM:
             response = self.get_api().keys_key_id_public_pem_get(
                 path_params=path_params, skip_deserialization=True
             )
-        except ApiException as e:
-            _handle_api_exception(
+        except Exception as e:
+            _handle_exception(
                 e,
                 state=State.OPERATIONAL,
                 roles=[Role.ADMINISTRATOR, Role.OPERATOR],
@@ -843,8 +871,8 @@ class NetHSM:
                     skip_deserialization=True,
                 )
                 return self.get_key_id_from_location(response.response.getheaders())
-        except ApiException as e:
-            _handle_api_exception(
+        except Exception as e:
+            _handle_exception(
                 e,
                 state=State.OPERATIONAL,
                 roles=[Role.ADMINISTRATOR],
@@ -860,8 +888,8 @@ class NetHSM:
         path_params = PathParametersDict(KeyID=key_id)
         try:
             self.get_api().keys_key_id_delete(path_params=path_params)
-        except ApiException as e:
-            _handle_api_exception(
+        except Exception as e:
+            _handle_exception(
                 e,
                 state=State.OPERATIONAL,
                 roles=[Role.ADMINISTRATOR],
@@ -899,8 +927,8 @@ class NetHSM:
             response = self.get_api().keys_generate_post(
                 body=body, skip_deserialization=True
             )
-        except ApiException as e:
-            _handle_api_exception(
+        except Exception as e:
+            _handle_exception(
                 e,
                 state=State.OPERATIONAL,
                 roles=[Role.ADMINISTRATOR],
@@ -916,37 +944,29 @@ class NetHSM:
     def get_config_logging(self):
         try:
             response = self.get_api().config_logging_get()
-        except ApiException as e:
-            _handle_api_exception(
-                e, state=State.OPERATIONAL, roles=[Role.ADMINISTRATOR]
-            )
+        except Exception as e:
+            _handle_exception(e, state=State.OPERATIONAL, roles=[Role.ADMINISTRATOR])
         return response.body
 
     def get_config_network(self):
         try:
             response = self.get_api().config_network_get()
-        except ApiException as e:
-            _handle_api_exception(
-                e, state=State.OPERATIONAL, roles=[Role.ADMINISTRATOR]
-            )
+        except Exception as e:
+            _handle_exception(e, state=State.OPERATIONAL, roles=[Role.ADMINISTRATOR])
         return response.body
 
     def get_config_time(self):
         try:
             response = self.get_api().config_time_get()
-        except ApiException as e:
-            _handle_api_exception(
-                e, state=State.OPERATIONAL, roles=[Role.ADMINISTRATOR]
-            )
+        except Exception as e:
+            _handle_exception(e, state=State.OPERATIONAL, roles=[Role.ADMINISTRATOR])
         return response.body.time
 
     def get_config_unattended_boot(self):
         try:
             response = self.get_api().config_unattended_boot_get()
-        except ApiException as e:
-            _handle_api_exception(
-                e, state=State.OPERATIONAL, roles=[Role.ADMINISTRATOR]
-            )
+        except Exception as e:
+            _handle_exception(e, state=State.OPERATIONAL, roles=[Role.ADMINISTRATOR])
         return response.body.status
 
     def get_public_key(self):
@@ -954,19 +974,15 @@ class NetHSM:
             response = self.get_api().config_tls_public_pem_get(
                 skip_deserialization=True
             )
-        except ApiException as e:
-            _handle_api_exception(
-                e, state=State.OPERATIONAL, roles=[Role.ADMINISTRATOR]
-            )
+        except Exception as e:
+            _handle_exception(e, state=State.OPERATIONAL, roles=[Role.ADMINISTRATOR])
         return response.response.data.decode("utf-8")
 
     def get_certificate(self):
         try:
             response = self.get_api().config_tls_cert_pem_get(skip_deserialization=True)
-        except ApiException as e:
-            _handle_api_exception(
-                e, state=State.OPERATIONAL, roles=[Role.ADMINISTRATOR]
-            )
+        except Exception as e:
+            _handle_exception(e, state=State.OPERATIONAL, roles=[Role.ADMINISTRATOR])
         return response.response.data.decode("utf-8")
 
     def get_key_certificate(self, key_id: str):
@@ -980,8 +996,8 @@ class NetHSM:
             response = self.get_api().keys_key_id_cert_get(
                 path_params=path_params, skip_deserialization=True
             )
-        except ApiException as e:
-            _handle_api_exception(
+        except Exception as e:
+            _handle_exception(
                 e,
                 state=State.OPERATIONAL,
                 roles=[Role.ADMINISTRATOR, Role.OPERATOR],
@@ -1001,8 +1017,8 @@ class NetHSM:
                 data=cert,
                 mime_type="application/x-pem-file",
             )
-        except ApiException as e:
-            _handle_api_exception(
+        except Exception as e:
+            _handle_exception(
                 e,
                 state=State.OPERATIONAL,
                 roles=[Role.ADMINISTRATOR],
@@ -1014,8 +1030,8 @@ class NetHSM:
     def set_key_certificate(self, key_id: str, cert: BufferedReader, mime_type: str):
         try:
             self.request("PUT", f"keys/{key_id}/cert", data=cert, mime_type=mime_type)
-        except ApiException as e:
-            _handle_api_exception(
+        except Exception as e:
+            _handle_exception(
                 e,
                 state=State.OPERATIONAL,
                 roles=[Role.ADMINISTRATOR],
@@ -1035,8 +1051,8 @@ class NetHSM:
         path_params = PathParametersDict(KeyID=key_id)
         try:
             return self.get_api().keys_key_id_cert_delete(path_params=path_params)
-        except ApiException as e:
-            _handle_api_exception(
+        except Exception as e:
+            _handle_exception(
                 e,
                 state=State.OPERATIONAL,
                 roles=[Role.ADMINISTRATOR],
@@ -1070,10 +1086,8 @@ class NetHSM:
                 body=body, skip_deserialization=True
             )
             return response.response.data.decode("utf-8")
-        except ApiException as e:
-            _handle_api_exception(
-                e, state=State.OPERATIONAL, roles=[Role.ADMINISTRATOR]
-            )
+        except Exception as e:
+            _handle_exception(e, state=State.OPERATIONAL, roles=[Role.ADMINISTRATOR])
 
     def generate_tls_key(
         self,
@@ -1091,10 +1105,8 @@ class NetHSM:
 
         try:
             return self.get_api().config_tls_generate_post(body=body)
-        except ApiException as e:
-            _handle_api_exception(
-                e, state=State.OPERATIONAL, roles=[Role.ADMINISTRATOR]
-            )
+        except Exception as e:
+            _handle_exception(e, state=State.OPERATIONAL, roles=[Role.ADMINISTRATOR])
 
     def key_csr(
         self,
@@ -1126,8 +1138,8 @@ class NetHSM:
                 path_params=path_params, body=body, skip_deserialization=True
             )
             return response.response.data.decode("utf-8")
-        except ApiException as e:
-            _handle_api_exception(
+        except Exception as e:
+            _handle_exception(
                 e,
                 state=State.OPERATIONAL,
                 roles=[Role.ADMINISTRATOR, Role.OPERATOR],
@@ -1144,8 +1156,8 @@ class NetHSM:
         body = BackupPassphraseConfigDict(passphrase=passphrase)
         try:
             self.get_api().config_backup_passphrase_put(body=body)
-        except ApiException as e:
-            _handle_api_exception(
+        except Exception as e:
+            _handle_exception(
                 e,
                 state=State.OPERATIONAL,
                 roles=[Role.ADMINISTRATOR],
@@ -1162,8 +1174,8 @@ class NetHSM:
         body = UnlockPassphraseConfigDict(passphrase=passphrase)
         try:
             self.get_api().config_unlock_passphrase_put(body=body)
-        except ApiException as e:
-            _handle_api_exception(
+        except Exception as e:
+            _handle_exception(
                 e,
                 state=State.OPERATIONAL,
                 roles=[Role.ADMINISTRATOR],
@@ -1183,8 +1195,8 @@ class NetHSM:
         body = LoggingConfigDict(ipAddress=ip_address, port=port, logLevel=log_level)
         try:
             self.get_api().config_logging_put(body=body)
-        except ApiException as e:
-            _handle_api_exception(
+        except Exception as e:
+            _handle_exception(
                 e,
                 state=State.OPERATIONAL,
                 roles=[Role.ADMINISTRATOR],
@@ -1199,8 +1211,8 @@ class NetHSM:
         body = NetworkConfigDict(ipAddress=ip_address, netmask=netmask, gateway=gateway)
         try:
             self.get_api().config_network_put(body=body)
-        except ApiException as e:
-            _handle_api_exception(
+        except Exception as e:
+            _handle_exception(
                 e,
                 state=State.OPERATIONAL,
                 roles=[Role.ADMINISTRATOR],
@@ -1215,8 +1227,8 @@ class NetHSM:
         body = TimeConfigDict(time=time)
         try:
             self.get_api().config_time_put(body=body)
-        except ApiException as e:
-            _handle_api_exception(
+        except Exception as e:
+            _handle_exception(
                 e,
                 state=State.OPERATIONAL,
                 roles=[Role.ADMINISTRATOR],
@@ -1233,8 +1245,8 @@ class NetHSM:
         body = UnattendedBootConfigDict(status=status)
         try:
             self.get_api().config_unattended_boot_put(body=body)
-        except ApiException as e:
-            _handle_api_exception(
+        except Exception as e:
+            _handle_exception(
                 e,
                 state=State.OPERATIONAL,
                 roles=[Role.ADMINISTRATOR],
@@ -1246,8 +1258,8 @@ class NetHSM:
     def get_system_info(self):
         try:
             response = self.get_api().system_info_get()
-        except ApiException as e:
-            _handle_api_exception(
+        except Exception as e:
+            _handle_exception(
                 e,
                 state=State.OPERATIONAL,
                 roles=[Role.ADMINISTRATOR],
@@ -1262,8 +1274,8 @@ class NetHSM:
     def backup(self):
         try:
             response = self.get_api().system_backup_post()
-        except ApiException as e:
-            _handle_api_exception(
+        except Exception as e:
+            _handle_exception(
                 e,
                 state=State.OPERATIONAL,
                 roles=[Role.BACKUP],
@@ -1283,8 +1295,8 @@ class NetHSM:
                 backupPassphrase=passphrase, systemTime=time.isoformat()
             )
             self.get_api().system_restore_post(body=backup, query_params=params)
-        except ApiException as e:
-            _handle_api_exception(
+        except Exception as e:
+            _handle_exception(
                 e,
                 state=State.UNPROVISIONED,
                 messages={
@@ -1300,8 +1312,8 @@ class NetHSM:
             response = self.get_api().system_update_post(
                 body=image, skip_deserialization=True
             )
-        except ApiException as e:
-            _handle_api_exception(
+        except Exception as e:
+            _handle_exception(
                 e,
                 state=State.OPERATIONAL,
                 roles=[Role.ADMINISTRATOR],
@@ -1321,8 +1333,8 @@ class NetHSM:
     def cancel_update(self):
         try:
             self.get_api().system_cancel_update_post()
-        except ApiException as e:
-            _handle_api_exception(
+        except Exception as e:
+            _handle_exception(
                 e,
                 state=State.OPERATIONAL,
                 roles=[Role.ADMINISTRATOR],
@@ -1331,8 +1343,8 @@ class NetHSM:
     def commit_update(self):
         try:
             self.get_api().system_commit_update_post()
-        except ApiException as e:
-            _handle_api_exception(
+        except Exception as e:
+            _handle_exception(
                 e,
                 state=State.OPERATIONAL,
                 roles=[Role.ADMINISTRATOR],
@@ -1341,8 +1353,8 @@ class NetHSM:
     def reboot(self):
         try:
             self.get_api().system_reboot_post()
-        except ApiException as e:
-            _handle_api_exception(
+        except Exception as e:
+            _handle_exception(
                 e,
                 state=State.OPERATIONAL,
                 roles=[Role.ADMINISTRATOR],
@@ -1351,8 +1363,8 @@ class NetHSM:
     def shutdown(self):
         try:
             self.get_api().system_shutdown_post()
-        except ApiException as e:
-            _handle_api_exception(
+        except Exception as e:
+            _handle_exception(
                 e,
                 state=State.OPERATIONAL,
                 roles=[Role.ADMINISTRATOR],
@@ -1361,8 +1373,8 @@ class NetHSM:
     def factory_reset(self):
         try:
             self.get_api().system_factory_reset_post()
-        except ApiException as e:
-            _handle_api_exception(
+        except Exception as e:
+            _handle_exception(
                 e,
                 state=State.OPERATIONAL,
                 roles=[Role.ADMINISTRATOR],
@@ -1382,8 +1394,8 @@ class NetHSM:
             response = self.get_api().keys_key_id_encrypt_post(
                 path_params=path_params, body=body
             )
-        except ApiException as e:
-            _handle_api_exception(
+        except Exception as e:
+            _handle_exception(
                 e,
                 state=State.OPERATIONAL,
                 roles=[Role.OPERATOR],
@@ -1428,8 +1440,8 @@ class NetHSM:
             response = self.get_api().keys_key_id_decrypt_post(
                 path_params=path_params, body=body
             )
-        except ApiException as e:
-            _handle_api_exception(
+        except Exception as e:
+            _handle_exception(
                 e,
                 state=State.OPERATIONAL,
                 roles=[Role.OPERATOR],
@@ -1467,8 +1479,8 @@ class NetHSM:
             response = self.get_api().keys_key_id_sign_post(
                 path_params=path_params, body=body
             )
-        except ApiException as e:
-            _handle_api_exception(
+        except Exception as e:
+            _handle_exception(
                 e,
                 state=State.OPERATIONAL,
                 roles=[Role.OPERATOR],
