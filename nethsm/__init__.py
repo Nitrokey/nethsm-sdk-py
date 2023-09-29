@@ -368,6 +368,9 @@ class NetHSM:
         config.verify_ssl = verify_tls
         self.client = client.ApiClient(configuration=config)
 
+        if not verify_tls:
+            urllib3.disable_warnings()
+
     def close(self):
         self.client.close()
 
