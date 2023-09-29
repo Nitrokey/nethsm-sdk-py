@@ -73,3 +73,39 @@ The current list of such functions is:
 - change the version in `nethsm/VERSION`. Example : 0.1.0
 - create a new tag, prepending `v` to the version. Example : v0.1.0
 - create a new release on GitHub to trigger the ci that will publish the new version.
+
+### Adding new tests
+
+Testing is done via `pytest`. A test is loaded when the name of the file starts with `test_` and the function doing the test is prefixed by `test`.
+
+Pytest fixtures are used, to get a provisioned and initialized NetHSM object to interact with, use `nethsm` as a parameter of your test function. For an unprovisioned NetHSM use `nethsm_no_provision`.
+
+If you want to force a reset (clearing the data) of the NetHSM instance, use `start_nethsm()`, it will kill and restart the process.
+
+If you want to get debug logs when running the tests, run `pytest -s`.
+
+When a test is currently broken and expected to fail, decorate the test function with:
+
+```python
+@pytest.mark.xfail(reason="reason")
+```
+
+You can mark a test to be skipped:
+
+```python
+@pytest.mark.skip(reason="reason")
+```
+
+#### Test modes
+
+By default these tests assume that a docker daemon is running and that open ports on containers can be accessed via `127.0.0.1`, meaning it will not work if run in a container.
+
+If you want to run these tests in a container, use the `docker.io/nitrokey/nethsm:testing` image and set the environment variable `TEST_MODE=ci`. Example:
+
+```sh
+docker run -v "$PWD:/nethsm" -e FLIT_ROOT_INSTALL=1 -e TEST_MODE=ci -it --entrypoint /bin/sh nitrokey/nethsm:testing -c "apk add make python3 && cd /nethsm && make init && make test"
+```
+
+> Be aware this command will create files owned by root in your working directory.
+
+This CI mode manually start and stops the necessary processes to run a NetHSM instance, due to its design it may brake when the container image is updated.
