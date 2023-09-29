@@ -328,6 +328,8 @@ class RequestErrorType(enum.Enum):
 class NetHSMRequestError(Exception):
     def __init__(self, type: RequestErrorType, reason: Exception):
         super().__init__(f"NetHSM API request error: {type.value} {reason}")
+        self.type = type
+        self.reason = reason
 
 
 class NetHSM:
