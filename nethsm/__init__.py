@@ -390,8 +390,8 @@ class NetHSM:
             url += "?" + urlencode(params)
 
         headers = _collections.HTTPHeaderDict()
-
-        headers["Content-Type"] = mime_type
+        if mime_type is not None:
+            headers["Content-Type"] = mime_type
 
         # basic auth from self.username and self.password
         if self.username and self.password:
