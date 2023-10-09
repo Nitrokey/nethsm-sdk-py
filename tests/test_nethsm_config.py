@@ -1,6 +1,5 @@
 import datetime
 from io import BytesIO
-import time
 
 import pytest
 from conftest import Constants as C
@@ -32,14 +31,17 @@ def get_config_network(nethsm):
 
 
 def get_config_time(nethsm):
-    ts_nethsm = time.mktime(datetime.datetime.strptime(nethsm.get_config_time(), "%Y-%m-%dT%H:%M:%SZ").timetuple())
-    ts_now = time.mktime(datetime.datetime.now(datetime.timezone.utc).timetuple())
+    dt_nethsm = datetime.datetime.strptime(nethsm.get_config_time(), "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=datetime.timezone.utc)
+    dt_now = datetime.datetime.now(datetime.timezone.utc)
+
+    seconds_diff = (dt_nethsm - dt_now).total_seconds()
 
     #Magic Constant 2.0
     #Due to network latency and execution time, the time difference may vary.
     #Therefore the time check allows a delta of nearly 2.0 seconds.
 
-    assert abs(ts_nethsm - ts_now) < 2.0
+    assert abs(seconds_diff) < 2.0
+
 
 """##########Start of Tests##########"""
 
