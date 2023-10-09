@@ -1311,11 +1311,8 @@ class NetHSM:
 
     def update(self, image: BufferedReader):
         try:
-            # Currently the deserialisation doesn't work because of a bug where the api sends the content-type header twice
-            # https://git.nitrokey.com/nitrokey/nethsm/nethsm/-/issues/245
-
             response = self.get_api().system_update_post(
-                body=image, skip_deserialization=True
+                body=image
             )
         except Exception as e:
             _handle_exception(
