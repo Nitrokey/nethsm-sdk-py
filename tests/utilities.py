@@ -70,8 +70,11 @@ class KeyfenderDockerManager(KeyfenderManager):
                     pass
             sleep(1)
 
+        repository, tag = C.IMAGE.split(":")
+        image = client.images.pull(repository, tag=tag)
+
         container = client.containers.run(
-            C.IMAGE,
+            image,
             "",
             ports={"8443": 8443},
             remove=True,
