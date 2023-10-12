@@ -11,15 +11,14 @@ from .content.application_xx509_ca_cert import schema as application_xx509_ca_ce
 from .content.application_pgp_keys import schema as application_pgp_keys_schema
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class ApiResponse(api_response.ApiResponse):
-    response: urllib3.HTTPResponse
     body: typing.Union[
         str,
         str,
         str,
     ]
-    headers: schemas.Unset = schemas.unset
+    headers: schemas.Unset
 
 
 class ResponseFor200(api_client.OpenApiResponse[ApiResponse]):

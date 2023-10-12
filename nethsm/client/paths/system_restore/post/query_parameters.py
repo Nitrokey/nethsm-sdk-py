@@ -40,6 +40,7 @@ QueryParametersOptionalDictInput = typing.TypedDict(
 
 
 class QueryParametersDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES]):
+
     __required_keys__: typing.FrozenSet[str] = frozenset({
         "backupPassphrase",
     })
@@ -61,12 +62,12 @@ class QueryParametersDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES])
         arg_: typing.Dict[str, typing.Any] = {
             "backupPassphrase": backupPassphrase,
         }
-        for key, val in (
+        for key_, val in (
             ("systemTime", systemTime),
         ):
             if isinstance(val, schemas.Unset):
                 continue
-            arg_[key] = val
+            arg_[key_] = val
         used_arg_ = typing.cast(QueryParametersDictInput, arg_)
         return QueryParameters.validate(used_arg_, configuration=configuration_)
     

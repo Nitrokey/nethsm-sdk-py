@@ -35,6 +35,7 @@ dev = [
   "docker",
   "pycryptodome",
   "requests",
+  "types-python-dateutil",
   "types-requests",
   "pytest-cov",
   "cryptography",
@@ -45,11 +46,6 @@ dev = [
 testpaths = ["tests"]
 # ignore InsecureRequestWarning from urllib3
 filterwarnings = ["ignore::urllib3.exceptions.InsecureRequestWarning"]
-
-
-[[tool.mypy.overrides]]
-module = "nethsm.client.*"
-ignore_errors = true
 
 [tool.black]
 target-version = ["py39"]

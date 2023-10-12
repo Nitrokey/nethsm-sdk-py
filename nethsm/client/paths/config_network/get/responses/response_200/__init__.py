@@ -9,11 +9,10 @@ from nethsm.client.shared_imports.response_imports import *  # pyright: ignore [
 from .content.application_json import schema as application_json_schema
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class ApiResponse(api_response.ApiResponse):
-    response: urllib3.HTTPResponse
     body: application_json_schema.network_config.NetworkConfigDict
-    headers: schemas.Unset = schemas.unset
+    headers: schemas.Unset
 
 
 class ResponseFor200(api_client.OpenApiResponse[ApiResponse]):

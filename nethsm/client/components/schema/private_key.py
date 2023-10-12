@@ -70,12 +70,12 @@ class PrivateKeyDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES]):
             "mechanisms": mechanisms,
             "type": type,
         }
-        for key, val in (
+        for key_, val in (
             ("restrictions", restrictions),
         ):
             if isinstance(val, schemas.Unset):
                 continue
-            arg_[key] = val
+            arg_[key_] = val
         arg_.update(kwargs)
         used_arg_ = typing.cast(PrivateKeyDictInput, arg_)
         return PrivateKey.validate(used_arg_, configuration=configuration_)

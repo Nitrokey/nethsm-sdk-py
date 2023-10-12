@@ -31,7 +31,7 @@ Properties = typing.TypedDict(
 )
 
 
-class DistinguishedNameDict(schemas.immutabledict[str, str]):
+class DistinguishedNameDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES]):
 
     __required_keys__: typing.FrozenSet[str] = frozenset({
         "commonName",
@@ -79,7 +79,7 @@ class DistinguishedNameDict(schemas.immutabledict[str, str]):
         arg_: typing.Dict[str, typing.Any] = {
             "commonName": commonName,
         }
-        for key, val in (
+        for key_, val in (
             ("countryName", countryName),
             ("stateOrProvinceName", stateOrProvinceName),
             ("localityName", localityName),
@@ -89,7 +89,7 @@ class DistinguishedNameDict(schemas.immutabledict[str, str]):
         ):
             if isinstance(val, schemas.Unset):
                 continue
-            arg_[key] = val
+            arg_[key_] = val
         arg_.update(kwargs)
         used_arg_ = typing.cast(DistinguishedNameDictInput, arg_)
         return DistinguishedName.validate(used_arg_, configuration=configuration_)

@@ -24,6 +24,7 @@ Properties = typing.TypedDict(
 
 
 class EncryptRequestDataDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES]):
+
     __required_keys__: typing.FrozenSet[str] = frozenset({
         "message",
         "mode",
@@ -50,12 +51,12 @@ class EncryptRequestDataDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPE
             "message": message,
             "mode": mode,
         }
-        for key, val in (
+        for key_, val in (
             ("iv", iv),
         ):
             if isinstance(val, schemas.Unset):
                 continue
-            arg_[key] = val
+            arg_[key_] = val
         arg_.update(kwargs)
         used_arg_ = typing.cast(EncryptRequestDataDictInput, arg_)
         return EncryptRequestData.validate(used_arg_, configuration=configuration_)

@@ -21,7 +21,7 @@ Properties = typing.TypedDict(
 )
 
 
-class HeadersDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES]):
+class HeadersDict(schemas.immutabledict[str, str]):
 
     __required_keys__: typing.FrozenSet[str] = frozenset({
     })
@@ -39,12 +39,12 @@ class HeadersDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES]):
         configuration_: typing.Optional[schema_configuration.SchemaConfiguration] = None,
     ):
         arg_: typing.Dict[str, typing.Any] = {}
-        for key, val in (
+        for key_, val in (
             ("location", location),
         ):
             if isinstance(val, schemas.Unset):
                 continue
-            arg_[key] = val
+            arg_[key_] = val
         used_arg_ = typing.cast(HeadersDictInput, arg_)
         return Headers.validate(used_arg_, configuration=configuration_)
     
@@ -63,10 +63,7 @@ class HeadersDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES]):
         val = self.get("location", schemas.unset)
         if isinstance(val, schemas.Unset):
             return val
-        return typing.cast(
-            str,
-            val
-        )
+        return val
 HeadersDictInput = typing.TypedDict(
     'HeadersDictInput',
     {

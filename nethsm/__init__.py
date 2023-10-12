@@ -411,7 +411,7 @@ class NetHSM:
         )
 
         if 200 > response.status or response.status > 399:
-            api_response = ApiResponseWithoutDeserialization(response)
+            api_response = ApiResponseWithoutDeserialization(response=response)
             raise ApiException(
                 status=response.status,
                 reason=response.reason,
