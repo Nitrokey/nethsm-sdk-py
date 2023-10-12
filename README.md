@@ -66,7 +66,6 @@ The current list of such functions is:
 
 - `NetHSM.set_key_certificate()` : `/keys/{KeyID}/cert`
 - `NetHSM.set_certificate()` : `/config/tls/cert.pem`
-- `NetHSM.update()`: `/system/update`, manual deserialization because the content-type header is sent twice, see [#245 on the NetHSM repo](https://git.nitrokey.com/nitrokey/nethsm/nethsm/-/issues/245)
 
 ### Publishing a new version
 
@@ -108,4 +107,4 @@ docker run -v "$PWD:/nethsm" -e FLIT_ROOT_INSTALL=1 -e TEST_MODE=ci -it --entryp
 
 > Be aware this command will create files owned by root in your working directory.
 
-This CI mode manually start and stops the necessary processes to run a NetHSM instance, due to its design it may brake when the container image is updated.
+This CI mode manually start and stops the necessary processes to run a NetHSM instance, due to its design it may break when the container image is updated.
