@@ -1061,10 +1061,7 @@ class NetHSM:
                 e,
                 state=State.OPERATIONAL,
                 roles=[Role.ADMINISTRATOR],
-                messages={
-                    404: f"Key {key_id} not found",
-                    409: f"Certificate for key {key_id} not found",
-                },
+                messages={404: f"There is no certificate for {key_id}."},
             )
 
     def csr(

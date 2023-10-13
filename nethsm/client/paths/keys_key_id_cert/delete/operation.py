@@ -14,7 +14,6 @@ from .responses import (
     response_403,
     response_404,
     response_406,
-    response_409,
     response_412,
 )
 from .parameters import parameter_0
@@ -37,7 +36,6 @@ __StatusCodeToResponse = typing.TypedDict(
         '403': typing.Type[response_403.ResponseFor403],
         '404': typing.Type[response_404.ResponseFor404],
         '406': typing.Type[response_406.ResponseFor406],
-        '409': typing.Type[response_409.ResponseFor409],
         '412': typing.Type[response_412.ResponseFor412],
     }
 )
@@ -47,7 +45,6 @@ _status_code_to_response: __StatusCodeToResponse = {
     '403': response_403.ResponseFor403,
     '404': response_404.ResponseFor404,
     '406': response_406.ResponseFor406,
-    '409': response_409.ResponseFor409,
     '412': response_412.ResponseFor412,
 }
 _non_error_status_codes = frozenset({
@@ -58,7 +55,6 @@ _error_status_codes = frozenset({
     '403',
     '404',
     '406',
-    '409',
     '412',
 })
 
@@ -112,7 +108,10 @@ class BaseApi(api_client.Api):
             api_response.body and api_response.headers will not be deserialized into schema
             class instances
         """
-        path_params = PathParameters.validate(path_params)
+        path_params = PathParameters.validate(
+            path_params,
+            configuration=self.api_client.schema_configuration
+        )
         used_path, query_params_suffix = self._get_used_path(
             path,
             path_parameters=path_parameter_classes,
@@ -160,7 +159,6 @@ class BaseApi(api_client.Api):
                     '403',
                     '404',
                     '406',
-                    '409',
                     '412',
                 ],
                 status
