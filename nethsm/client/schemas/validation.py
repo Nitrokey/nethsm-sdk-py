@@ -99,6 +99,14 @@ class SchemaValidator:
                 validation_metadata,
                 path_to_schemas
             )
+        validated_pattern_properties: typing.Optional[PathToSchemasType] = None
+        if 'pattern_properties' in vars(cls_schema):
+             validated_pattern_properties = _get_validated_pattern_properties(
+                 arg,
+                 vars(cls_schema)['pattern_properties'],
+                 cls,
+                 validation_metadata
+             )
         prefix_items_length = 0
         if 'prefix_items' in vars(cls_schema):
             prefix_items_length = len(vars(cls_schema)['prefix_items'])
@@ -110,6 +118,11 @@ class SchemaValidator:
                 used_val = (val, prefix_items_length)
             elif keyword in {'unevaluated_items', 'unevaluated_properties'}:
                 used_val = (val, path_to_schemas)
+            elif keyword in {'types'}:
+                format: typing.Optional[str] = vars(cls_schema).get('format', None)
+                used_val = (val, format)
+            elif keyword in {'pattern_properties', 'additional_properties'}:
+                used_val = (val, validated_pattern_properties)
             else:
                 used_val = val
             validator = json_schema_keyword_to_validator[keyword]
@@ -257,10 +270,11 @@ class PatternInfo:
 
 def validate_types(
     arg: typing.Any,
-    allowed_types: typing.Set[typing.Type],
+    allowed_types_format: typing.Tuple[typing.Set[typing.Type], typing.Optional[str]],
     cls: typing.Type,
     validation_metadata: ValidationMetadata,
 ) -> None:
+    allowed_types = allowed_types_format[0]
     if type(arg) not in allowed_types:
         raise __get_type_error(
             arg,
@@ -268,7 +282,18 @@ def validate_types(
             allowed_types,
             key_type=False,
         )
+    if isinstance(arg, bool) or not isinstance(arg, (int, float)):
+        return None
+    format = allowed_types_format[1]
+    if format and format == 'int' and arg != int(arg):
+        # there is a json schema test where 1.0 validates as an integer
+        raise exceptions.ApiValueError(
+            "Invalid non-integer value '{}' for type {} at {}".format(
+                arg, format, validation_metadata.path_to_item
+            )
+        )
     return None
+
 
 def validate_enum(
     arg: typing.Any,
@@ -722,19 +747,25 @@ def validate_properties(
 
 def validate_additional_properties(
     arg: typing.Any,
-    additional_properties_cls: typing.Type[SchemaValidator],
+    additional_properties_cls_val_pprops: typing.Tuple[
+        typing.Type[SchemaValidator],
+        typing.Optional[PathToSchemasType]
+    ],
     cls: typing.Type,
     validation_metadata: ValidationMetadata,
 ) -> typing.Optional[PathToSchemasType]:
     if not isinstance(arg, immutabledict):
         return None
-    schema = _get_class(additional_properties_cls)
+    schema = _get_class(additional_properties_cls_val_pprops[0])
     path_to_schemas: PathToSchemasType = {}
     cls_schema = cls()
     properties = cls_schema.properties if hasattr(cls_schema, 'properties') else {}
     present_additional_properties = {k: v for k, v, in arg.items() if k not in properties}
+    validated_pattern_properties = additional_properties_cls_val_pprops[1]
     for property_name, value in present_additional_properties.items():
         path_to_item = validation_metadata.path_to_item + (property_name,)
+        if validated_pattern_properties and path_to_item in validated_pattern_properties:
+            continue
         arg_validation_metadata = ValidationMetadata(
             path_to_item=path_to_item,
             configuration=validation_metadata.configuration,
@@ -1133,7 +1164,7 @@ def validate_property_names(
     return None
 
 
-def validate_pattern_properties(
+def _get_validated_pattern_properties(
     arg: typing.Any,
     pattern_properties: typing.Mapping[PatternInfo, typing.Type[SchemaValidator]],
     cls: typing.Type,
@@ -1161,6 +1192,21 @@ def validate_pattern_properties(
             other_path_to_schemas = schema._validate(property_value, validation_metadata=property_validation_metadata)
             update(path_to_schemas, other_path_to_schemas)
     return path_to_schemas
+
+
+def validate_pattern_properties(
+    arg: typing.Any,
+    pattern_properties_validation_results: typing.Tuple[
+        typing.Mapping[PatternInfo, typing.Type[SchemaValidator]],
+        typing.Optional[PathToSchemasType]
+    ],
+    cls: typing.Type,
+    validation_metadata: ValidationMetadata,
+) -> typing.Optional[PathToSchemasType]:
+    if not isinstance(arg, immutabledict):
+        return None
+    validation_results = pattern_properties_validation_results[1]
+    return validation_results
 
 
 def validate_prefix_items(
