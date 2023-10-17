@@ -20,9 +20,10 @@ import contextlib
 import enum
 import json
 import re
+from dataclasses import dataclass
 from datetime import datetime
 from io import BufferedReader
-from typing import Any, List, Literal, Optional, Tuple, Union, cast
+from typing import Any, Iterator, Literal, Optional, Union, cast
 from urllib.parse import urlencode
 
 from urllib3 import HTTPResponse, _collections
@@ -46,11 +47,7 @@ class Role(enum.Enum):
     BACKUP = "Backup"
 
     @staticmethod
-    def from_model(model_role):
-        return Role.from_string(model_role.value)
-
-    @staticmethod
-    def from_string(s: str):
+    def from_string(s: str) -> "Role":
         for role in Role:
             if role.value == s:
                 return role
@@ -63,11 +60,7 @@ class State(enum.Enum):
     OPERATIONAL = "Operational"
 
     @staticmethod
-    def from_model(model_state):
-        return State.from_string(model_state.value)
-
-    @staticmethod
-    def from_string(s):
+    def from_string(s: str) -> "State":
         for state in State:
             if state.value == s:
                 return state
@@ -81,11 +74,7 @@ class LogLevel(enum.Enum):
     ERROR = "error"
 
     @staticmethod
-    def from_model(model_log_level):
-        return LogLevel.from_string(model_log_level.value)
-
-    @staticmethod
-    def from_string(s: str):
+    def from_string(s: str) -> "LogLevel":
         for log_level in LogLevel:
             if log_level.value == s:
                 return log_level
@@ -107,7 +96,7 @@ class KeyType(enum.Enum):
     GENERIC = "Generic"
 
     @staticmethod
-    def from_string(s: str):
+    def from_string(s: str) -> "KeyType":
         for key_type in KeyType:
             if key_type.value == s:
                 return key_type
@@ -201,47 +190,45 @@ class TlsKeyType(enum.Enum):
     EC_P521 = "EC_P521"
 
 
+@dataclass
 class SystemInfo:
-    def __init__(
-        self,
-        firmware_version: str,
-        software_version: str,
-        hardware_version: str,
-        build_tag: str,
-    ):
-        self.firmware_version = firmware_version
-        self.software_version = software_version
-        self.hardware_version = hardware_version
-        self.build_tag = build_tag
+    firmware_version: str
+    software_version: str
+    hardware_version: str
+    build_tag: str
 
 
+@dataclass
 class User:
-    def __init__(self, user_id: str, real_name: str, role: Role):
-        self.user_id = user_id
-        self.real_name = real_name
-        self.role = role
+    user_id: str
+    real_name: str
+    role: Role
 
 
+@dataclass
 class Key:
-    def __init__(
-        self,
-        key_id: str,
-        mechanisms: list[str],
-        type: KeyType,
-        operations: int,
-        tags: Optional[List[str]],
-        modulus: Optional[str],
-        public_exponent: Optional[str],
-        data: Optional[str],
-    ):
-        self.key_id = key_id
-        self.mechanisms = mechanisms
-        self.type = type
-        self.operations = operations
-        self.tags = tags
-        self.modulus = modulus
-        self.public_exponent = public_exponent
-        self.data = data
+    key_id: str
+    mechanisms: list[str]
+    type: KeyType
+    operations: int
+    tags: Optional[list[str]]
+    modulus: Optional[str]
+    public_exponent: Optional[str]
+    data: Optional[str]
+
+
+@dataclass
+class LoggingConfig:
+    ip_address: str
+    log_level: LogLevel
+    port: int
+
+
+@dataclass
+class NetworkConfig:
+    gateway: str
+    ip_address: str
+    netmask: str
 
 
 def _handle_exception(
@@ -249,7 +236,7 @@ def _handle_exception(
     messages: dict[int, str] = {},
     roles: list[Role] = [],
     state: Optional[State] = None,
-):
+) -> None:
     if isinstance(e, ApiException):
         _handle_api_exception(e, messages, roles, state)
     elif isinstance(e, urllib3.exceptions.MaxRetryError):
@@ -261,11 +248,11 @@ def _handle_exception(
 
 
 def _handle_api_exception(
-    e: ApiException,
+    e: ApiException[Any],
     messages: dict[int, str] = {},
     roles: list[Role] = [],
     state: Optional[State] = None,
-):
+) -> None:
     if e.status in messages:
         message = messages[e.status]
         raise NetHSMError(message)
@@ -316,7 +303,7 @@ def _handle_api_exception(
 
 
 class NetHSMError(Exception):
-    def __init__(self, message: str):
+    def __init__(self, message: str) -> None:
         super().__init__(message)
 
 
@@ -326,7 +313,7 @@ class RequestErrorType(enum.Enum):
 
 
 class NetHSMRequestError(Exception):
-    def __init__(self, type: RequestErrorType, reason: Exception):
+    def __init__(self, type: RequestErrorType, reason: Exception) -> None:
         super().__init__(f"NetHSM API request error: {type.value} {reason}")
         self.type = type
         self.reason = reason
@@ -340,7 +327,7 @@ class NetHSM:
         username: str,
         password: str,
         verify_tls: bool = True,
-    ):
+    ) -> None:
         from .client.components.security_schemes import security_scheme_basic
         from .client.configurations.api_configuration import SecuritySchemeInfo
         from .client.servers.server_0 import Server0, VariablesDict
@@ -371,8 +358,8 @@ class NetHSM:
         if not verify_tls:
             urllib3.disable_warnings()
 
-    def close(self):
-        self.client.close()
+    def close(self) -> None:
+        self.client.close()  # type: ignore[no-untyped-call]
 
     def request(
         self,
@@ -443,7 +430,7 @@ class NetHSM:
             raise NetHSMError("Could not determine the ID of the new user")
         return user_id_match[1]
 
-    def unlock(self, passphrase: str):
+    def unlock(self, passphrase: str) -> None:
         from .client.components.schema.unlock_request_data import UnlockRequestDataDict
 
         request_body = UnlockRequestDataDict(
@@ -462,7 +449,7 @@ class NetHSM:
                 },
             )
 
-    def lock(self):
+    def lock(self) -> None:
         try:
             self.get_api().lock_post()
         except Exception as e:
@@ -477,7 +464,7 @@ class NetHSM:
         unlock_passphrase: str,
         admin_passphrase: str,
         system_time: Union[str, datetime],
-    ):
+    ) -> None:
         from .client.components.schema.provision_request_data import (
             ProvisionRequestDataDict,
         )
@@ -501,14 +488,13 @@ class NetHSM:
     def list_users(self) -> list[str]:
         try:
             response = self.get_api().users_get()
-            return [str(item["user"]) for item in response.body]
         except Exception as e:
             _handle_exception(
                 e,
                 state=State.OPERATIONAL,
                 roles=[Role.ADMINISTRATOR],
             )
-        return []
+        return [item.user for item in response.body]
 
     def get_user(self, user_id: str) -> User:
         from .client.paths.users_user_id.get.path_parameters import PathParametersDict
@@ -567,7 +553,7 @@ class NetHSM:
             raise NetHSMError("Could not determine the ID of the new user")
         return user_id
 
-    def delete_user(self, user_id: str):
+    def delete_user(self, user_id: str) -> None:
         from .client.paths.users_user_id.delete.path_parameters import (
             PathParametersDict,
         )
@@ -585,7 +571,7 @@ class NetHSM:
                 },
             )
 
-    def set_passphrase(self, user_id: str, passphrase: str):
+    def set_passphrase(self, user_id: str, passphrase: str) -> None:
         from .client.components.schema.user_passphrase_post_data import (
             UserPassphrasePostDataDict,
         )
@@ -610,7 +596,7 @@ class NetHSM:
                 },
             )
 
-    def list_operator_tags(self, user_id: str):
+    def list_operator_tags(self, user_id: str) -> list[str]:
         from .client.paths.users_user_id_tags.get.path_parameters import (
             PathParametersDict,
         )
@@ -618,7 +604,6 @@ class NetHSM:
         path_params = PathParametersDict(UserID=user_id)
         try:
             response = self.get_api().users_user_id_tags_get(path_params=path_params)
-            return response.body
         except Exception as e:
             _handle_exception(
                 e,
@@ -628,15 +613,16 @@ class NetHSM:
                     404: f"User {user_id} not found",
                 },
             )
+        return list(response.body)
 
-    def add_operator_tag(self, user_id: str, tag: str):
+    def add_operator_tag(self, user_id: str, tag: str) -> None:
         from .client.paths.users_user_id_tags_tag.put.path_parameters import (
             PathParametersDict,
         )
 
         path_params = PathParametersDict(UserID=user_id, Tag=tag)
         try:
-            return self.get_api().users_user_id_tags_tag_put(path_params=path_params)
+            self.get_api().users_user_id_tags_tag_put(path_params=path_params)
         except Exception as e:
             _handle_exception(
                 e,
@@ -649,14 +635,14 @@ class NetHSM:
                 },
             )
 
-    def delete_operator_tag(self, user_id: str, tag: str):
+    def delete_operator_tag(self, user_id: str, tag: str) -> None:
         from .client.paths.users_user_id_tags_tag.delete.path_parameters import (
             PathParametersDict,
         )
 
         path_params = PathParametersDict(UserID=user_id, Tag=tag)
         try:
-            return self.get_api().users_user_id_tags_tag_delete(path_params=path_params)
+            self.get_api().users_user_id_tags_tag_delete(path_params=path_params)
         except Exception as e:
             _handle_exception(
                 e,
@@ -667,14 +653,14 @@ class NetHSM:
                 },
             )
 
-    def add_key_tag(self, key_id: str, tag: str):
+    def add_key_tag(self, key_id: str, tag: str) -> None:
         from .client.paths.keys_key_id_restrictions_tags_tag.put.path_parameters import (
             PathParametersDict,
         )
 
         path_params = PathParametersDict(KeyID=key_id, Tag=tag)
         try:
-            return self.get_api().keys_key_id_restrictions_tags_tag_put(
+            self.get_api().keys_key_id_restrictions_tags_tag_put(
                 path_params=path_params
             )
         except Exception as e:
@@ -689,14 +675,14 @@ class NetHSM:
                 },
             )
 
-    def delete_key_tag(self, key_id: str, tag: str):
+    def delete_key_tag(self, key_id: str, tag: str) -> None:
         from .client.paths.keys_key_id_restrictions_tags_tag.delete.path_parameters import (
             PathParametersDict,
         )
 
         path_params = PathParametersDict(KeyID=key_id, Tag=tag)
         try:
-            return self.get_api().keys_key_id_restrictions_tags_tag_delete(
+            self.get_api().keys_key_id_restrictions_tags_tag_delete(
                 path_params=path_params
             )
         except Exception as e:
@@ -714,14 +700,14 @@ class NetHSM:
             response = self.get_api().info_get()
         except Exception as e:
             _handle_exception(e)
-        return (str(response.body["vendor"]), str(response.body["product"]))
+        return (response.body.vendor, response.body.product)
 
-    def get_state(self):
+    def get_state(self) -> State:
         try:
             response = self.get_api().health_state_get()
-            return State.from_string(response.body["state"])
         except Exception as e:
             _handle_exception(e)
+        return State.from_string(response.body.state)
 
     def get_random_data(self, n: int) -> str:
         from .client.components.schema.random_request_data import RandomRequestDataDict
@@ -738,7 +724,7 @@ class NetHSM:
                     400: "Invalid length. Must be between 1 and 1024",
                 },
             )
-        return str(response.body["random"])
+        return response.body.random
 
     def get_metrics(self) -> immutabledict[str, OUTPUT_BASE_TYPES]:
         try:
@@ -762,7 +748,7 @@ class NetHSM:
                 state=State.OPERATIONAL,
                 roles=[Role.ADMINISTRATOR, Role.OPERATOR],
             )
-        return [str(item["key"]) for item in response.body]
+        return [item.key for item in response.body]
 
     def get_key(self, key_id: str) -> Key:
         from .client.paths.keys_key_id.get.path_parameters import PathParametersDict
@@ -819,25 +805,32 @@ class NetHSM:
         self,
         key_id: str,
         type: KeyTypeLitteral,
-        mechanisms,
-        tags,
-        prime_p,
-        prime_q,
-        public_exponent,
-        data,
-    ):
+        mechanisms: list[KeyMechanismLiteral],
+        tags: list[str],
+        prime_p: Optional[str],
+        prime_q: Optional[str],
+        public_exponent: Optional[str],
+        data: Optional[str],
+    ) -> str:
         from .client.components.schema.key_private_data import KeyPrivateDataDict
         from .client.components.schema.key_restrictions import KeyRestrictionsDict
         from .client.components.schema.private_key import PrivateKeyDict
         from .client.components.schema.tag_list import TagListTuple
 
+        # To do: split into different methods for RSA and other key types, or
+        # at least change typing accordingly
+
         if type == "RSA":
+            assert prime_p
+            assert prime_q
+            assert public_exponent
             key_data = KeyPrivateDataDict(
                 primeP=prime_p,
                 primeQ=prime_q,
                 publicExponent=public_exponent,
             )
         else:
+            assert data
             key_data = KeyPrivateDataDict(data=data)
 
         if tags:
@@ -868,14 +861,13 @@ class NetHSM:
                     body=body,
                     content_type="application/json",
                 )
-                return key_id
             else:
                 response = self.get_api().keys_post(
                     body=body,
                     content_type="application/json",
                     skip_deserialization=True,
                 )
-                return self.get_key_id_from_location(response.response.getheaders())
+                key_id = self.get_key_id_from_location(response.response.getheaders())
         except Exception as e:
             _handle_exception(
                 e,
@@ -886,8 +878,9 @@ class NetHSM:
                     409: f"Conflict -- a key with the ID {key_id} already exists",
                 },
             )
+        return key_id
 
-    def delete_key(self, key_id: str):
+    def delete_key(self, key_id: str) -> None:
         from .client.paths.keys_key_id.delete.path_parameters import PathParametersDict
 
         path_params = PathParametersDict(KeyID=key_id)
@@ -906,10 +899,10 @@ class NetHSM:
     def generate_key(
         self,
         type: KeyTypeLitteral,
-        mechanisms: Tuple[KeyMechanismLiteral],
+        mechanisms: tuple[KeyMechanismLiteral],
         length: int,
         key_id: Optional[str] = None,
-    ):
+    ) -> str:
         from .client.components.schema.key_generate_request_data import (
             KeyGenerateRequestDataDict,
         )
@@ -946,35 +939,43 @@ class NetHSM:
             self.get_key_id_from_location(response.response.getheaders())
         )
 
-    def get_config_logging(self):
+    def get_config_logging(self) -> LoggingConfig:
         try:
             response = self.get_api().config_logging_get()
         except Exception as e:
             _handle_exception(e, state=State.OPERATIONAL, roles=[Role.ADMINISTRATOR])
-        return response.body
+        return LoggingConfig(
+            ip_address=response.body.ipAddress,
+            log_level=LogLevel.from_string(response.body.logLevel),
+            port=response.body.port,
+        )
 
-    def get_config_network(self):
+    def get_config_network(self) -> NetworkConfig:
         try:
             response = self.get_api().config_network_get()
         except Exception as e:
             _handle_exception(e, state=State.OPERATIONAL, roles=[Role.ADMINISTRATOR])
-        return response.body
+        return NetworkConfig(
+            gateway=response.body.gateway,
+            ip_address=response.body.ipAddress,
+            netmask=response.body.netmask,
+        )
 
-    def get_config_time(self):
+    def get_config_time(self) -> str:
         try:
             response = self.get_api().config_time_get()
         except Exception as e:
             _handle_exception(e, state=State.OPERATIONAL, roles=[Role.ADMINISTRATOR])
         return response.body.time
 
-    def get_config_unattended_boot(self):
+    def get_config_unattended_boot(self) -> str:
         try:
             response = self.get_api().config_unattended_boot_get()
         except Exception as e:
             _handle_exception(e, state=State.OPERATIONAL, roles=[Role.ADMINISTRATOR])
         return response.body.status
 
-    def get_public_key(self):
+    def get_public_key(self) -> str:
         try:
             response = self.get_api().config_tls_public_pem_get(
                 skip_deserialization=True
@@ -983,14 +984,14 @@ class NetHSM:
             _handle_exception(e, state=State.OPERATIONAL, roles=[Role.ADMINISTRATOR])
         return response.response.data.decode("utf-8")
 
-    def get_certificate(self):
+    def get_certificate(self) -> str:
         try:
             response = self.get_api().config_tls_cert_pem_get(skip_deserialization=True)
         except Exception as e:
             _handle_exception(e, state=State.OPERATIONAL, roles=[Role.ADMINISTRATOR])
         return response.response.data.decode("utf-8")
 
-    def get_key_certificate(self, key_id: str):
+    def get_key_certificate(self, key_id: str) -> str:
         try:
             from .client.paths.keys_key_id_cert.get.path_parameters import (
                 PathParametersDict,
@@ -1014,7 +1015,7 @@ class NetHSM:
             )
         return response.response.data.decode("utf-8")
 
-    def set_certificate(self, cert: BufferedReader):
+    def set_certificate(self, cert: BufferedReader) -> None:
         try:
             self.request(
                 "PUT",
@@ -1032,7 +1033,9 @@ class NetHSM:
                 },
             )
 
-    def set_key_certificate(self, key_id: str, cert: BufferedReader, mime_type: str):
+    def set_key_certificate(
+        self, key_id: str, cert: BufferedReader, mime_type: str
+    ) -> None:
         try:
             self.request("PUT", f"keys/{key_id}/cert", data=cert, mime_type=mime_type)
         except Exception as e:
@@ -1048,14 +1051,14 @@ class NetHSM:
                 },
             )
 
-    def delete_key_certificate(self, key_id: str):
+    def delete_key_certificate(self, key_id: str) -> None:
         from .client.paths.keys_key_id_cert.delete.path_parameters import (
             PathParametersDict,
         )
 
         path_params = PathParametersDict(KeyID=key_id)
         try:
-            return self.get_api().keys_key_id_cert_delete(path_params=path_params)
+            self.get_api().keys_key_id_cert_delete(path_params=path_params)
         except Exception as e:
             _handle_exception(
                 e,
@@ -1073,7 +1076,7 @@ class NetHSM:
         organizational_unit: Optional[str] = None,
         common_name: Optional[str] = None,
         email_address: Optional[str] = None,
-    ):
+    ) -> str:
         body = {
             "countryName": country,
             "stateOrProvinceName": state_or_province,
@@ -1087,15 +1090,15 @@ class NetHSM:
             response = self.get_api().config_tls_csr_pem_post(
                 body=body, skip_deserialization=True
             )
-            return response.response.data.decode("utf-8")
         except Exception as e:
             _handle_exception(e, state=State.OPERATIONAL, roles=[Role.ADMINISTRATOR])
+        return response.response.data.decode("utf-8")
 
     def generate_tls_key(
         self,
         type: Literal["RSA", "Curve25519", "EC_P224", "EC_P256", "EC_P384", "EC_P521"],
         length: Union[int, Unset] = Unset(),
-    ):
+    ) -> None:
         from .client.components.schema.tls_key_generate_request_data import (
             TlsKeyGenerateRequestDataDict,
         )
@@ -1106,7 +1109,7 @@ class NetHSM:
         )
 
         try:
-            return self.get_api().config_tls_generate_post(body=body)
+            self.get_api().config_tls_generate_post(body=body)
         except Exception as e:
             _handle_exception(e, state=State.OPERATIONAL, roles=[Role.ADMINISTRATOR])
 
@@ -1120,7 +1123,7 @@ class NetHSM:
         organizational_unit: Optional[str] = None,
         common_name: Optional[str] = None,
         email_address: Optional[str] = None,
-    ):
+    ) -> str:
         from .client.paths.keys_key_id_csr_pem.post.path_parameters import (
             PathParametersDict,
         )
@@ -1139,7 +1142,6 @@ class NetHSM:
             response = self.get_api().keys_key_id_csr_pem_post(
                 path_params=path_params, body=body, skip_deserialization=True
             )
-            return response.response.data.decode("utf-8")
         except Exception as e:
             _handle_exception(
                 e,
@@ -1149,8 +1151,9 @@ class NetHSM:
                     404: f"Key {key_id} not found",
                 },
             )
+        return response.response.data.decode("utf-8")
 
-    def set_backup_passphrase(self, passphrase: str):
+    def set_backup_passphrase(self, passphrase: str) -> None:
         from .client.components.schema.backup_passphrase_config import (
             BackupPassphraseConfigDict,
         )
@@ -1168,7 +1171,7 @@ class NetHSM:
                 },
             )
 
-    def set_unlock_passphrase(self, passphrase: str):
+    def set_unlock_passphrase(self, passphrase: str) -> None:
         from .client.components.schema.unlock_passphrase_config import (
             UnlockPassphraseConfigDict,
         )
@@ -1191,7 +1194,7 @@ class NetHSM:
         ip_address: str,
         port: int,
         log_level: Literal["debug", "info", "warning", "error"],
-    ):
+    ) -> None:
         from .client.components.schema.logging_config import LoggingConfigDict
 
         body = LoggingConfigDict(ipAddress=ip_address, port=port, logLevel=log_level)
@@ -1207,7 +1210,7 @@ class NetHSM:
                 },
             )
 
-    def set_network_config(self, ip_address: str, netmask: str, gateway: str):
+    def set_network_config(self, ip_address: str, netmask: str, gateway: str) -> None:
         from .client.components.schema.network_config import NetworkConfigDict
 
         body = NetworkConfigDict(ipAddress=ip_address, netmask=netmask, gateway=gateway)
@@ -1223,7 +1226,7 @@ class NetHSM:
                 },
             )
 
-    def set_time(self, time: Union[str, datetime]):
+    def set_time(self, time: Union[str, datetime]) -> None:
         from .client.components.schema.time_config import TimeConfigDict
 
         body = TimeConfigDict(time=time)
@@ -1239,7 +1242,7 @@ class NetHSM:
                 },
             )
 
-    def set_unattended_boot(self, status: Literal["on", "off"]):
+    def set_unattended_boot(self, status: Literal["on", "off"]) -> None:
         from .client.components.schema.unattended_boot_config import (
             UnattendedBootConfigDict,
         )
@@ -1257,7 +1260,7 @@ class NetHSM:
                 },
             )
 
-    def get_system_info(self):
+    def get_system_info(self) -> SystemInfo:
         try:
             response = self.get_api().system_info_get()
         except Exception as e:
@@ -1267,13 +1270,13 @@ class NetHSM:
                 roles=[Role.ADMINISTRATOR],
             )
         return SystemInfo(
-            firmware_version=response.body["firmwareVersion"],
-            software_version=response.body["softwareVersion"],
-            hardware_version=response.body["hardwareVersion"],
-            build_tag=response.body["softwareBuild"],
+            firmware_version=response.body.firmwareVersion,
+            software_version=response.body.softwareVersion,
+            hardware_version=response.body.hardwareVersion,
+            build_tag=response.body.softwareBuild,
         )
 
-    def backup(self):
+    def backup(self) -> bytes:
         try:
             response = self.get_api().system_backup_post()
         except Exception as e:
@@ -1287,7 +1290,7 @@ class NetHSM:
             )
         return response.response.data
 
-    def restore(self, backup: BufferedReader, passphrase: str, time: datetime):
+    def restore(self, backup: BufferedReader, passphrase: str, time: datetime) -> None:
         try:
             from .client.paths.system_restore.post.query_parameters import (
                 QueryParametersDict,
@@ -1306,7 +1309,7 @@ class NetHSM:
                 },
             )
 
-    def update(self, image: BufferedReader):
+    def update(self, image: BufferedReader) -> str:
         try:
             response = self.get_api().system_update_post(body=image)
         except Exception as e:
@@ -1322,12 +1325,14 @@ class NetHSM:
 
         # Manually read the release notes from the response body
         json_str = response.response.data.decode("utf-8")
-        return json.loads(json_str)["releaseNotes"]
+        release_notes = json.loads(json_str)["releaseNotes"]
+        assert isinstance(release_notes, str)
+        return release_notes
 
         # # Use this one when the bug is fixed:
         # return response.body.releaseNotes
 
-    def cancel_update(self):
+    def cancel_update(self) -> None:
         try:
             self.get_api().system_cancel_update_post()
         except Exception as e:
@@ -1337,7 +1342,7 @@ class NetHSM:
                 roles=[Role.ADMINISTRATOR],
             )
 
-    def commit_update(self):
+    def commit_update(self) -> None:
         try:
             self.get_api().system_commit_update_post()
         except Exception as e:
@@ -1347,7 +1352,7 @@ class NetHSM:
                 roles=[Role.ADMINISTRATOR],
             )
 
-    def reboot(self):
+    def reboot(self) -> None:
         try:
             self.get_api().system_reboot_post()
         except Exception as e:
@@ -1357,7 +1362,7 @@ class NetHSM:
                 roles=[Role.ADMINISTRATOR],
             )
 
-    def shutdown(self):
+    def shutdown(self) -> None:
         try:
             self.get_api().system_shutdown_post()
         except Exception as e:
@@ -1367,7 +1372,7 @@ class NetHSM:
                 roles=[Role.ADMINISTRATOR],
             )
 
-    def factory_reset(self):
+    def factory_reset(self) -> None:
         try:
             self.get_api().system_factory_reset_post()
         except Exception as e:
@@ -1377,7 +1382,9 @@ class NetHSM:
                 roles=[Role.ADMINISTRATOR],
             )
 
-    def encrypt(self, key_id: str, data: str, mode: Literal["AES_CBC"], iv: str):
+    def encrypt(
+        self, key_id: str, data: str, mode: Literal["AES_CBC"], iv: str
+    ) -> tuple[str, str]:
         from .client.components.schema.encrypt_request_data import (
             EncryptRequestDataDict,
         )
@@ -1419,7 +1426,7 @@ class NetHSM:
             "AES_CBC",
         ],
         iv: str,
-    ):
+    ) -> str:
         from .client.components.schema.decrypt_request_data import (
             DecryptRequestDataDict,
         )
@@ -1464,7 +1471,7 @@ class NetHSM:
             "EdDSA",
             "ECDSA",
         ],
-    ):
+    ) -> str:
         from .client.components.schema.sign_request_data import SignRequestDataDict
         from .client.paths.keys_key_id_sign.post.path_parameters import (
             PathParametersDict,
@@ -1490,7 +1497,13 @@ class NetHSM:
 
 
 @contextlib.contextmanager
-def connect(host, version, username, password, verify_tls=True):
+def connect(
+    host: str,
+    version: str,
+    username: str,
+    password: str,
+    verify_tls: bool = True,
+) -> Iterator[NetHSM]:
     nethsm = NetHSM(host, version, username, password, verify_tls)
     try:
         yield nethsm

@@ -18,14 +18,14 @@ https://stackoverflow.com/questions/36530082/running-pycharm-as-root-from-launch
 
 def get_config_logging(nethsm):
     data = nethsm.get_config_logging()
-    assert data.ipAddress == C.IP_ADDRESS_LOGGING
+    assert data.ip_address == C.IP_ADDRESS_LOGGING
     assert data.port == C.PORT
-    assert str(data.logLevel) == C.LOG_LEVEL
+    assert data.log_level.value == C.LOG_LEVEL
 
 
 def get_config_network(nethsm):
     data = nethsm.get_config_network()
-    assert data.ipAddress == C.IP_ADDRESS_NETWORK
+    assert data.ip_address == C.IP_ADDRESS_NETWORK
     assert data.netmask == C.NETMASK
     assert data.gateway == C.GATEWAY
 
