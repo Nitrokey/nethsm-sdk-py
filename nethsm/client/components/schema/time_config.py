@@ -19,7 +19,7 @@ Properties = typing.TypedDict(
 )
 
 
-class TimeConfigDict(schemas.immutabledict[str, str]):
+class TimeConfigDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES]):
 
     __required_keys__: typing.FrozenSet[str] = frozenset({
         "time",

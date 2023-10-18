@@ -9,11 +9,10 @@ from nethsm.client.shared_imports.response_imports import *  # pyright: ignore [
 from .content.application_octet_stream import schema as application_octet_stream_schema
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class ApiResponse(api_response.ApiResponse):
-    response: urllib3.HTTPResponse
     body: typing.Union[bytes, schemas.FileIO]
-    headers: schemas.Unset = schemas.unset
+    headers: schemas.Unset
 
 
 class ResponseFor200(api_client.OpenApiResponse[ApiResponse]):

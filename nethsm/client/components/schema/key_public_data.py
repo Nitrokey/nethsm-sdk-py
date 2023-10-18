@@ -23,6 +23,7 @@ Properties = typing.TypedDict(
 
 
 class KeyPublicDataDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES]):
+
     __required_keys__: typing.FrozenSet[str] = frozenset({
     })
     __optional_keys__: typing.FrozenSet[str] = frozenset({
@@ -50,14 +51,14 @@ class KeyPublicDataDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES]):
         **kwargs: schemas.INPUT_TYPES_ALL,
     ):
         arg_: typing.Dict[str, typing.Any] = {}
-        for key, val in (
+        for key_, val in (
             ("modulus", modulus),
             ("publicExponent", publicExponent),
             ("data", data),
         ):
             if isinstance(val, schemas.Unset):
                 continue
-            arg_[key] = val
+            arg_[key_] = val
         arg_.update(kwargs)
         used_arg_ = typing.cast(KeyPublicDataDictInput, arg_)
         return KeyPublicData.validate(used_arg_, configuration=configuration_)

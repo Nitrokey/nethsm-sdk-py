@@ -14,14 +14,14 @@ import urllib3
 from nethsm.client import schemas
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class ApiResponse:
     response: urllib3.HTTPResponse
-    body: typing.Union[schemas.Unset, schemas.OUTPUT_BASE_TYPES] = schemas.unset
-    headers: typing.Union[schemas.Unset, typing.Mapping[str, schemas.OUTPUT_BASE_TYPES]] = schemas.unset
+    body: typing.Union[schemas.Unset, schemas.OUTPUT_BASE_TYPES]
+    headers: typing.Union[schemas.Unset, typing.Mapping[str, schemas.OUTPUT_BASE_TYPES]]
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class ApiResponseWithoutDeserialization(ApiResponse):
     response: urllib3.HTTPResponse
     body: schemas.Unset = schemas.unset

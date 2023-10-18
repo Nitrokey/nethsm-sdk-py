@@ -33,7 +33,7 @@ Properties = typing.TypedDict(
 )
 
 
-class TlsKeyGenerateRequestDataDict(schemas.immutabledict[str, int]):
+class TlsKeyGenerateRequestDataDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES]):
 
     __required_keys__: typing.FrozenSet[str] = frozenset({
         "type",
@@ -63,12 +63,12 @@ class TlsKeyGenerateRequestDataDict(schemas.immutabledict[str, int]):
         arg_: typing.Dict[str, typing.Any] = {
             "type": type,
         }
-        for key, val in (
+        for key_, val in (
             ("length", length),
         ):
             if isinstance(val, schemas.Unset):
                 continue
-            arg_[key] = val
+            arg_[key_] = val
         arg_.update(kwargs)
         used_arg_ = typing.cast(TlsKeyGenerateRequestDataDictInput, arg_)
         return TlsKeyGenerateRequestData.validate(used_arg_, configuration=configuration_)

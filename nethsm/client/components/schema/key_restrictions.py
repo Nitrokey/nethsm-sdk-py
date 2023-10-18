@@ -21,6 +21,7 @@ Properties = typing.TypedDict(
 
 
 class KeyRestrictionsDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES]):
+
     __required_keys__: typing.FrozenSet[str] = frozenset({
     })
     __optional_keys__: typing.FrozenSet[str] = frozenset({
@@ -39,12 +40,12 @@ class KeyRestrictionsDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES])
         **kwargs: schemas.INPUT_TYPES_ALL,
     ):
         arg_: typing.Dict[str, typing.Any] = {}
-        for key, val in (
+        for key_, val in (
             ("tags", tags),
         ):
             if isinstance(val, schemas.Unset):
                 continue
-            arg_[key] = val
+            arg_[key_] = val
         arg_.update(kwargs)
         used_arg_ = typing.cast(KeyRestrictionsDictInput, arg_)
         return KeyRestrictions.validate(used_arg_, configuration=configuration_)

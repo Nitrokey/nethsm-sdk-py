@@ -87,14 +87,14 @@ class KeyGenerateRequestDataDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_
             "mechanisms": mechanisms,
             "type": type,
         }
-        for key, val in (
+        for key_, val in (
             ("length", length),
             ("id", id),
             ("restrictions", restrictions),
         ):
             if isinstance(val, schemas.Unset):
                 continue
-            arg_[key] = val
+            arg_[key_] = val
         arg_.update(kwargs)
         used_arg_ = typing.cast(KeyGenerateRequestDataDictInput, arg_)
         return KeyGenerateRequestData.validate(used_arg_, configuration=configuration_)

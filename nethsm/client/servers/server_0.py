@@ -71,17 +71,11 @@ class VariablesDict(schemas.immutabledict[str, str]):
     
     @property
     def host(self) -> str:
-        return typing.cast(
-            str,
-            self.__getitem__("host")
-        )
+        return self.__getitem__("host")
     
     @property
     def version(self) -> str:
-        return typing.cast(
-            str,
-            self.__getitem__("version")
-        )
+        return self.__getitem__("version")
 VariablesDictInput = typing.TypedDict(
     'VariablesDictInput',
     {
