@@ -12,6 +12,7 @@ classifiers = ["License :: OSI Approved :: Apache Software License"]
 dynamic = ["version", "description"]
 dependencies = [
   "certifi",
+  "cryptography >=41.0",
   "python-dateutil",
   "typing_extensions ~= 4.3.0",
   "urllib3 >=2.0,<2.1",
@@ -59,24 +60,23 @@ extend_skip = ["nethsm/client"]
 
 [tool.mypy]
 show_error_codes = true
+strict = true
 python_version = "3.9"
-warn_unused_configs = true
-warn_redundant_casts = true
 
-# enable strict checks for the manually written code, see
+# disable strict checks for the auto-generated code, see
 # - https://github.com/python/mypy/issues/11401
 # - https://mypy.readthedocs.io/en/stable/existing_code.html#introduce-stricter-options
 [[tool.mypy.overrides]]
-module = "nethsm"
-check_untyped_defs = true
-disallow_any_generics = true
-disallow_incomplete_defs = true
-disallow_subclassing_any = true
-disallow_untyped_calls = true
-disallow_untyped_decorators = true
-disallow_untyped_defs = true
-no_implicit_reexport = true
-strict_concatenate = true
-strict_equality = true
-warn_unused_ignores = true
-warn_return_any = true
+module = "nethsm.client.*"
+check_untyped_defs = false
+disallow_any_generics = false
+disallow_incomplete_defs = false
+disallow_subclassing_any = false
+disallow_untyped_calls = false
+disallow_untyped_decorators = false
+disallow_untyped_defs = false
+no_implicit_reexport = false
+strict_concatenate = false
+strict_equality = false
+warn_unused_ignores = false
+warn_return_any = false
