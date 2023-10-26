@@ -17,6 +17,8 @@ from utilities import (
     update,
 )
 
+from nethsm.backup import Backup, EncryptedBackup
+
 """######################### Preparation for the Tests #########################
 
 To run these test on Ubuntu like systems in Terminal you need sudo rights.
@@ -67,6 +69,8 @@ def test_passphrase_add_user_retrieve_backup(nethsm):
         if os.path.exists(C.FILENAME_BACKUP):
             os.remove(C.FILENAME_BACKUP)
         data = nethsm.backup()
+        backup = EncryptedBackup.parse(data).decrypt(C.BACKUP_PASSPHRASE)
+        assert f"/key/{C.KEY_ID_GENERATED}" in backup.data
         try:
             with open(C.FILENAME_BACKUP, "xb") as f:
                 f.write(data)
