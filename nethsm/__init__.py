@@ -8,7 +8,7 @@
 # copied, modified, or distributed except according to those terms.
 """Python Library to manage NetHSM(s)."""
 
-__version__ = "0.3.2"
+__version__ = "0.4.0"
 
 import contextlib
 import enum
