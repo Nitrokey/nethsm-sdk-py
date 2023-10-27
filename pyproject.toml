@@ -11,9 +11,10 @@ license = {file = "LICENSE"}
 classifiers = ["License :: OSI Approved :: Apache Software License"]
 dynamic = ["version", "description"]
 dependencies = [
-  "urllib3 >=2.0,<2.1",
-  "typing_extensions ~= 4.3.0",
+  "certifi",
   "python-dateutil",
+  "typing_extensions ~= 4.3.0",
+  "urllib3 >=2.0,<2.1",
 ]
 
 [project.urls]
