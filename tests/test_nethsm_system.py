@@ -1,13 +1,16 @@
+import base64
 import datetime
 import os
 
 import docker
 import pytest
 from conftest import Constants as C
+from test_nethsm_keys import generate_key
 from utilities import nethsm  # noqa: F401
 from utilities import (
     add_user,
     connect,
+    encrypt_rsa,
     provision,
     set_backup_passphrase,
     start_nethsm,
@@ -46,13 +49,19 @@ def test_provision_system_info(nethsm):
 def test_passphrase_add_user_retrieve_backup(nethsm):
     """Make a backup of a NetHSM instance and write it to a file.
 
-    This command requires authentication as a user with the Backup role.
+    This command requires authentication as a user with the Backup role."""
 
-    Todo: Further Optimization contains reading all the contents of the Nethsm
-    the do the backup and restore and then read once again all the contents
-    to compare before to later"""
     set_backup_passphrase(nethsm)
     add_user(nethsm, C.BackupUser)
+    add_user(nethsm, C.OperatorUser)
+
+    generate_key(nethsm)
+    assert nethsm.list_keys() == [C.KEY_ID_GENERATED]
+
+    key = nethsm.get_key_public_key(C.KEY_ID_GENERATED)
+    encrypted = encrypt_rsa(key, C.DATA)
+    with open(C.FILENAME_ENCRYPTED, "wb") as f:
+        f.write(encrypted)
 
     with connect(C.BackupUser) as nethsm:
         if os.path.exists(C.FILENAME_BACKUP):
@@ -72,26 +81,47 @@ def test_factory_reset(nethsm):
     This command requires authentication as a user with the Administrator
     role."""
     nethsm.factory_reset()
+    start_nethsm()
+
+    # make sure that we really cleared the data
+    assert nethsm.get_state().value == "Unprovisioned"
+    provision(nethsm)
+    assert nethsm.list_keys() == []
+
+    nethsm.factory_reset()
+    start_nethsm()
 
 
-@pytest.mark.xfail(reason="NetHSM backup is currently not working")
 def test_state_restore(nethsm):
     """Restore a backup of a NetHSM instance from a file.
 
     If the system time is not set, the current system time is used."""
-    start_nethsm()
 
     system_time = datetime.datetime.now(datetime.timezone.utc)
-    if nethsm.get_state().value == "Unprovisioned":
-        try:
-            with open(C.FILENAME_BACKUP, "rb") as f:
-                nethsm.restore(f, C.BACKUP_PASSPHRASE, system_time)
-                nethsm.unlock(C.UNLOCK_PASSPHRASE)
-        except OSError as e:
-            print(e, type(e))
-            assert False
-    else:
+    assert nethsm.get_state().value == "Unprovisioned"
+
+    try:
+        with open(C.FILENAME_BACKUP, "rb") as f:
+            nethsm.restore(f, C.BACKUP_PASSPHRASE, system_time)
+            nethsm.unlock(C.UNLOCK_PASSPHRASE)
+    except OSError as e:
+        print(e, type(e))
         assert False
+
+    assert nethsm.list_keys() == [C.KEY_ID_GENERATED]
+
+    with open(C.FILENAME_ENCRYPTED, "rb") as f:
+        encrypted = f.read()
+
+    # see test_decrypt in test_nethsm_keys
+    with connect(C.OperatorUser) as nethsm:
+        decrypt = nethsm.decrypt(
+            C.KEY_ID_GENERATED,
+            base64.b64encode(encrypted).decode(),
+            C.MODE,
+            "arstasrta",
+        )
+        assert base64.b64decode(decrypt).decode() == C.DATA
 
 
 def test_state_provision_update(nethsm):

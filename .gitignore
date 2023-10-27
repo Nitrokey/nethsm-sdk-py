@@ -7,3 +7,4 @@ backupNethsm.bin
 .mypy_cache
 .coverage
 coverage.xml
+encrypted.bin

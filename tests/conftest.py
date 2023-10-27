@@ -44,6 +44,7 @@ class Constants:
     FILENAME_BACKUP = "backupNethsm.bin"
     FILENAME_UPDATE = "update.img.bin"
     FILENAME_UPDATE_IN_TEST = "tests/update.img.bin"
+    FILENAME_ENCRYPTED = "encrypted.bin"
 
     # test_nethsm_config
     COUNTRY = "DE"
