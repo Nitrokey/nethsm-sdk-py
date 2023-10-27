@@ -8,24 +8,20 @@
 # copied, modified, or distributed except according to those terms.
 """Python Library to manage NetHSM(s)."""
 
-import pathlib
-from base64 import b64encode
-
-import urllib3
-
-__version_path__ = pathlib.Path(__file__).parent.resolve().absolute() / "VERSION"
-__version__ = open(__version_path__).read().strip()
+__version__ = "0.3.2"
 
 import contextlib
 import enum
 import json
 import re
+from base64 import b64encode
 from dataclasses import dataclass
 from datetime import datetime
 from io import BufferedReader
 from typing import Any, Iterator, Literal, Optional, Union, cast
 from urllib.parse import urlencode
 
+import urllib3
 from urllib3 import HTTPResponse, _collections
 from urllib3._collections import HTTPHeaderDict
 

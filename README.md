@@ -69,7 +69,7 @@ The current list of such functions is:
 
 ### Publishing a new version
 
-- change the version in `nethsm/VERSION`. Example : 0.1.0
+- change `__version__` in `nethsm/__init__.py`. Example : 0.1.0
 - create a new tag, prepending `v` to the version. Example : v0.1.0
 - create a new release on GitHub to trigger the ci that will publish the new version.
 
