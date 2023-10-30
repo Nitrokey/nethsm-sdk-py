@@ -92,7 +92,7 @@ class EncryptedBackup:
 
     def _key(self, passphrase: str) -> bytes:
         return hashlib.scrypt(
-            password=passphrase.encode(), salt=self.salt, n=16384, r=8, p=1, dklen=32
+            password=passphrase.encode(), salt=self.salt, n=16384, r=8, p=16, dklen=32
         )
 
     def decrypt(self, passphrase: str) -> Backup:
