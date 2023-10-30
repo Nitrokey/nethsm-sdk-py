@@ -18,11 +18,11 @@ from .responses import (
     response_412,
 )
 from . import request_body
-from .parameters import parameter_0
+from ..parameters import parameter_0 as path_item_parameter_0
 from .security import security_requirement_object_0
 from .path_parameters import PathParameters, PathParametersDictInput, PathParametersDict
 path_parameter_classes = (
-    parameter_0.Parameter0,
+    path_item_parameter_0.Parameter0,
 )
 
 _security: typing.List[security_schemes.SecurityRequirementObject] = [
