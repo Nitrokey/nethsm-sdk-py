@@ -1029,11 +1029,14 @@ class NetHSM:
                 },
             )
 
-    def set_key_certificate(
-        self, key_id: str, cert: BufferedReader, mime_type: str
-    ) -> None:
+    def set_key_certificate(self, key_id: str, cert: BufferedReader) -> None:
         try:
-            self.request("PUT", f"keys/{key_id}/cert", data=cert, mime_type=mime_type)
+            self.request(
+                "PUT",
+                f"keys/{key_id}/cert",
+                data=cert,
+                mime_type="application/octet-stream",
+            )
         except Exception as e:
             _handle_exception(
                 e,
