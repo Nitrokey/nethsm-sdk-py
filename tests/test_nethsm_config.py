@@ -72,11 +72,11 @@ def test_set_certificate(nethsm: nethsm_module.NetHSM) -> None:
         C.COMMON_NAME,
         C.EMAIL_ADDRESS,
     )
-    cert = self_sign_csr(csr)
-    nethsm.set_certificate(BytesIO(cert))
+    cert = self_sign_csr(csr).decode()
+    nethsm.set_certificate(cert)
 
     remote_cert = nethsm.get_certificate()
-    assert cert.decode("utf-8") == remote_cert
+    assert cert == remote_cert
 
 
 def generate_tls_key(nethsm):

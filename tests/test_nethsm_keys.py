@@ -222,7 +222,7 @@ def test_set_get_key_certificate(nethsm: nethsm_module.NetHSM):
         nethsm.set_key_certificate(C.KEY_ID_ADDED, f)
     with open(C.CERTIFICATE_FILE, "rb") as f:
         certificate = nethsm.get_key_certificate(C.KEY_ID_ADDED)
-        file_cert = f.read().decode("utf-8")
+        file_cert = f.read()
         assert certificate == file_cert
 
 

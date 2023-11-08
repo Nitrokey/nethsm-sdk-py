@@ -16,15 +16,15 @@ from .responses import (
     response_406,
     response_412,
 )
-from .parameters import (
-    parameter_0,
-    parameter_1,
+from ..parameters import (
+    parameter_0 as path_item_parameter_0,
+    parameter_1 as path_item_parameter_1,
 )
 from .security import security_requirement_object_0
 from .path_parameters import PathParameters, PathParametersDictInput, PathParametersDict
 path_parameter_classes = (
-    parameter_0.Parameter0,
-    parameter_1.Parameter1,
+    path_item_parameter_0.Parameter0,
+    path_item_parameter_1.Parameter1,
 )
 
 _security: typing.List[security_schemes.SecurityRequirementObject] = [
