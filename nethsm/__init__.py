@@ -1031,12 +1031,13 @@ class NetHSM:
 
     def set_key_certificate(self, key_id: str, cert: BufferedReader) -> None:
         try:
-            self.request(
-                "PUT",
-                f"keys/{key_id}/cert",
-                data=cert,
-                mime_type="application/octet-stream",
+            from .client.paths.keys_key_id_cert.put.path_parameters import (
+                PathParametersDict,
             )
+
+            path_params = PathParametersDict(KeyID=key_id)
+
+            self.get_api().keys_key_id_cert_put(body=cert, path_params=path_params)
         except Exception as e:
             _handle_exception(
                 e,
