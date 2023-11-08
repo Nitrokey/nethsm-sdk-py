@@ -987,7 +987,7 @@ class NetHSM:
             _handle_exception(e, state=State.OPERATIONAL, roles=[Role.ADMINISTRATOR])
         return response.response.data.decode("utf-8")
 
-    def get_key_certificate(self, key_id: str) -> str:
+    def get_key_certificate(self, key_id: str) -> bytes:
         try:
             from .client.paths.keys_key_id_cert.get.path_parameters import (
                 PathParametersDict,
@@ -1009,7 +1009,7 @@ class NetHSM:
                     406: f"Certificate for key {key_id} not found",
                 },
             )
-        return response.response.data.decode("utf-8")
+        return response.response.data
 
     def set_certificate(self, cert: BufferedReader) -> None:
         try:
