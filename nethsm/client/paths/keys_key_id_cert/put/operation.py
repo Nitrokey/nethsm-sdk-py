@@ -65,7 +65,12 @@ class BaseApi(api_client.Api):
     @typing.overload
     def _keys_key_id_cert_put(
         self,
-        body: str,
+        body: typing.Union[
+            bytes,
+            io.FileIO,
+            io.BufferedReader,
+            schemas.FileIO
+        ],
         path_params: typing.Union[
             PathParametersDictInput,
             PathParametersDict
@@ -82,7 +87,12 @@ class BaseApi(api_client.Api):
     @typing.overload
     def _keys_key_id_cert_put(
         self,
-        body: str,
+        body: typing.Union[
+            bytes,
+            io.FileIO,
+            io.BufferedReader,
+            schemas.FileIO
+        ],
         path_params: typing.Union[
             PathParametersDictInput,
             PathParametersDict
@@ -98,7 +108,12 @@ class BaseApi(api_client.Api):
 
     def _keys_key_id_cert_put(
         self,
-        body: str,
+        body: typing.Union[
+            bytes,
+            io.FileIO,
+            io.BufferedReader,
+            schemas.FileIO
+        ],
         path_params: typing.Union[
             PathParametersDictInput,
             PathParametersDict

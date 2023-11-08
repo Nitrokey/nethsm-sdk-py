@@ -789,6 +789,7 @@ paths:
           content:
             application/octet-stream:
               schema:
+                format: binary
                 type: string
         "400":
           description: Invalid character in the KeyID.
@@ -834,6 +835,7 @@ paths:
         content:
           application/octet-stream:
             schema:
+              format: binary
               type: string
         required: true
       security:

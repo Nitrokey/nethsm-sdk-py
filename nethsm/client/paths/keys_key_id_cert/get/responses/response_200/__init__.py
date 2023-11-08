@@ -11,7 +11,7 @@ from .content.application_octet_stream import schema as application_octet_stream
 
 @dataclasses.dataclass(frozen=True)
 class ApiResponse(api_response.ApiResponse):
-    body: str
+    body: typing.Union[bytes, schemas.FileIO]
     headers: schemas.Unset
 
 
