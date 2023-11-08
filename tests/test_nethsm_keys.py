@@ -219,7 +219,7 @@ def test_set_get_key_certificate(nethsm: nethsm_module.NetHSM):
 
     add_key(nethsm)
     with open(C.CERTIFICATE_FILE, "rb") as f:
-        nethsm.set_key_certificate(C.KEY_ID_ADDED, f, "application/x-pem-file")
+        nethsm.set_key_certificate(C.KEY_ID_ADDED, f)
     with open(C.CERTIFICATE_FILE, "rb") as f:
         certificate = nethsm.get_key_certificate(C.KEY_ID_ADDED)
         file_cert = f.read().decode("utf-8")
@@ -251,7 +251,7 @@ def test_delete_certificate(nethsm):
 
     add_key(nethsm)
     with open(C.CERTIFICATE_FILE, "rb") as f:
-        nethsm.set_key_certificate(C.KEY_ID_ADDED, f, "application/x-pem-file")
+        nethsm.set_key_certificate(C.KEY_ID_ADDED, f)
 
     nethsm.delete_key_certificate(C.KEY_ID_ADDED)
 

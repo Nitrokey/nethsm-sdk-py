@@ -6,18 +6,12 @@
 
 from nethsm.client.shared_imports.response_imports import *  # pyright: ignore [reportWildcardImportFromLibrary]
 
-from .content.application_x_pem_file import schema as application_x_pem_file_schema
-from .content.application_xx509_ca_cert import schema as application_xx509_ca_cert_schema
-from .content.application_pgp_keys import schema as application_pgp_keys_schema
+from .content.application_octet_stream import schema as application_octet_stream_schema
 
 
 @dataclasses.dataclass(frozen=True)
 class ApiResponse(api_response.ApiResponse):
-    body: typing.Union[
-        str,
-        str,
-        str,
-    ]
+    body: str
     headers: schemas.Unset
 
 
@@ -27,18 +21,8 @@ class ResponseFor200(api_client.OpenApiResponse[ApiResponse]):
         return ApiResponse(response=response, body=body, headers=headers)
 
 
-    class ApplicationXPemFileMediaType(api_client.MediaType):
-        schema: typing_extensions.TypeAlias = application_x_pem_file_schema.Schema
-
-
-    class ApplicationXX509CaCertMediaType(api_client.MediaType):
-        schema: typing_extensions.TypeAlias = application_xx509_ca_cert_schema.Schema
-
-
-    class ApplicationPgpKeysMediaType(api_client.MediaType):
-        schema: typing_extensions.TypeAlias = application_pgp_keys_schema.Schema
+    class ApplicationOctetStreamMediaType(api_client.MediaType):
+        schema: typing_extensions.TypeAlias = application_octet_stream_schema.Schema
     content = {
-        'application/x-pem-file': ApplicationXPemFileMediaType,
-        'application/x-x509-ca-cert': ApplicationXX509CaCertMediaType,
-        'application/pgp-keys': ApplicationPgpKeysMediaType,
+        'application/octet-stream': ApplicationOctetStreamMediaType,
     }
