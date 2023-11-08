@@ -36,7 +36,6 @@ from nethsm.client.components.schema.log_level import LogLevel
 from nethsm.client.components.schema.logging_config import LoggingConfig
 from nethsm.client.components.schema.metrics_data import MetricsData
 from nethsm.client.components.schema.network_config import NetworkConfig
-from nethsm.client.components.schema.pgp_private_key import PGPPrivateKey
 from nethsm.client.components.schema.passphrase import Passphrase
 from nethsm.client.components.schema.pem_csr import PemCSR
 from nethsm.client.components.schema.pem_cert import PemCert

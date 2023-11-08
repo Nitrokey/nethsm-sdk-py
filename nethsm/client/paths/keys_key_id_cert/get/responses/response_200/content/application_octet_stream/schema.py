@@ -10,4 +10,4 @@
 from __future__ import annotations
 from nethsm.client.shared_imports.schema_imports import *  # pyright: ignore [reportWildcardImportFromLibrary]
 
-Schema: typing_extensions.TypeAlias = schemas.StrSchema
+Schema: typing_extensions.TypeAlias = schemas.BinarySchema

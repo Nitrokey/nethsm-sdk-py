@@ -6,9 +6,7 @@
 
 from nethsm.client import api_client, exceptions, security_schemes
 from nethsm.client.shared_imports.operation_imports import *  # pyright: ignore [reportWildcardImportFromLibrary]
-from nethsm.client.components.schema import pem_cert
-from nethsm.client.components.schema import pgp_private_key
-from nethsm.client.paths.keys_key_id_cert.put.request_body.content.application_xx509_ca_cert import schema
+from nethsm.client.paths.keys_key_id_cert.put.request_body.content.application_octet_stream import schema
 
 from .. import path
 from .responses import (
@@ -67,14 +65,19 @@ class BaseApi(api_client.Api):
     @typing.overload
     def _keys_key_id_cert_put(
         self,
-        body: str,
+        body: typing.Union[
+            bytes,
+            io.FileIO,
+            io.BufferedReader,
+            schemas.FileIO
+        ],
         path_params: typing.Union[
             PathParametersDictInput,
             PathParametersDict
         ],
         *,
         skip_deserialization: typing.Literal[False] = False,
-        content_type: typing.Literal["application/x-pem-file"] = "application/x-pem-file",
+        content_type: typing.Literal["application/octet-stream"] = "application/octet-stream",
         security_index: typing.Optional[int] = None,
         server_index: typing.Optional[int] = None,
         stream: bool = False,
@@ -84,82 +87,19 @@ class BaseApi(api_client.Api):
     @typing.overload
     def _keys_key_id_cert_put(
         self,
-        body: str,
+        body: typing.Union[
+            bytes,
+            io.FileIO,
+            io.BufferedReader,
+            schemas.FileIO
+        ],
         path_params: typing.Union[
             PathParametersDictInput,
             PathParametersDict
         ],
         *,
         skip_deserialization: typing.Literal[True],
-        content_type: typing.Literal["application/x-pem-file"] = "application/x-pem-file",
-        security_index: typing.Optional[int] = None,
-        server_index: typing.Optional[int] = None,
-        stream: bool = False,
-        timeout: typing.Optional[typing.Union[int, float, typing.Tuple]] = None,
-    ) -> api_response.ApiResponseWithoutDeserialization: ...
-
-    @typing.overload
-    def _keys_key_id_cert_put(
-        self,
-        body: str,
-        path_params: typing.Union[
-            PathParametersDictInput,
-            PathParametersDict
-        ],
-        *,
-        skip_deserialization: typing.Literal[False] = False,
-        content_type: typing.Literal["application/x-x509-ca-cert"],
-        security_index: typing.Optional[int] = None,
-        server_index: typing.Optional[int] = None,
-        stream: bool = False,
-        timeout: typing.Optional[typing.Union[int, float, typing.Tuple]] = None,
-    ) -> response_201.ApiResponse: ...
-
-    @typing.overload
-    def _keys_key_id_cert_put(
-        self,
-        body: str,
-        path_params: typing.Union[
-            PathParametersDictInput,
-            PathParametersDict
-        ],
-        *,
-        skip_deserialization: typing.Literal[True],
-        content_type: typing.Literal["application/x-x509-ca-cert"],
-        security_index: typing.Optional[int] = None,
-        server_index: typing.Optional[int] = None,
-        stream: bool = False,
-        timeout: typing.Optional[typing.Union[int, float, typing.Tuple]] = None,
-    ) -> api_response.ApiResponseWithoutDeserialization: ...
-
-    @typing.overload
-    def _keys_key_id_cert_put(
-        self,
-        body: str,
-        path_params: typing.Union[
-            PathParametersDictInput,
-            PathParametersDict
-        ],
-        *,
-        skip_deserialization: typing.Literal[False] = False,
-        content_type: typing.Literal["application/pgp-keys"],
-        security_index: typing.Optional[int] = None,
-        server_index: typing.Optional[int] = None,
-        stream: bool = False,
-        timeout: typing.Optional[typing.Union[int, float, typing.Tuple]] = None,
-    ) -> response_201.ApiResponse: ...
-
-    @typing.overload
-    def _keys_key_id_cert_put(
-        self,
-        body: str,
-        path_params: typing.Union[
-            PathParametersDictInput,
-            PathParametersDict
-        ],
-        *,
-        skip_deserialization: typing.Literal[True],
-        content_type: typing.Literal["application/pgp-keys"],
+        content_type: typing.Literal["application/octet-stream"] = "application/octet-stream",
         security_index: typing.Optional[int] = None,
         server_index: typing.Optional[int] = None,
         stream: bool = False,
@@ -169,9 +109,10 @@ class BaseApi(api_client.Api):
     def _keys_key_id_cert_put(
         self,
         body: typing.Union[
-            str,
-            str,
-            str,
+            bytes,
+            io.FileIO,
+            io.BufferedReader,
+            schemas.FileIO
         ],
         path_params: typing.Union[
             PathParametersDictInput,
@@ -179,11 +120,7 @@ class BaseApi(api_client.Api):
         ],
         *,
         skip_deserialization: bool = False,
-        content_type: typing.Literal[
-            "application/x-pem-file",
-            "application/x-x509-ca-cert",
-            "application/pgp-keys",
-        ] = "application/x-pem-file",
+        content_type: typing.Literal["application/octet-stream"] = "application/octet-stream",
         security_index: typing.Optional[int] = None,
         server_index: typing.Optional[int] = None,
         stream: bool = False,
