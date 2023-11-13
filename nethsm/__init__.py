@@ -18,22 +18,17 @@ from base64 import b64encode
 from dataclasses import dataclass
 from datetime import datetime
 from io import BufferedReader
-from typing import Any, Iterator, Literal, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, Iterator, Literal, Mapping, Optional, Union, cast
 from urllib.parse import urlencode
 
 import urllib3
 from urllib3 import HTTPResponse, _collections
 from urllib3._collections import HTTPHeaderDict
 
-from nethsm.client.api_response import ApiResponseWithoutDeserialization
-from nethsm.client.configurations.api_configuration import ServerInfo
-from nethsm.client.schemas import Unset
-from nethsm.client.schemas.original_immutabledict import immutabledict
-from nethsm.client.schemas.schemas import OUTPUT_BASE_TYPES
-
-from . import client
-from .client import ApiException
-from .client.apis.tags.default_api import DefaultApi
+# Avoid direct imports from .client at runtime to reduce the module load time
+if TYPE_CHECKING:
+    from .client import ApiException
+    from .client.apis.tags.default_api import DefaultApi
 
 
 class Role(enum.Enum):
@@ -233,6 +228,8 @@ def _handle_exception(
     roles: list[Role] = [],
     state: Optional[State] = None,
 ) -> None:
+    from .client import ApiException
+
     if isinstance(e, ApiException):
         _handle_api_exception(e, messages, roles, state)
     elif isinstance(e, urllib3.exceptions.MaxRetryError):
@@ -244,7 +241,7 @@ def _handle_exception(
 
 
 def _handle_api_exception(
-    e: ApiException[Any],
+    e: "ApiException[Any]",
     messages: dict[int, str] = {},
     roles: list[Role] = [],
     state: Optional[State] = None,
@@ -324,8 +321,12 @@ class NetHSM:
         password: str,
         verify_tls: bool = True,
     ) -> None:
+        from .client import ApiClient, ApiConfiguration
         from .client.components.security_schemes import security_scheme_basic
-        from .client.configurations.api_configuration import SecuritySchemeInfo
+        from .client.configurations.api_configuration import (
+            SecuritySchemeInfo,
+            ServerInfo,
+        )
         from .client.servers.server_0 import Server0, VariablesDict
 
         self.host = host
@@ -345,11 +346,11 @@ class NetHSM:
         server_config = ServerInfo(
             {"servers/0": Server0(variables=VariablesDict(host=host, version=version))}
         )
-        config = client.ApiConfiguration(
+        config = ApiConfiguration(
             server_info=server_config, security_scheme_info=security_info
         )
         config.verify_ssl = verify_tls
-        self.client = client.ApiClient(configuration=config)
+        self.client = ApiClient(configuration=config)
 
         if not verify_tls:
             urllib3.disable_warnings()
@@ -366,6 +367,8 @@ class NetHSM:
         mime_type: Optional[str] = "application/json",
         json_obj: Optional[Any] = None,
     ) -> HTTPResponse:
+        from .client import ApiException
+        from .client.api_response import ApiResponseWithoutDeserialization
 
         url = f"https://{self.host}/api/{self.version}/{endpoint}"
 
@@ -402,7 +405,9 @@ class NetHSM:
             )
         return response
 
-    def get_api(self) -> DefaultApi:
+    def get_api(self) -> "DefaultApi":
+        from .client.apis.tags.default_api import DefaultApi
+
         return DefaultApi(self.client)
 
     def get_location(self, headers: HTTPHeaderDict) -> Optional[str]:
@@ -722,7 +727,7 @@ class NetHSM:
             )
         return response.body.random
 
-    def get_metrics(self) -> immutabledict[str, OUTPUT_BASE_TYPES]:
+    def get_metrics(self) -> Mapping[str, Any]:
         try:
             response = self.get_api().metrics_get()
         except Exception as e:
@@ -1097,15 +1102,16 @@ class NetHSM:
     def generate_tls_key(
         self,
         type: Literal["RSA", "Curve25519", "EC_P224", "EC_P256", "EC_P384", "EC_P521"],
-        length: Union[int, Unset] = Unset(),
+        length: Optional[int] = None,
     ) -> None:
         from .client.components.schema.tls_key_generate_request_data import (
             TlsKeyGenerateRequestDataDict,
         )
+        from .client.schemas import Unset
 
         body = TlsKeyGenerateRequestDataDict(
             type=type,
-            length=length,
+            length=length if length is not None else Unset(),
         )
 
         try:
