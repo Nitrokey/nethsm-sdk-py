@@ -53,15 +53,15 @@ nethsm-api.yaml:
 	curl "https://nethsmdemo.nitrokey.com/api_docs/nethsm-api.yaml" --output nethsm-api.yaml
 
 # Generates the OpenAPI client for the NetHSM REST API
-# Currently using tag latest because the 3.0.0 tag has problem.
-# Hash of the current latest tag (19/09/2023): 880ff39e9610bc379e68da03de91f20af51d5242f19bc9c29ac04f763c480f82
 .PHONY: nethsm-client
 nethsm-client: nethsm-api.yaml
+	rm -r nethsm/client
+	rm -r "${OPENAPI_OUTPUT_DIR}"
 	mkdir -p "${OPENAPI_OUTPUT_DIR}"
-	python tools/transform_nethsm_api_spec.py nethsm-api.yaml "${OPENAPI_OUTPUT_DIR}/nethsm-api.json"
+	cp nethsm-api.yaml "${OPENAPI_OUTPUT_DIR}"
 	docker run --rm -ti -v "${OPENAPI_OUTPUT_DIR}:/out" \
-		openapijsonschematools/openapi-json-schema-generator-cli:3.1.1 generate \
-		-i=/out/nethsm-api.json \
+		openapijsonschematools/openapi-json-schema-generator-cli:3.2.1 generate \
+		-i=/out/nethsm-api.yaml \
 		-g=python -o=/out/python --package-name=nethsm.client
 	cp -r "${OPENAPI_OUTPUT_DIR}/python/src/nethsm/client" nethsm
 
