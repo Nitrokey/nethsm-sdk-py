@@ -24,4 +24,4 @@ class Passphrase(
     types: typing.FrozenSet[typing.Type] = frozenset({
         str,
     })
-    min_length: int = 1
+    min_length: int = 10

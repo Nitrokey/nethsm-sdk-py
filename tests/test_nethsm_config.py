@@ -168,7 +168,10 @@ def test_set_backup_passphrase(nethsm):
     true only if failing. Because this test is dependant of set_backup,
     reset and restore it would be better to write an own module for that with
     a suitable fixture"""
-    nethsm.set_backup_passphrase(C.BACKUP_PASSPHRASE)
+    nethsm.set_backup_passphrase(C.BACKUP_PASSPHRASE_CHANGED)
+    nethsm.set_backup_passphrase(
+        C.BACKUP_PASSPHRASE, current_passphrase=C.BACKUP_PASSPHRASE_CHANGED
+    )
 
 
 # @pytest.mark.skip(reason="not finished yet")
@@ -236,7 +239,10 @@ def test_set_unlock_passphrase_lock_unlock(nethsm):
 
     This command requires authentication as a user with the Administrator
     role."""
-    nethsm.set_unlock_passphrase(C.UNLOCK_PASSPHRASE_CHANGED)
+
+    nethsm.set_unlock_passphrase(
+        C.UNLOCK_PASSPHRASE_CHANGED, current_passphrase=C.UNLOCK_PASSPHRASE
+    )
 
     lock(nethsm)
     unlock(nethsm, C.UNLOCK_PASSPHRASE_CHANGED)

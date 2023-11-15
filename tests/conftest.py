@@ -39,6 +39,7 @@ class Constants:
     PASSPHRASE_WRONG = "madmadadmin"
     PASSPHRASE_WRONG_CASE = "AdminiAdmini"
     BACKUP_PASSPHRASE = "adminadmin"
+    BACKUP_PASSPHRASE_CHANGED = "backupbackup"
 
     # test_nethsm_system
     FILENAME_BACKUP = "backupNethsm.bin"
