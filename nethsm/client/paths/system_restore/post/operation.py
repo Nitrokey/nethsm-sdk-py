@@ -6,7 +6,7 @@
 
 from nethsm.client import api_client, exceptions
 from nethsm.client.shared_imports.operation_imports import *  # pyright: ignore [reportWildcardImportFromLibrary]
-from nethsm.client.paths.system_restore.post.request_body.content.application_octet_stream import schema
+from nethsm.client.paths.system_restore.post.request_body.content.multipart_form_data import schema
 
 from .. import path
 from .responses import (
@@ -16,15 +16,6 @@ from .responses import (
     response_412,
 )
 from . import request_body
-from .parameters import (
-    parameter_0,
-    parameter_1,
-)
-from .query_parameters import QueryParameters, QueryParametersDictInput, QueryParametersDict
-query_parameter_classes = (
-    parameter_0.Parameter0,
-    parameter_1.Parameter1,
-)
 
 
 __StatusCodeToResponse = typing.TypedDict(
@@ -57,18 +48,13 @@ class BaseApi(api_client.Api):
     def _system_restore_post(
         self,
         body: typing.Union[
-            bytes,
-            io.FileIO,
-            io.BufferedReader,
-            schemas.FileIO
-        ],
-        query_params: typing.Union[
-            QueryParametersDictInput,
-            QueryParametersDict
-        ],
+            schema.SchemaDictInput,
+            schema.SchemaDict,
+            schemas.Unset
+        ] = schemas.unset,
         *,
         skip_deserialization: typing.Literal[False] = False,
-        content_type: typing.Literal["application/octet-stream"] = "application/octet-stream",
+        content_type: typing.Literal["multipart/form-data"] = "multipart/form-data",
         server_index: typing.Optional[int] = None,
         stream: bool = False,
         timeout: typing.Optional[typing.Union[int, float, typing.Tuple]] = None,
@@ -78,18 +64,13 @@ class BaseApi(api_client.Api):
     def _system_restore_post(
         self,
         body: typing.Union[
-            bytes,
-            io.FileIO,
-            io.BufferedReader,
-            schemas.FileIO
-        ],
-        query_params: typing.Union[
-            QueryParametersDictInput,
-            QueryParametersDict
-        ],
+            schema.SchemaDictInput,
+            schema.SchemaDict,
+            schemas.Unset
+        ] = schemas.unset,
         *,
         skip_deserialization: typing.Literal[True],
-        content_type: typing.Literal["application/octet-stream"] = "application/octet-stream",
+        content_type: typing.Literal["multipart/form-data"] = "multipart/form-data",
         server_index: typing.Optional[int] = None,
         stream: bool = False,
         timeout: typing.Optional[typing.Union[int, float, typing.Tuple]] = None,
@@ -98,18 +79,13 @@ class BaseApi(api_client.Api):
     def _system_restore_post(
         self,
         body: typing.Union[
-            bytes,
-            io.FileIO,
-            io.BufferedReader,
-            schemas.FileIO
-        ],
-        query_params: typing.Union[
-            QueryParametersDictInput,
-            QueryParametersDict
-        ],
+            schema.SchemaDictInput,
+            schema.SchemaDict,
+            schemas.Unset
+        ] = schemas.unset,
         *,
         skip_deserialization: bool = False,
-        content_type: typing.Literal["application/octet-stream"] = "application/octet-stream",
+        content_type: typing.Literal["multipart/form-data"] = "multipart/form-data",
         server_index: typing.Optional[int] = None,
         stream: bool = False,
         timeout: typing.Optional[typing.Union[int, float, typing.Tuple]] = None,
@@ -119,16 +95,7 @@ class BaseApi(api_client.Api):
             api_response.body and api_response.headers will not be deserialized into schema
             class instances
         """
-        query_params = QueryParameters.validate(
-            query_params,
-            configuration=self.api_client.schema_configuration
-        )
-        used_path, query_params_suffix = self._get_used_path(
-            path,
-            query_parameters=query_parameter_classes,
-            query_params=query_params,
-            skip_validation=True
-        )
+        used_path = path
         headers = self._get_headers()
         # TODO add cookie handling
 
@@ -144,7 +111,6 @@ class BaseApi(api_client.Api):
 
         raw_response = self.api_client.call_api(
             resource_path=used_path,
-            query_params_suffix=query_params_suffix,
             method='post',
             host=host,
             headers=headers,
