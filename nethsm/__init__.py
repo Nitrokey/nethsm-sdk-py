@@ -1298,14 +1298,19 @@ class NetHSM:
 
     def restore(self, backup: BufferedReader, passphrase: str, time: datetime) -> None:
         try:
-            from .client.paths.system_restore.post.query_parameters import (
-                QueryParametersDict,
+            from .client.paths.system_restore.post.request_body.content.multipart_form_data.schema import (
+                ArgumentsDict,
+                SchemaDict,
             )
 
-            params = QueryParametersDict(
-                backupPassphrase=passphrase, systemTime=time.isoformat()
+            body = SchemaDict(
+                arguments=ArgumentsDict(
+                    backupPassphrase=passphrase, systemTime=time.isoformat()
+                ),
+                backup_file=backup,
             )
-            self.get_api().system_restore_post(body=backup, query_params=params)
+
+            self.get_api().system_restore_post(body)
         except Exception as e:
             _handle_exception(
                 e,

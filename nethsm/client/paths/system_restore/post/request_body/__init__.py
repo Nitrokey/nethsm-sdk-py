@@ -6,15 +6,14 @@
 
 from nethsm.client.shared_imports.header_imports import *  # pyright: ignore [reportWildcardImportFromLibrary]
 
-from .content.application_octet_stream import schema as application_octet_stream_schema
+from .content.multipart_form_data import schema as multipart_form_data_schema
 
 
 class RequestBody(api_client.RequestBody):
 
 
-    class ApplicationOctetStreamMediaType(api_client.MediaType):
-        schema: typing_extensions.TypeAlias = application_octet_stream_schema.Schema
+    class MultipartFormDataMediaType(api_client.MediaType):
+        schema: typing_extensions.TypeAlias = multipart_form_data_schema.Schema
     content = {
-        'application/octet-stream': ApplicationOctetStreamMediaType,
+        'multipart/form-data': MultipartFormDataMediaType,
     }
-    required = True
