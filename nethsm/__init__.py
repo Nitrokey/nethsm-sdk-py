@@ -1159,12 +1159,16 @@ class NetHSM:
             )
         return response.response.data.decode("utf-8")
 
-    def set_backup_passphrase(self, passphrase: str) -> None:
+    def set_backup_passphrase(
+        self, new_passphrase: str, current_passphrase: Optional[str] = None
+    ) -> None:
         from .client.components.schema.backup_passphrase_config import (
             BackupPassphraseConfigDict,
         )
 
-        body = BackupPassphraseConfigDict(passphrase=passphrase)
+        body = BackupPassphraseConfigDict(
+            newPassphrase=new_passphrase, currentPassphrase=current_passphrase or ""
+        )
         try:
             self.get_api().config_backup_passphrase_put(body=body)
         except Exception as e:
@@ -1177,12 +1181,16 @@ class NetHSM:
                 },
             )
 
-    def set_unlock_passphrase(self, passphrase: str) -> None:
+    def set_unlock_passphrase(
+        self, new_passphrase: str, current_passphrase: Optional[str] = None
+    ) -> None:
         from .client.components.schema.unlock_passphrase_config import (
             UnlockPassphraseConfigDict,
         )
 
-        body = UnlockPassphraseConfigDict(passphrase=passphrase)
+        body = UnlockPassphraseConfigDict(
+            newPassphrase=new_passphrase, currentPassphrase=current_passphrase or ""
+        )
         try:
             self.get_api().config_unlock_passphrase_put(body=body)
         except Exception as e:
