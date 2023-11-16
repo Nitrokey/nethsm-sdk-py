@@ -6,6 +6,7 @@ from conftest import Constants as C
 from utilities import lock, nethsm, self_sign_csr, unlock  # noqa: F401
 
 import nethsm as nethsm_module
+from nethsm import NetHSM
 
 """########## Preparation for the Tests ##########
 
@@ -16,21 +17,21 @@ https://stackoverflow.com/questions/36530082/running-pycharm-as-root-from-launch
 """
 
 
-def get_config_logging(nethsm):
+def get_config_logging(nethsm: NetHSM) -> None:
     data = nethsm.get_config_logging()
     assert data.ip_address == C.IP_ADDRESS_LOGGING
     assert data.port == C.PORT
     assert data.log_level.value == C.LOG_LEVEL
 
 
-def get_config_network(nethsm):
+def get_config_network(nethsm: NetHSM) -> None:
     data = nethsm.get_config_network()
     assert data.ip_address == C.IP_ADDRESS_NETWORK
     assert data.netmask == C.NETMASK
     assert data.gateway == C.GATEWAY
 
 
-def get_config_time(nethsm):
+def get_config_time(nethsm: NetHSM) -> None:
     dt_nethsm = datetime.datetime.strptime(
         nethsm.get_config_time(), "%Y-%m-%dT%H:%M:%SZ"
     ).replace(tzinfo=datetime.timezone.utc)
@@ -48,7 +49,7 @@ def get_config_time(nethsm):
 """##########Start of Tests##########"""
 
 
-def test_csr(nethsm):
+def test_csr(nethsm: NetHSM) -> None:
     csr = nethsm.csr(
         C.COUNTRY,
         C.STATE_OR_PROVINCE,
@@ -61,7 +62,7 @@ def test_csr(nethsm):
     print(csr)
 
 
-def test_set_certificate(nethsm: nethsm_module.NetHSM) -> None:
+def test_set_certificate(nethsm: NetHSM) -> None:
 
     csr = nethsm.csr(
         C.COUNTRY,
@@ -73,18 +74,17 @@ def test_set_certificate(nethsm: nethsm_module.NetHSM) -> None:
         C.EMAIL_ADDRESS,
     )
     cert = self_sign_csr(csr)
-    nethsm.set_certificate(BytesIO(cert))
+    nethsm.set_certificate(BytesIO(cert))  # type: ignore
 
     remote_cert = nethsm.get_certificate()
     assert cert.decode("utf-8") == remote_cert
 
 
-def generate_tls_key(nethsm):
-    resp = nethsm.generate_tls_key("RSA", 2048)
-    print(resp)
+def generate_tls_key(nethsm: NetHSM) -> None:
+    nethsm.generate_tls_key("RSA", 2048)
 
 
-def test_get_config_logging(nethsm):
+def test_get_config_logging(nethsm: NetHSM) -> None:
     """Query the configuration of a NetHSM.
 
     For logging
@@ -94,7 +94,7 @@ def test_get_config_logging(nethsm):
     get_config_logging(nethsm)
 
 
-def test_get_config_network(nethsm):
+def test_get_config_network(nethsm: NetHSM) -> None:
     """Query the configuration of a NetHSM.
 
     For network
@@ -104,7 +104,7 @@ def test_get_config_network(nethsm):
     get_config_logging(nethsm)
 
 
-def test_get_config_time(nethsm):
+def test_get_config_time(nethsm: NetHSM) -> None:
     """Query the configuration of a NetHSM.
 
     For time
@@ -115,7 +115,7 @@ def test_get_config_time(nethsm):
     get_config_time(nethsm)
 
 
-def test_get_config_unattended_boot(nethsm):
+def test_get_config_unattended_boot(nethsm: NetHSM) -> None:
     """Query the configuration of a NetHSM.
 
     For unattended boot
@@ -129,7 +129,7 @@ def test_get_config_unattended_boot(nethsm):
     )
 
 
-def test_get_config_get_public_key(nethsm):
+def test_get_config_get_public_key(nethsm: NetHSM) -> None:
     """Query the configuration of a NetHSM.
 
     For get public key
@@ -144,7 +144,7 @@ def test_get_config_get_public_key(nethsm):
     assert str_end == "-----END PUBLIC KEY-----"
 
 
-def test_get_config_get_certificate(nethsm):
+def test_get_config_get_certificate(nethsm: NetHSM) -> None:
     """Query the configuration of a NetHSM.
 
     For get certificate
@@ -159,7 +159,7 @@ def test_get_config_get_certificate(nethsm):
     assert str_end == "-----END CERTIFICATE-----"
 
 
-def test_set_backup_passphrase(nethsm):
+def test_set_backup_passphrase(nethsm: NetHSM) -> None:
     """Set the backup passphrase of a NetHSM.
 
     This command requires authentication as a user with the Administrator
@@ -175,7 +175,7 @@ def test_set_backup_passphrase(nethsm):
 
 
 # @pytest.mark.skip(reason="not finished yet")
-def test_set_get_logging_config(nethsm):
+def test_set_get_logging_config(nethsm: NetHSM) -> None:
     """Set the logging configuration of a NetHSM.
 
     This command requires authentication as a user with the Administrator
@@ -188,7 +188,7 @@ def test_set_get_logging_config(nethsm):
 
 
 # @pytest.mark.skip(reason="not finished yet")
-def test_set_get_network_config(nethsm):
+def test_set_get_network_config(nethsm: NetHSM) -> None:
     """Set the network configuration of a NetHSM.
 
     This command requires authentication as a user with the Administrator
@@ -200,7 +200,7 @@ def test_set_get_network_config(nethsm):
     get_config_network(nethsm)
 
 
-def test_set_get_time(nethsm):
+def test_set_get_time(nethsm: NetHSM) -> None:
     """Set the system time of a NetHSM.
 
     If the time is not given as an argument, the system time of this system
@@ -213,7 +213,7 @@ def test_set_get_time(nethsm):
     get_config_time(nethsm)
 
 
-def test_set_get_unattended_boot(nethsm):
+def test_set_get_unattended_boot(nethsm: NetHSM) -> None:
     """Set the unattended boot configuration of a NetHSM.
 
     This command requires authentication as a user with the Administrator
@@ -234,7 +234,7 @@ def test_set_get_unattended_boot(nethsm):
         assert str(nethsm.get_config_unattended_boot()) == C.UNATTENDED_BOOT_ON
 
 
-def test_set_unlock_passphrase_lock_unlock(nethsm):
+def test_set_unlock_passphrase_lock_unlock(nethsm: NetHSM) -> None:
     """Set the unlock passphrase of a NetHSM.
 
     This command requires authentication as a user with the Administrator

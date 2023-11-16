@@ -2,7 +2,6 @@ import base64
 import datetime
 import os
 
-import docker
 import pytest
 from conftest import Constants as C
 from test_nethsm_keys import generate_key
@@ -17,6 +16,7 @@ from utilities import (
     update,
 )
 
+from nethsm import NetHSM
 from nethsm.backup import Backup, EncryptedBackup
 
 """######################### Preparation for the Tests #########################
@@ -31,7 +31,7 @@ https://stackoverflow.com/questions/36530082/running-pycharm-as-root-from-launch
 """######################### Start of Tests #########################"""
 
 
-def test_provision_system_info(nethsm):
+def test_provision_system_info(nethsm: NetHSM) -> None:
     """Get system information for a NetHSM instance.
 
     This command requires authentication as a user with the Administrator
@@ -48,14 +48,14 @@ def test_provision_system_info(nethsm):
     # fixme: this changes between the NetHSM instances
 
 
-def test_passphrase_add_user_retrieve_backup(nethsm):
+def test_passphrase_add_user_retrieve_backup(nethsm: NetHSM) -> None:
     """Make a backup of a NetHSM instance and write it to a file.
 
     This command requires authentication as a user with the Backup role."""
 
     set_backup_passphrase(nethsm)
-    add_user(nethsm, C.BackupUser)
-    add_user(nethsm, C.OperatorUser)
+    add_user(nethsm, C.BACKUP_USER)
+    add_user(nethsm, C.OPERATOR_USER)
 
     generate_key(nethsm)
     assert nethsm.list_keys() == [C.KEY_ID_GENERATED]
@@ -65,7 +65,7 @@ def test_passphrase_add_user_retrieve_backup(nethsm):
     with open(C.FILENAME_ENCRYPTED, "wb") as f:
         f.write(encrypted)
 
-    with connect(C.BackupUser) as nethsm:
+    with connect(C.BACKUP_USER) as nethsm:
         if os.path.exists(C.FILENAME_BACKUP):
             os.remove(C.FILENAME_BACKUP)
         data = nethsm.backup()
@@ -79,7 +79,7 @@ def test_passphrase_add_user_retrieve_backup(nethsm):
             assert False
 
 
-def test_factory_reset(nethsm):
+def test_factory_reset(nethsm: NetHSM) -> None:
     """Perform a factory reset for a NetHSM instance.
 
     This command requires authentication as a user with the Administrator
@@ -96,7 +96,7 @@ def test_factory_reset(nethsm):
     start_nethsm()
 
 
-def test_state_restore(nethsm):
+def test_state_restore(nethsm: NetHSM) -> None:
     """Restore a backup of a NetHSM instance from a file.
 
     If the system time is not set, the current system time is used."""
@@ -118,7 +118,7 @@ def test_state_restore(nethsm):
         encrypted = f.read()
 
     # see test_decrypt in test_nethsm_keys
-    with connect(C.OperatorUser) as nethsm:
+    with connect(C.OPERATOR_USER) as nethsm:
         decrypt = nethsm.decrypt(
             C.KEY_ID_GENERATED,
             base64.b64encode(encrypted).decode(),
@@ -128,7 +128,7 @@ def test_state_restore(nethsm):
         assert base64.b64decode(decrypt).decode() == C.DATA
 
 
-def test_state_provision_update(nethsm):
+def test_state_provision_update(nethsm: NetHSM) -> None:
     """Load an update to a NetHSM instance.
 
     This command requires authentication as a user with the Administrator
@@ -140,7 +140,7 @@ def test_state_provision_update(nethsm):
     update(nethsm)
 
 
-def test_state_provision_update_cancel_update(nethsm):
+def test_state_provision_update_cancel_update(nethsm: NetHSM) -> None:
     """Cancel a queued update on a NetHSM instance.
 
     This command requires authentication as a user with the Administrator
@@ -153,7 +153,7 @@ def test_state_provision_update_cancel_update(nethsm):
     nethsm.cancel_update()
 
 
-def test_update_commit_update(nethsm):
+def test_update_commit_update(nethsm: NetHSM) -> None:
     """Commit a queued update on a NetHSM instance.
 
     This command requires authentication as a user with the Administrator
@@ -166,7 +166,7 @@ def test_update_commit_update(nethsm):
     nethsm.commit_update()
 
 
-def test_provision_reboot(nethsm):
+def test_provision_reboot(nethsm: NetHSM) -> None:
     """Reboot a NetHSM instance.
 
     This command requires authentication as a user with the Administrator
@@ -178,7 +178,7 @@ def test_provision_reboot(nethsm):
     nethsm.reboot()
 
 
-def test_provision_shutdown(nethsm):
+def test_provision_shutdown(nethsm: NetHSM) -> None:
     """Shutdown a NetHSM instance.
 
     This command requires authentication as a user with the Administrator

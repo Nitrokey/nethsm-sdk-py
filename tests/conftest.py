@@ -1,4 +1,13 @@
+from dataclasses import dataclass
 from os import environ
+from typing import Literal
+
+
+@dataclass
+class UserData:
+    user_id: str
+    real_name: str
+    role: Literal["Administrator", "Operator", "Metrics", "Backup"]
 
 
 class Constants:
@@ -60,12 +69,12 @@ class Constants:
     PORT = 514
     NETMASK = "255.255.255.0"
     GATEWAY = "0.0.0.0"
-    UNATTENDED_BOOT_OFF = "off"
-    UNATTENDED_BOOT_ON = "on"
-    LOG_LEVEL = "info"
+    UNATTENDED_BOOT_OFF: Literal["off"] = "off"
+    UNATTENDED_BOOT_ON: Literal["on"] = "on"
+    LOG_LEVEL: Literal["info"] = "info"
 
     # test_nethsm_keys
-    TYPE = "RSA"
+    TYPE: Literal["RSA"] = "RSA"
     MECHANISM = [
         "RSA_Signature_PKCS1",
         "RSA_Decryption_PKCS1",
@@ -77,7 +86,7 @@ class Constants:
     KEY_ID_GENERATED = "KeyIdGenerated"
     KEY_ID_AES = "KeyIdAES"
     DATA = "Test data 123456"
-    MODE = "PKCS1"
+    MODE: Literal["PKCS1"] = "PKCS1"
     # 'PKCS1', 'PSS_MD5', 'PSS_SHA1', 'PSS_SHA224', 'PSS_SHA256', 'PSS_SHA384', 'PSS_SHA512', 'EdDSA', 'ECDSA'
     # test_nethsm_users, test_nethsm_keys
     TAG1 = "Frankfurt"
@@ -85,32 +94,23 @@ class Constants:
     TAG3 = "Teltow"
     TAGS = [TAG1, TAG2, TAG3]
 
-    class AdminUser:
-        USER_ID = "admin"
-        REAL_NAME = "admin"
-        ROLE = "Administrator"
-
-    class AdministratorUser:
-        USER_ID = "UIAdministrator"
-        REAL_NAME = "RNAdministrator"
-        ROLE = "Administrator"
-
-    class OperatorUser:
-        USER_ID = "UIOperator"
-        REAL_NAME = "RNOperator"
-        ROLE = "Operator"
-
-    class MetricsUser:
-        USER_ID = "UIMetrics"
-        REAL_NAME = "RNMetrics"
-        ROLE = "Metrics"
-
-    class BackupUser:
-        USER_ID = "UIBackup"
-        REAL_NAME = "RNBackup"
-        ROLE = "Backup"
+    ADMIN_USER = UserData(user_id="admin", real_name="admin", role="Administrator")
+    ADMINISTRATOR_USER = UserData(
+        user_id="UIAdministrator", real_name="RNAdministrator", role="Administrator"
+    )
+    OPERATOR_USER = UserData(
+        user_id="UIOperator", real_name="RNOperator", role="Operator"
+    )
+    METRICS_USER = UserData(user_id="UIMetrics", real_name="RNMetrics", role="Metrics")
+    BACKUP_USER = UserData(user_id="UIBackup", real_name="RNBackup", role="Backup")
 
     DETAILS = ""
-    USERS_LIST = [AdministratorUser, BackupUser, MetricsUser, OperatorUser, AdminUser]
+    USERS_LIST = [
+        ADMINISTRATOR_USER,
+        BACKUP_USER,
+        METRICS_USER,
+        OPERATOR_USER,
+        ADMIN_USER,
+    ]
 
     # nitropy nethsm --host nethsmdemo.nitrokey.com --no-verify-tls info
