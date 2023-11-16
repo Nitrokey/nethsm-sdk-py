@@ -789,7 +789,7 @@ class NetHSM:
         path_params = PathParametersDict(KeyID=key_id)
         try:
             response = self.get_api().keys_key_id_public_pem_get(
-                path_params=path_params, skip_deserialization=True
+                path_params=path_params
             )
         except Exception as e:
             _handle_exception(
@@ -800,7 +800,7 @@ class NetHSM:
                     404: f"Key {key_id} not found",
                 },
             )
-        return response.response.data.decode("utf-8")
+        return response.body
 
     def add_key(
         self,
@@ -978,19 +978,17 @@ class NetHSM:
 
     def get_public_key(self) -> str:
         try:
-            response = self.get_api().config_tls_public_pem_get(
-                skip_deserialization=True
-            )
+            response = self.get_api().config_tls_public_pem_get()
         except Exception as e:
             _handle_exception(e, state=State.OPERATIONAL, roles=[Role.ADMINISTRATOR])
-        return response.response.data.decode("utf-8")
+        return response.body
 
     def get_certificate(self) -> str:
         try:
-            response = self.get_api().config_tls_cert_pem_get(skip_deserialization=True)
+            response = self.get_api().config_tls_cert_pem_get()
         except Exception as e:
             _handle_exception(e, state=State.OPERATIONAL, roles=[Role.ADMINISTRATOR])
-        return response.response.data.decode("utf-8")
+        return response.body
 
     def get_key_certificate(self, key_id: str) -> bytes:
         try:
@@ -1001,7 +999,7 @@ class NetHSM:
             path_params = PathParametersDict(KeyID=key_id)
 
             response = self.get_api().keys_key_id_cert_get(
-                path_params=path_params, skip_deserialization=True
+                path_params=path_params, skip_deserialization=False
             )
         except Exception as e:
             _handle_exception(
@@ -1016,14 +1014,9 @@ class NetHSM:
             )
         return response.response.data
 
-    def set_certificate(self, cert: BufferedReader) -> None:
+    def set_certificate(self, cert: str) -> None:
         try:
-            self.request(
-                "PUT",
-                "config/tls/cert.pem",
-                data=cert,
-                mime_type="application/x-pem-file",
-            )
+            self.get_api().config_tls_cert_pem_put(body=cert)
         except Exception as e:
             _handle_exception(
                 e,
@@ -1092,12 +1085,10 @@ class NetHSM:
             "emailAddress": email_address,
         }
         try:
-            response = self.get_api().config_tls_csr_pem_post(
-                body=body, skip_deserialization=True
-            )
+            response = self.get_api().config_tls_csr_pem_post(body=body)
         except Exception as e:
             _handle_exception(e, state=State.OPERATIONAL, roles=[Role.ADMINISTRATOR])
-        return response.response.data.decode("utf-8")
+        return response.body
 
     def generate_tls_key(
         self,
@@ -1146,7 +1137,7 @@ class NetHSM:
         }
         try:
             response = self.get_api().keys_key_id_csr_pem_post(
-                path_params=path_params, body=body, skip_deserialization=True
+                path_params=path_params, body=body
             )
         except Exception as e:
             _handle_exception(
@@ -1157,7 +1148,7 @@ class NetHSM:
                     404: f"Key {key_id} not found",
                 },
             )
-        return response.response.data.decode("utf-8")
+        return response.body
 
     def set_backup_passphrase(self, passphrase: str) -> None:
         from .client.components.schema.backup_passphrase_config import (
