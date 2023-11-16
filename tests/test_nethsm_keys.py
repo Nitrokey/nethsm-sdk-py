@@ -15,7 +15,7 @@ from utilities import (
 )
 
 import nethsm as nethsm_module
-from nethsm import NetHSM
+from nethsm import DecryptMode, EncryptMode, KeyMechanism, KeyType, NetHSM, SignMode
 
 """########## Preparation for the Tests ##########
 
@@ -42,7 +42,7 @@ def add_key(nethsm: NetHSM) -> None:
     nethsm.add_key(
         key_id=C.KEY_ID_ADDED,
         type=C.TYPE,
-        mechanisms=C.MECHANISM,  # type: ignore
+        mechanisms=C.MECHANISM,
         prime_p=p,
         prime_q=q,
         public_exponent=e,
@@ -64,8 +64,8 @@ def generate_key_aes(nethsm: NetHSM) -> None:
 
     nethsm.generate_key(
         key_id=C.KEY_ID_AES,
-        type="Generic",
-        mechanisms=["AES_Encryption_CBC", "AES_Decryption_CBC"],  # type: ignore
+        type=KeyType.GENERIC,
+        mechanisms=[KeyMechanism.AES_ENCRYPTION_CBC, KeyMechanism.AES_DECRYPTION_CBC],
         length=256,
     )
 
@@ -76,7 +76,7 @@ def generate_key(nethsm: NetHSM) -> None:
     This command requires authentication as a user with the Administrator or
     Operator role."""
     try:
-        nethsm.generate_key(C.TYPE, C.MECHANISM, C.LENGTH, C.KEY_ID_GENERATED)  # type: ignore
+        nethsm.generate_key(C.TYPE, C.MECHANISM, C.LENGTH, C.KEY_ID_GENERATED)
     except nethsm_module.NetHSMError:
         pass
 
@@ -137,7 +137,7 @@ def test_generate_get_key_by_id(nethsm: nethsm_module.NetHSM) -> None:
 
     key = nethsm.get_key(C.KEY_ID_GENERATED)
     # mechanisms = ", ".join(key.mechanisms) Todo: test with multiple mech.
-    assert key.type.value == C.TYPE
+    assert key.type == C.TYPE
     for mechanism in key.mechanisms:
         assert mechanism in C.MECHANISM
     assert key.operations >= 0
@@ -194,7 +194,7 @@ def test_list_get_keys(nethsm: nethsm_module.NetHSM) -> None:
     key_ids = nethsm.list_keys(None)
     for key_id in key_ids:
         key = nethsm.get_key(key_id=key_id)
-        assert key.type.value == C.TYPE
+        assert key.type == C.TYPE
         for mechanism in key.mechanisms:
             assert mechanism in C.MECHANISM
         assert key.operations >= 0
@@ -276,7 +276,7 @@ def test_sign(nethsm: NetHSM) -> None:  # mit dem privaten schlüssel signieren
         signature = nethsm.sign(
             C.KEY_ID_GENERATED,
             base64.b64encode(hash_object.digest()).decode(),
-            "PSS_SHA256",
+            SignMode.PSS_SHA256,
         )
         print(signature)
         verify_rsa_signature(key, hash_object, base64.b64decode(signature))
@@ -317,13 +317,13 @@ def test_encrypt_decrypt(nethsm: NetHSM) -> None:
         encrypted = nethsm.encrypt(
             C.KEY_ID_AES,
             data_b64,
-            "AES_CBC",
+            EncryptMode.AES_CBC,
             iv_b64,
         )
         decrypt = nethsm.decrypt(
             C.KEY_ID_AES,
             encrypted[0],
-            "AES_CBC",
+            DecryptMode.AES_CBC,
             iv_b64,
         )
         assert decrypt == data_b64
