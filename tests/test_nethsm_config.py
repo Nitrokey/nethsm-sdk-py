@@ -74,7 +74,7 @@ def test_set_certificate(nethsm: NetHSM) -> None:
         C.EMAIL_ADDRESS,
     )
     cert = self_sign_csr(csr)
-    nethsm.set_certificate(BytesIO(cert))  # type: ignore
+    nethsm.set_certificate(cert)
 
     remote_cert = nethsm.get_certificate()
     assert cert.decode("utf-8") == remote_cert

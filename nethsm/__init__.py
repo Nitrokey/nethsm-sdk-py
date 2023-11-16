@@ -17,7 +17,7 @@ import re
 from base64 import b64encode
 from dataclasses import dataclass
 from datetime import datetime
-from io import BufferedReader
+from io import BufferedReader, FileIO
 from typing import TYPE_CHECKING, Any, Iterator, Literal, Mapping, Optional, Union, cast
 from urllib.parse import urlencode
 
@@ -29,6 +29,9 @@ from urllib3._collections import HTTPHeaderDict
 if TYPE_CHECKING:
     from .client import ApiException
     from .client.apis.tags.default_api import DefaultApi
+
+
+Bytes = Union[BufferedReader, FileIO, bytes]
 
 
 class Role(enum.Enum):
@@ -363,7 +366,7 @@ class NetHSM:
         method: str,
         endpoint: str,
         params: Optional[dict[str, str]] = None,
-        data: Optional[BufferedReader] = None,
+        data: Optional[Bytes] = None,
         mime_type: Optional[str] = "application/json",
         json_obj: Optional[Any] = None,
     ) -> HTTPResponse:
@@ -387,7 +390,10 @@ class NetHSM:
 
         body: Union[str, bytes, None] = None
         if data:
-            body = data.read(-1)
+            if isinstance(data, bytes):
+                body = data
+            else:
+                body = data.read()
         elif json_obj:
             encoder = json.JSONEncoder()
             body = encoder.encode(json_obj)
@@ -1016,7 +1022,7 @@ class NetHSM:
             )
         return response.response.data
 
-    def set_certificate(self, cert: BufferedReader) -> None:
+    def set_certificate(self, cert: Bytes) -> None:
         try:
             self.request(
                 "PUT",
@@ -1034,7 +1040,7 @@ class NetHSM:
                 },
             )
 
-    def set_key_certificate(self, key_id: str, cert: BufferedReader) -> None:
+    def set_key_certificate(self, key_id: str, cert: Bytes) -> None:
         try:
             from .client.paths.keys_key_id_cert.put.path_parameters import (
                 PathParametersDict,
@@ -1304,7 +1310,7 @@ class NetHSM:
             )
         return response.response.data
 
-    def restore(self, backup: BufferedReader, passphrase: str, time: datetime) -> None:
+    def restore(self, backup: Bytes, passphrase: str, time: datetime) -> None:
         try:
             from .client.paths.system_restore.post.request_body.content.multipart_form_data.schema import (
                 ArgumentsDict,
@@ -1328,7 +1334,7 @@ class NetHSM:
                 },
             )
 
-    def update(self, image: BufferedReader) -> str:
+    def update(self, image: Bytes) -> str:
         try:
             response = self.get_api().system_update_post(body=image)
         except Exception as e:
