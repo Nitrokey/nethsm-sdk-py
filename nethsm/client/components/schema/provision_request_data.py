@@ -36,12 +36,18 @@ class ProvisionRequestDataDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_TY
     def __new__(
         cls,
         *,
-        adminPassphrase: str,
+        adminPassphrase: typing.Union[
+            None,
+            str,
+        ],
         systemTime: typing.Union[
             str,
             datetime.datetime
         ],
-        unlockPassphrase: str,
+        unlockPassphrase: typing.Union[
+            None,
+            str,
+        ],
         configuration_: typing.Optional[schema_configuration.SchemaConfiguration] = None,
         **kwargs: schemas.INPUT_TYPES_ALL,
     ):
@@ -65,9 +71,15 @@ class ProvisionRequestDataDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_TY
         return ProvisionRequestData.validate(arg, configuration=configuration)
     
     @property
-    def adminPassphrase(self) -> str:
+    def adminPassphrase(self) -> typing.Union[
+        None,
+        str,
+    ]:
         return typing.cast(
-            str,
+            typing.Union[
+                None,
+                str,
+            ],
             self.__getitem__("adminPassphrase")
         )
     
@@ -79,9 +91,15 @@ class ProvisionRequestDataDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_TY
         )
     
     @property
-    def unlockPassphrase(self) -> str:
+    def unlockPassphrase(self) -> typing.Union[
+        None,
+        str,
+    ]:
         return typing.cast(
-            str,
+            typing.Union[
+                None,
+                str,
+            ],
             self.__getitem__("unlockPassphrase")
         )
     

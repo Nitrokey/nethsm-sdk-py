@@ -33,8 +33,14 @@ class BackupPassphraseConfigDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_
     def __new__(
         cls,
         *,
-        currentPassphrase: str,
-        newPassphrase: str,
+        currentPassphrase: typing.Union[
+            None,
+            str,
+        ],
+        newPassphrase: typing.Union[
+            None,
+            str,
+        ],
         configuration_: typing.Optional[schema_configuration.SchemaConfiguration] = None,
         **kwargs: schemas.INPUT_TYPES_ALL,
     ):
@@ -57,16 +63,28 @@ class BackupPassphraseConfigDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_
         return BackupPassphraseConfig.validate(arg, configuration=configuration)
     
     @property
-    def currentPassphrase(self) -> str:
+    def currentPassphrase(self) -> typing.Union[
+        None,
+        str,
+    ]:
         return typing.cast(
-            str,
+            typing.Union[
+                None,
+                str,
+            ],
             self.__getitem__("currentPassphrase")
         )
     
     @property
-    def newPassphrase(self) -> str:
+    def newPassphrase(self) -> typing.Union[
+        None,
+        str,
+    ]:
         return typing.cast(
-            str,
+            typing.Union[
+                None,
+                str,
+            ],
             self.__getitem__("newPassphrase")
         )
     

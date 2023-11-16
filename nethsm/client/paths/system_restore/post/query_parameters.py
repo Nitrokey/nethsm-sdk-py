@@ -24,7 +24,10 @@ Properties = typing.TypedDict(
 QueryParametersRequiredDictInput = typing.TypedDict(
     'QueryParametersRequiredDictInput',
     {
-        "backupPassphrase": str,
+        backupPassphrase: typing.Union[
+            None,
+            str,
+        ],
     }
 )
 QueryParametersOptionalDictInput = typing.TypedDict(
@@ -51,7 +54,10 @@ class QueryParametersDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES])
     def __new__(
         cls,
         *,
-        backupPassphrase: str,
+        backupPassphrase: typing.Union[
+            None,
+            str,
+        ],
         systemTime: typing.Union[
             str,
             datetime.datetime,
@@ -82,9 +88,15 @@ class QueryParametersDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES])
         return QueryParameters.validate(arg, configuration=configuration)
     
     @property
-    def backupPassphrase(self) -> str:
+    def backupPassphrase(self) -> typing.Union[
+        None,
+        str,
+    ]:
         return typing.cast(
-            str,
+            typing.Union[
+                None,
+                str,
+            ],
             self.__getitem__("backupPassphrase")
         )
     

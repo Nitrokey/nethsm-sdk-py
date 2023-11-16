@@ -37,7 +37,10 @@ class UserPostDataDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES]):
     def __new__(
         cls,
         *,
-        passphrase: str,
+        passphrase: typing.Union[
+            None,
+            str,
+        ],
         realName: str,
         role: typing.Literal[
             "Administrator",
@@ -68,9 +71,15 @@ class UserPostDataDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES]):
         return UserPostData.validate(arg, configuration=configuration)
     
     @property
-    def passphrase(self) -> str:
+    def passphrase(self) -> typing.Union[
+        None,
+        str,
+    ]:
         return typing.cast(
-            str,
+            typing.Union[
+                None,
+                str,
+            ],
             self.__getitem__("passphrase")
         )
     

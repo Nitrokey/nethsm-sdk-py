@@ -31,7 +31,10 @@ class UserPassphrasePostDataDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_
     def __new__(
         cls,
         *,
-        passphrase: str,
+        passphrase: typing.Union[
+            None,
+            str,
+        ],
         configuration_: typing.Optional[schema_configuration.SchemaConfiguration] = None,
         **kwargs: schemas.INPUT_TYPES_ALL,
     ):
@@ -53,9 +56,15 @@ class UserPassphrasePostDataDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_
         return UserPassphrasePostData.validate(arg, configuration=configuration)
     
     @property
-    def passphrase(self) -> str:
+    def passphrase(self) -> typing.Union[
+        None,
+        str,
+    ]:
         return typing.cast(
-            str,
+            typing.Union[
+                None,
+                str,
+            ],
             self.__getitem__("passphrase")
         )
     

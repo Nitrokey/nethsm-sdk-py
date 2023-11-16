@@ -1863,7 +1863,8 @@ paths:
 components:
   schemas:
     Passphrase:
-      minLength: 1
+      nullable: true
+      minLength: 10
       type: string
     ID:
       pattern: ^[a-zA-Z0-9]+$

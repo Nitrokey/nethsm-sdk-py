@@ -1167,7 +1167,7 @@ class NetHSM:
         )
 
         body = BackupPassphraseConfigDict(
-            newPassphrase=new_passphrase, currentPassphrase=current_passphrase or ""
+            newPassphrase=new_passphrase, currentPassphrase=current_passphrase
         )
         try:
             self.get_api().config_backup_passphrase_put(body=body)
