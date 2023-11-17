@@ -199,6 +199,12 @@ class TlsKeyType(enum.Enum):
 
 
 @dataclass
+class Info:
+    vendor: str
+    product: str
+
+
+@dataclass
 class SystemInfo:
     firmware_version: str
     software_version: str
@@ -223,6 +229,12 @@ class Key:
     modulus: Optional[str]
     public_exponent: Optional[str]
     data: Optional[str]
+
+
+@dataclass
+class EncryptionResult:
+    encrypted: str
+    iv: str
 
 
 @dataclass
@@ -716,12 +728,12 @@ class NetHSM:
                 },
             )
 
-    def get_info(self) -> tuple[str, str]:
+    def get_info(self) -> Info:
         try:
             response = self.get_api().info_get()
         except Exception as e:
             _handle_exception(e)
-        return (response.body.vendor, response.body.product)
+        return Info(vendor=response.body.vendor, product=response.body.product)
 
     def get_state(self) -> State:
         try:
@@ -1436,7 +1448,7 @@ class NetHSM:
 
     def encrypt(
         self, key_id: str, data: str, mode: EncryptMode, iv: str
-    ) -> tuple[str, str]:
+    ) -> EncryptionResult:
         from .client.components.schema.encrypt_request_data import (
             EncryptRequestDataDict,
         )
@@ -1460,7 +1472,7 @@ class NetHSM:
                     404: f"Key {key_id} not found",
                 },
             )
-        return (response.body.encrypted, response.body.iv)
+        return EncryptionResult(encrypted=response.body.encrypted, iv=response.body.iv)
 
     def decrypt(
         self,

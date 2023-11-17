@@ -55,10 +55,10 @@ def test_state_provision(nethsm_no_provision: NetHSM) -> None:
 
 def test_info(nethsm_no_provision: NetHSM) -> None:
     """Query the vendor and product information for a NetHSM."""
-    (vendor, product) = nethsm_no_provision.get_info()
+    info = nethsm_no_provision.get_info()
     assert nethsm_no_provision.host == C.HOST
-    assert vendor == "Nitrokey GmbH"
-    assert product == "NetHSM"
+    assert info.vendor == "Nitrokey GmbH"
+    assert info.product == "NetHSM"
 
 
 def test_state_provision_add_user_metrics_get_metrics(
