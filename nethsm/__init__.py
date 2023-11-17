@@ -333,7 +333,6 @@ class NetHSM:
     def __init__(
         self,
         host: str,
-        version: str,
         username: str,
         password: str,
         verify_tls: bool = True,
@@ -344,7 +343,9 @@ class NetHSM:
             SecuritySchemeInfo,
             ServerInfo,
         )
-        from .client.servers.server_0 import Server0, VariablesDict
+        from .client.servers.server_0 import Server0, VariablesDict, Version
+
+        version = Version.default
 
         self.host = host
         self.version = version
@@ -1531,12 +1532,11 @@ class NetHSM:
 @contextlib.contextmanager
 def connect(
     host: str,
-    version: str,
     username: str,
     password: str,
     verify_tls: bool = True,
 ) -> Iterator[NetHSM]:
-    nethsm = NetHSM(host, version, username, password, verify_tls)
+    nethsm = NetHSM(host, username, password, verify_tls)
     try:
         yield nethsm
     finally:

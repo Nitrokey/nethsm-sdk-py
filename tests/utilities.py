@@ -142,7 +142,7 @@ def start_nethsm() -> KeyfenderManager:
 @contextlib.contextmanager
 def connect(user: UserData) -> Iterator[NetHSM]:
     with nethsm_module.connect(
-        C.HOST, C.VERSION, user.user_id, C.PASSWORD, C.VERIFY_TLS
+        C.HOST, user.user_id, C.PASSWORD, C.VERIFY_TLS
     ) as nethsm_out:
         yield nethsm_out
 
