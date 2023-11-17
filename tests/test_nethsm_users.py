@@ -76,7 +76,7 @@ def test_list_get_delete_add_users(nethsm: NetHSM) -> None:
         for i in range(len(remaining)):
             if user.user_id == remaining[i].user_id:
                 assert user.real_name == remaining[i].real_name
-                assert user.role.value == remaining[i].role
+                assert user.role.value == remaining[i].role.value
                 remaining.pop(i)
                 break
 
@@ -91,7 +91,7 @@ def test_get_user_admin(nethsm: NetHSM) -> None:
     user = nethsm.get_user(user_id=C.ADMIN_USER.user_id)
     assert user.user_id == C.ADMIN_USER.user_id
     assert user.real_name == C.ADMIN_USER.real_name
-    assert user.role.value == C.ADMIN_USER.role
+    assert user.role.value == C.ADMIN_USER.role.value
 
 
 # @pytest.mark.xfail(reason="connect() doesn't require correct passphrase yet")

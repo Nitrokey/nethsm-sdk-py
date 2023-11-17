@@ -2,12 +2,21 @@ from dataclasses import dataclass
 from os import environ
 from typing import Literal
 
+from nethsm import (
+    DecryptMode,
+    KeyMechanism,
+    KeyType,
+    LogLevel,
+    Role,
+    UnattendedBootStatus,
+)
+
 
 @dataclass
 class UserData:
     user_id: str
     real_name: str
-    role: Literal["Administrator", "Operator", "Metrics", "Backup"]
+    role: Role
 
 
 class Constants:
@@ -69,24 +78,24 @@ class Constants:
     PORT = 514
     NETMASK = "255.255.255.0"
     GATEWAY = "0.0.0.0"
-    UNATTENDED_BOOT_OFF: Literal["off"] = "off"
-    UNATTENDED_BOOT_ON: Literal["on"] = "on"
-    LOG_LEVEL: Literal["info"] = "info"
+    UNATTENDED_BOOT_OFF = UnattendedBootStatus.OFF
+    UNATTENDED_BOOT_ON = UnattendedBootStatus.ON
+    LOG_LEVEL = LogLevel.INFO
 
     # test_nethsm_keys
-    TYPE: Literal["RSA"] = "RSA"
+    TYPE = KeyType.RSA
     MECHANISM = [
-        "RSA_Signature_PKCS1",
-        "RSA_Decryption_PKCS1",
-        "RSA_Signature_PSS_SHA256",
-        "RSA_Decryption_OAEP_SHA256",
+        KeyMechanism.RSA_SIGNATURE_PKCS1,
+        KeyMechanism.RSA_DECRYPTION_PKCS1,
+        KeyMechanism.RSA_SIGNATURE_PSS_SHA256,
+        KeyMechanism.RSA_DECRYPTION_OAEP_SHA256,
     ]
     LENGTH = 1024
     KEY_ID_ADDED = "KeyIdAdded"
     KEY_ID_GENERATED = "KeyIdGenerated"
     KEY_ID_AES = "KeyIdAES"
     DATA = "Test data 123456"
-    MODE: Literal["PKCS1"] = "PKCS1"
+    MODE = DecryptMode.PKCS1
     # 'PKCS1', 'PSS_MD5', 'PSS_SHA1', 'PSS_SHA224', 'PSS_SHA256', 'PSS_SHA384', 'PSS_SHA512', 'EdDSA', 'ECDSA'
     # test_nethsm_users, test_nethsm_keys
     TAG1 = "Frankfurt"
@@ -94,15 +103,17 @@ class Constants:
     TAG3 = "Teltow"
     TAGS = [TAG1, TAG2, TAG3]
 
-    ADMIN_USER = UserData(user_id="admin", real_name="admin", role="Administrator")
+    ADMIN_USER = UserData(user_id="admin", real_name="admin", role=Role.ADMINISTRATOR)
     ADMINISTRATOR_USER = UserData(
-        user_id="UIAdministrator", real_name="RNAdministrator", role="Administrator"
+        user_id="UIAdministrator", real_name="RNAdministrator", role=Role.ADMINISTRATOR
     )
     OPERATOR_USER = UserData(
-        user_id="UIOperator", real_name="RNOperator", role="Operator"
+        user_id="UIOperator", real_name="RNOperator", role=Role.OPERATOR
     )
-    METRICS_USER = UserData(user_id="UIMetrics", real_name="RNMetrics", role="Metrics")
-    BACKUP_USER = UserData(user_id="UIBackup", real_name="RNBackup", role="Backup")
+    METRICS_USER = UserData(
+        user_id="UIMetrics", real_name="RNMetrics", role=Role.METRICS
+    )
+    BACKUP_USER = UserData(user_id="UIBackup", real_name="RNBackup", role=Role.BACKUP)
 
     DETAILS = ""
     USERS_LIST = [

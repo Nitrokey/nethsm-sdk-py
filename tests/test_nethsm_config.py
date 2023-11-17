@@ -6,7 +6,7 @@ from conftest import Constants as C
 from utilities import lock, nethsm, self_sign_csr, unlock  # noqa: F401
 
 import nethsm as nethsm_module
-from nethsm import NetHSM
+from nethsm import NetHSM, TlsKeyType
 
 """########## Preparation for the Tests ##########
 
@@ -21,7 +21,7 @@ def get_config_logging(nethsm: NetHSM) -> None:
     data = nethsm.get_config_logging()
     assert data.ip_address == C.IP_ADDRESS_LOGGING
     assert data.port == C.PORT
-    assert data.log_level.value == C.LOG_LEVEL
+    assert data.log_level == C.LOG_LEVEL
 
 
 def get_config_network(nethsm: NetHSM) -> None:
@@ -81,7 +81,7 @@ def test_set_certificate(nethsm: NetHSM) -> None:
 
 
 def generate_tls_key(nethsm: NetHSM) -> None:
-    nethsm.generate_tls_key("RSA", 2048)
+    nethsm.generate_tls_key(TlsKeyType.RSA, 2048)
 
 
 def test_get_config_logging(nethsm: NetHSM) -> None:
@@ -124,8 +124,8 @@ def test_get_config_unattended_boot(nethsm: NetHSM) -> None:
     role."""
     unattended_boot = nethsm.get_config_unattended_boot()
     assert (
-        str(unattended_boot) == C.UNATTENDED_BOOT_OFF
-        or str(unattended_boot) == C.UNATTENDED_BOOT_ON
+        unattended_boot == C.UNATTENDED_BOOT_OFF.value
+        or unattended_boot == C.UNATTENDED_BOOT_ON.value
     )
 
 
@@ -219,19 +219,19 @@ def test_set_get_unattended_boot(nethsm: NetHSM) -> None:
     This command requires authentication as a user with the Administrator
     role."""
     unattended_boot = nethsm.get_config_unattended_boot()
-    if str(unattended_boot) == C.UNATTENDED_BOOT_OFF:
+    if unattended_boot == C.UNATTENDED_BOOT_OFF.value:
         nethsm.set_unattended_boot(C.UNATTENDED_BOOT_ON)
-        assert str(nethsm.get_config_unattended_boot()) == C.UNATTENDED_BOOT_ON
+        assert nethsm.get_config_unattended_boot() == C.UNATTENDED_BOOT_ON.value
 
         nethsm.set_unattended_boot(C.UNATTENDED_BOOT_OFF)
-        assert str(nethsm.get_config_unattended_boot()) == C.UNATTENDED_BOOT_OFF
+        assert nethsm.get_config_unattended_boot() == C.UNATTENDED_BOOT_OFF.value
 
-    if str(unattended_boot) == C.UNATTENDED_BOOT_ON:
+    if unattended_boot == C.UNATTENDED_BOOT_ON.value:
         nethsm.set_unattended_boot(C.UNATTENDED_BOOT_OFF)
-        assert str(nethsm.get_config_unattended_boot()) == C.UNATTENDED_BOOT_OFF
+        assert nethsm.get_config_unattended_boot() == C.UNATTENDED_BOOT_OFF.value
 
         nethsm.set_unattended_boot(C.UNATTENDED_BOOT_ON)
-        assert str(nethsm.get_config_unattended_boot()) == C.UNATTENDED_BOOT_ON
+        assert nethsm.get_config_unattended_boot() == C.UNATTENDED_BOOT_ON.value
 
 
 def test_set_unlock_passphrase_lock_unlock(nethsm: NetHSM) -> None:
