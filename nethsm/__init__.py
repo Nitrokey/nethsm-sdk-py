@@ -18,7 +18,7 @@ from base64 import b64encode
 from dataclasses import dataclass
 from datetime import datetime
 from io import BufferedReader, FileIO
-from typing import TYPE_CHECKING, Any, Iterator, Mapping, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, Iterator, Mapping, Optional, Union
 from urllib.parse import urlencode
 
 import urllib3
@@ -220,15 +220,27 @@ class User:
 
 
 @dataclass
+class RsaPublicKey:
+    modulus: str
+    public_exponent: str
+
+
+@dataclass
+class EcPublicKey:
+    data: str
+
+
+PublicKey = Union[RsaPublicKey, EcPublicKey, None]
+
+
+@dataclass
 class Key:
     key_id: str
     mechanisms: list[KeyMechanism]
     type: KeyType
     operations: int
-    tags: Optional[list[str]]
-    modulus: Optional[str]
-    public_exponent: Optional[str]
-    data: Optional[str]
+    tags: list[str]
+    public_key: PublicKey
 
 
 @dataclass
@@ -787,6 +799,7 @@ class NetHSM:
 
     def get_key(self, key_id: str) -> Key:
         from .client.paths.keys_key_id.get.path_parameters import PathParametersDict
+        from .client.schemas import Unset
 
         path_params = PathParametersDict(KeyID=key_id)
         try:
@@ -801,19 +814,45 @@ class NetHSM:
                     404: f"Key {key_id} not found",
                 },
             )
+
+        mechanisms = [
+            KeyMechanism.from_string(mechanism) for mechanism in key.mechanisms
+        ]
+        tags = []
+        if not isinstance(key.restrictions, Unset):
+            if not isinstance(key.restrictions.tags, Unset):
+                tags = list(key.restrictions.tags)
+        key_type = KeyType.from_string(key.type)
+
+        public_key: PublicKey
+        if key_type == KeyType.RSA:
+            assert not isinstance(key.key, Unset)
+            assert isinstance(key.key.data, Unset)
+            assert not isinstance(key.key.modulus, Unset)
+            assert not isinstance(key.key.publicExponent, Unset)
+            public_key = RsaPublicKey(
+                modulus=key.key.modulus, public_exponent=key.key.publicExponent
+            )
+        elif key_type == KeyType.GENERIC:
+            if not isinstance(key.key, Unset):
+                assert isinstance(key.key.data, Unset)
+                assert isinstance(key.key.modulus, Unset)
+                assert isinstance(key.key.publicExponent, Unset)
+            public_key = None
+        else:
+            assert not isinstance(key.key, Unset)
+            assert not isinstance(key.key.data, Unset)
+            assert isinstance(key.key.modulus, Unset)
+            assert isinstance(key.key.publicExponent, Unset)
+            public_key = EcPublicKey(data=key.key.data)
+
         return Key(
             key_id=key_id,
-            mechanisms=[
-                KeyMechanism.from_string(mechanism) for mechanism in key.mechanisms
-            ],
-            type=KeyType.from_string(key.type),
+            mechanisms=mechanisms,
+            type=key_type,
             operations=key.operations,
-            tags=[str(tag) for tag in cast(list[str], key.restrictions["tags"])]
-            if "tags" in key.restrictions.keys()
-            else None,
-            modulus=getattr(key.key, "modulus", None),
-            public_exponent=getattr(key.key, "public_exponent", None),
-            data=getattr(key.key, "data", None),
+            tags=tags,
+            public_key=public_key,
         )
 
     # Get the public key file in PEM format
