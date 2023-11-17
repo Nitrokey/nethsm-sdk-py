@@ -20,7 +20,7 @@ check-style:
 
 check-typing:
 	@echo "Note: run semi-clean target in case this fails without any proper reason"
-	$(PYTHON3_VENV) -m mypy $(PACKAGE_NAME)/
+	$(PYTHON3_VENV) -m mypy $(PACKAGE_NAME)/ tests/
 
 check: check-format check-import-sorting check-style check-typing test 
 
