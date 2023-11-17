@@ -10,12 +10,14 @@
 from __future__ import annotations
 from nethsm.client.shared_imports.schema_imports import *  # pyright: ignore [reportWildcardImportFromLibrary]
 
+CurrentPassphrase: typing_extensions.TypeAlias = schemas.StrSchema
 
 from nethsm.client.components.schema import passphrase
 Properties = typing.TypedDict(
     'Properties',
     {
-        "passphrase": typing.Type[passphrase.Passphrase],
+        "newPassphrase": typing.Type[passphrase.Passphrase],
+        "currentPassphrase": typing.Type[CurrentPassphrase],
     }
 )
 
@@ -23,7 +25,8 @@ Properties = typing.TypedDict(
 class UnlockPassphraseConfigDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES]):
 
     __required_keys__: typing.FrozenSet[str] = frozenset({
-        "passphrase",
+        "currentPassphrase",
+        "newPassphrase",
     })
     __optional_keys__: typing.FrozenSet[str] = frozenset({
     })
@@ -31,12 +34,14 @@ class UnlockPassphraseConfigDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_
     def __new__(
         cls,
         *,
-        passphrase: str,
+        currentPassphrase: str,
+        newPassphrase: str,
         configuration_: typing.Optional[schema_configuration.SchemaConfiguration] = None,
         **kwargs: schemas.INPUT_TYPES_ALL,
     ):
         arg_: typing.Dict[str, typing.Any] = {
-            "passphrase": passphrase,
+            "currentPassphrase": currentPassphrase,
+            "newPassphrase": newPassphrase,
         }
         arg_.update(kwargs)
         used_arg_ = typing.cast(UnlockPassphraseConfigDictInput, arg_)
@@ -53,10 +58,17 @@ class UnlockPassphraseConfigDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_
         return UnlockPassphraseConfig.validate(arg, configuration=configuration)
     
     @property
-    def passphrase(self) -> str:
+    def currentPassphrase(self) -> str:
         return typing.cast(
             str,
-            self.__getitem__("passphrase")
+            self.__getitem__("currentPassphrase")
+        )
+    
+    @property
+    def newPassphrase(self) -> str:
+        return typing.cast(
+            str,
+            self.__getitem__("newPassphrase")
         )
     
     def get_additional_property_(self, name: str) -> typing.Union[schemas.OUTPUT_BASE_TYPES, schemas.Unset]:
@@ -76,7 +88,8 @@ class UnlockPassphraseConfig(
     """
     types: typing.FrozenSet[typing.Type] = frozenset({schemas.immutabledict})
     required: typing.FrozenSet[str] = frozenset({
-        "passphrase",
+        "currentPassphrase",
+        "newPassphrase",
     })
     properties: Properties = dataclasses.field(default_factory=lambda: schemas.typed_dict_to_instance(Properties)) # type: ignore
     type_to_output_cls: typing.Mapping[
