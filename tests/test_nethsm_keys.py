@@ -320,9 +320,10 @@ def test_encrypt_decrypt(nethsm: NetHSM) -> None:
             EncryptMode.AES_CBC,
             iv_b64,
         )
+        assert encrypted.iv == iv_b64
         decrypt = nethsm.decrypt(
             C.KEY_ID_AES,
-            encrypted[0],
+            encrypted.encrypted,
             DecryptMode.AES_CBC,
             iv_b64,
         )
