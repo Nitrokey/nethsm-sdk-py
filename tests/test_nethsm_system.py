@@ -16,7 +16,7 @@ from utilities import (
     update,
 )
 
-from nethsm import NetHSM
+from nethsm import NetHSM, NetHSMError
 from nethsm.backup import Backup, EncryptedBackup
 
 """######################### Preparation for the Tests #########################
@@ -104,13 +104,27 @@ def test_state_restore(nethsm: NetHSM) -> None:
     system_time = datetime.datetime.now(datetime.timezone.utc)
     assert nethsm.get_state().value == "Unprovisioned"
 
-    try:
-        with open(C.FILENAME_BACKUP, "rb") as f:
-            nethsm.restore(f, C.BACKUP_PASSPHRASE, system_time)
-            nethsm.unlock(C.UNLOCK_PASSPHRASE)
-    except OSError as e:
-        print(e, type(e))
-        assert False
+    # We repeat the restore call to debug a problem with the restore endpoint in the CI.
+    # See this issue for more information:
+    # https://github.com/Nitrokey/nethsm-sdk-py/issues/93
+
+    successful_try = None
+    last_exception = None
+    for i in range(10):
+        try:
+            with open(C.FILENAME_BACKUP, "rb") as f:
+                nethsm.restore(f, C.BACKUP_PASSPHRASE, system_time)
+            successful_try = i
+        except NetHSMError as e:
+            last_exception = e
+            continue
+
+    if successful_try != 0:
+        print(f"successful try: {successful_try}")
+        assert last_exception
+        raise last_exception
+
+    nethsm.unlock(C.UNLOCK_PASSPHRASE)
 
     assert nethsm.list_keys() == [C.KEY_ID_GENERATED]
 

@@ -97,6 +97,12 @@ jobs:
         run: |
           . venv/bin/activate
           make test
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        if: ${{ failure() }}
+        with:
+          name: backup
+          path: backupNethsm.bin
       - name: upload coverage
         uses: codecov/codecov-action@v3
         with:
