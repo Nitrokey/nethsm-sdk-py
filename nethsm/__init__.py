@@ -199,6 +199,12 @@ class TlsKeyType(enum.Enum):
 
 
 @dataclass
+class Authentication:
+    username: str
+    password: str
+
+
+@dataclass
 class Info:
     vendor: str
     product: str
@@ -372,8 +378,7 @@ class NetHSM:
     def __init__(
         self,
         host: str,
-        username: str,
-        password: str,
+        auth: Optional[Authentication] = None,
         verify_tls: bool = True,
     ) -> None:
         from .client import ApiClient, ApiConfiguration
@@ -388,17 +393,18 @@ class NetHSM:
 
         self.host = host
         self.version = version
-        self.username = username
-        self.password = password
+        self.auth = auth
 
-        security_info = SecuritySchemeInfo(
-            {
-                "basic": security_scheme_basic.Basic(
-                    user_id=username,
-                    password=password,
-                )
-            }
-        )
+        security_info = None
+        if auth:
+            security_info = SecuritySchemeInfo(
+                {
+                    "basic": security_scheme_basic.Basic(
+                        user_id=auth.username,
+                        password=auth.password,
+                    )
+                }
+            )
 
         server_config = ServerInfo(
             {"servers/0": Server0(variables=VariablesDict(host=host, version=version))}
@@ -436,11 +442,11 @@ class NetHSM:
         if mime_type is not None:
             headers["Content-Type"] = mime_type
 
-        # basic auth from self.username and self.password
-        if self.username and self.password:
+        # basic auth from self.auth
+        if self.auth:
             headers[
                 "Authorization"
-            ] = f"Basic {b64encode(f'{self.username}:{self.password}'.encode('latin-1')).decode()}"
+            ] = f"Basic {b64encode(f'{self.auth.username}:{self.auth.password}'.encode('latin-1')).decode()}"
 
         body: Union[str, bytes, None] = None
         if data:
@@ -1594,11 +1600,10 @@ class NetHSM:
 @contextlib.contextmanager
 def connect(
     host: str,
-    username: str,
-    password: str,
+    auth: Optional[Authentication] = None,
     verify_tls: bool = True,
 ) -> Iterator[NetHSM]:
-    nethsm = NetHSM(host, username, password, verify_tls)
+    nethsm = NetHSM(host, auth, verify_tls)
     try:
         yield nethsm
     finally:
