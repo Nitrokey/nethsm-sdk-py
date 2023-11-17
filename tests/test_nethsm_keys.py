@@ -15,7 +15,15 @@ from utilities import (
 )
 
 import nethsm as nethsm_module
-from nethsm import DecryptMode, EncryptMode, KeyMechanism, KeyType, NetHSM, SignMode
+from nethsm import (
+    DecryptMode,
+    EncryptMode,
+    KeyMechanism,
+    KeyType,
+    NetHSM,
+    RsaPublicKey,
+    SignMode,
+)
 
 """########## Preparation for the Tests ##########
 
@@ -141,12 +149,9 @@ def test_generate_get_key_by_id(nethsm: nethsm_module.NetHSM) -> None:
     for mechanism in key.mechanisms:
         assert mechanism in C.MECHANISM
     assert key.operations >= 0
-    if key.tags:
-        assert key.tags
-    if key.modulus:
-        assert key.modulus
-    if key.public_exponent:
-        assert key.public_exponent
+    assert isinstance(key.public_key, RsaPublicKey)
+    assert key.public_key.modulus
+    assert key.public_key.public_exponent
 
 
 def test_add_key_tag_get_key(nethsm: NetHSM) -> None:
@@ -159,7 +164,6 @@ def test_add_key_tag_get_key(nethsm: NetHSM) -> None:
 
     key = nethsm.get_key(C.KEY_ID_GENERATED)
     tags = key.tags
-    assert tags
     assert C.TAG1 in tags
     assert C.TAG2 in tags
     assert C.TAG3 in tags
@@ -177,7 +181,6 @@ def test_delete_key_tag_get_key(nethsm: NetHSM) -> None:
     nethsm.delete_key_tag(key_id=C.KEY_ID_GENERATED, tag=C.TAG2)
     key = nethsm.get_key(C.KEY_ID_GENERATED)
 
-    assert key.tags
     assert C.TAG1 not in key.tags
     assert C.TAG2 not in key.tags
     assert C.TAG3 in key.tags
@@ -198,12 +201,9 @@ def test_list_get_keys(nethsm: nethsm_module.NetHSM) -> None:
         for mechanism in key.mechanisms:
             assert mechanism in C.MECHANISM
         assert key.operations >= 0
-        if key.tags:
-            assert key.tags
-        if key.modulus:
-            assert key.modulus
-        if key.public_exponent:
-            assert key.public_exponent
+        assert isinstance(key.public_key, RsaPublicKey)
+        assert key.public_key.modulus
+        assert key.public_key.public_exponent
 
 
 def test_delete_key(nethsm: NetHSM) -> None:
