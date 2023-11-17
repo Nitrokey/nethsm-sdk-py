@@ -32,9 +32,7 @@ def get_config_network(nethsm: NetHSM) -> None:
 
 
 def get_config_time(nethsm: NetHSM) -> None:
-    dt_nethsm = datetime.datetime.strptime(
-        nethsm.get_config_time(), "%Y-%m-%dT%H:%M:%SZ"
-    ).replace(tzinfo=datetime.timezone.utc)
+    dt_nethsm = nethsm.get_config_time()
     dt_now = datetime.datetime.now(datetime.timezone.utc)
 
     seconds_diff = (dt_nethsm - dt_now).total_seconds()

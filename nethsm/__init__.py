@@ -16,7 +16,7 @@ import json
 import re
 from base64 import b64encode
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from io import BufferedReader, FileIO
 from typing import TYPE_CHECKING, Any, Iterator, Mapping, Optional, Union
 from urllib.parse import urlencode
@@ -1060,12 +1060,15 @@ class NetHSM:
             netmask=response.body.netmask,
         )
 
-    def get_config_time(self) -> str:
+    def get_config_time(self) -> datetime:
         try:
             response = self._get_api().config_time_get()
         except Exception as e:
             _handle_exception(e, state=State.OPERATIONAL, roles=[Role.ADMINISTRATOR])
-        return response.body.time
+        # could be replaced with datetime.fromisoformat in Python 3.11 or later
+        return datetime.strptime(response.body.time, "%Y-%m-%dT%H:%M:%SZ").replace(
+            tzinfo=timezone.utc
+        )
 
     def get_config_unattended_boot(self) -> str:
         try:
