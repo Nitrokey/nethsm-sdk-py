@@ -22,7 +22,7 @@ from cryptography.hazmat.primitives.serialization import Encoding
 from cryptography.x509.oid import NameOID
 
 import nethsm as nethsm_module
-from nethsm import NetHSM
+from nethsm import Authentication, NetHSM
 
 
 @pytest.fixture(scope="module")
@@ -141,9 +141,8 @@ def start_nethsm() -> KeyfenderManager:
 
 @contextlib.contextmanager
 def connect(user: UserData) -> Iterator[NetHSM]:
-    with nethsm_module.connect(
-        C.HOST, user.user_id, C.PASSWORD, C.VERIFY_TLS
-    ) as nethsm_out:
+    auth = Authentication(user.user_id, C.PASSWORD)
+    with nethsm_module.connect(C.HOST, auth, C.VERIFY_TLS) as nethsm_out:
         yield nethsm_out
 
 

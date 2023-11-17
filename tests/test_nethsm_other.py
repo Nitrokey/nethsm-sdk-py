@@ -6,6 +6,7 @@ from conftest import Constants as C
 from utilities import nethsm  # noqa: F401
 from utilities import add_user, connect, lock, provision, start_nethsm, unlock
 
+import nethsm as nethsm_sdk
 from nethsm import NetHSM
 
 """######################### Preparation for the Tests #########################
@@ -34,7 +35,30 @@ def nethsm_no_provision() -> Iterator[NetHSM]:
         pass
 
 
+@pytest.fixture(scope="module")
+def nethsm_no_provision_no_auth() -> Iterator[NetHSM]:
+    """Start Docker container with Nethsm image and connect to Nethsm
+
+    This Pytest Fixture will run before the tests to provide the tests with
+    a nethsm instance via Docker container"""
+    container = start_nethsm()
+
+    with nethsm_sdk.connect(C.HOST, verify_tls=C.VERIFY_TLS) as nethsm:
+        yield nethsm
+
+    try:
+        container.kill()
+    except docker.errors.APIError:
+        pass
+
+
 """######################### Start of Tests #########################"""
+
+
+def test_state_no_auth(nethsm_no_provision_no_auth: NetHSM) -> None:
+    """Query the state of a NetHSM without authentication."""
+    state = nethsm_no_provision_no_auth.get_state().value
+    assert state in C.STATES
 
 
 def test_state(nethsm_no_provision: NetHSM) -> None:
