@@ -21,6 +21,7 @@ from nethsm import (
     KeyMechanism,
     KeyType,
     NetHSM,
+    RsaPrivateKey,
     RsaPublicKey,
     SignMode,
 )
@@ -51,11 +52,7 @@ def add_key(nethsm: NetHSM) -> None:
         key_id=C.KEY_ID_ADDED,
         type=C.TYPE,
         mechanisms=C.MECHANISM,
-        prime_p=p,
-        prime_q=q,
-        public_exponent=e,
-        data=C.DATA,
-        tags=[],
+        private_key=RsaPrivateKey(prime_p=p, prime_q=q, public_exponent=e),
     )
 
 

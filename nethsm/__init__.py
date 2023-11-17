@@ -234,6 +234,21 @@ PublicKey = Union[RsaPublicKey, EcPublicKey, None]
 
 
 @dataclass
+class RsaPrivateKey:
+    prime_p: str
+    prime_q: str
+    public_exponent: str
+
+
+@dataclass
+class GenericPrivateKey:
+    data: str
+
+
+PrivateKey = Union[RsaPrivateKey, GenericPrivateKey]
+
+
+@dataclass
 class Key:
     key_id: str
     mechanisms: list[KeyMechanism]
@@ -882,11 +897,8 @@ class NetHSM:
         key_id: str,
         type: KeyType,
         mechanisms: list[KeyMechanism],
-        tags: list[str],
-        prime_p: Optional[str],
-        prime_q: Optional[str],
-        public_exponent: Optional[str],
-        data: Optional[str],
+        private_key: PrivateKey,
+        tags: list[str] = [],
     ) -> str:
         from .client.components.schema.key_mechanisms import KeyMechanismsTupleInput
         from .client.components.schema.key_private_data import KeyPrivateDataDict
@@ -894,21 +906,16 @@ class NetHSM:
         from .client.components.schema.private_key import PrivateKeyDict
         from .client.components.schema.tag_list import TagListTuple
 
-        # To do: split into different methods for RSA and other key types, or
-        # at least change typing accordingly
-
         if type == KeyType.RSA:
-            assert prime_p
-            assert prime_q
-            assert public_exponent
+            assert isinstance(private_key, RsaPrivateKey)
             key_data = KeyPrivateDataDict(
-                primeP=prime_p,
-                primeQ=prime_q,
-                publicExponent=public_exponent,
+                primeP=private_key.prime_p,
+                primeQ=private_key.prime_q,
+                publicExponent=private_key.public_exponent,
             )
         else:
-            assert data
-            key_data = KeyPrivateDataDict(data=data)
+            assert isinstance(private_key, GenericPrivateKey)
+            key_data = KeyPrivateDataDict(data=private_key.data)
 
         mechanism_tuple: KeyMechanismsTupleInput = [
             mechanism.value for mechanism in mechanisms
