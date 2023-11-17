@@ -33,7 +33,6 @@ class Constants:
 
     # READ env variables
     HOST = environ.get("NETHSM_HOST", "127.0.0.1:8443")
-    VERSION = "v1"
     VERIFY_TLS = False
 
     USERNAME = "admin"
