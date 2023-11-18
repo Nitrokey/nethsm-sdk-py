@@ -6,8 +6,8 @@
 
 from nethsm.client import api_client, exceptions, security_schemes
 from nethsm.client.shared_imports.operation_imports import *  # pyright: ignore [reportWildcardImportFromLibrary]
-from nethsm.client.components.schema import pem_private_key
 from nethsm.client.components.schema import private_key
+from nethsm.client.components.schema import private_key_pem
 
 from .. import path
 from .responses import (
@@ -20,18 +20,9 @@ from .responses import (
     response_412,
 )
 from . import request_body
-from .parameters import (
-    parameter_0,
-    parameter_1,
-)
 from ..parameters import parameter_0 as path_item_parameter_0
 from .security import security_requirement_object_0
 from .path_parameters import PathParameters, PathParametersDictInput, PathParametersDict
-from .query_parameters import QueryParameters, QueryParametersDictInput, QueryParametersDict
-query_parameter_classes = (
-    parameter_0.Parameter0,
-    parameter_1.Parameter1,
-)
 path_parameter_classes = (
     path_item_parameter_0.Parameter0,
 )
@@ -87,11 +78,6 @@ class BaseApi(api_client.Api):
             PathParametersDictInput,
             PathParametersDict
         ],
-        query_params: typing.Union[
-            QueryParametersDictInput,
-            QueryParametersDict,
-            None
-        ] = None,
         *,
         skip_deserialization: typing.Literal[False] = False,
         content_type: typing.Literal["application/json"] = "application/json",
@@ -112,11 +98,6 @@ class BaseApi(api_client.Api):
             PathParametersDictInput,
             PathParametersDict
         ],
-        query_params: typing.Union[
-            QueryParametersDictInput,
-            QueryParametersDict,
-            None
-        ] = None,
         *,
         skip_deserialization: typing.Literal[True],
         content_type: typing.Literal["application/json"] = "application/json",
@@ -129,19 +110,17 @@ class BaseApi(api_client.Api):
     @typing.overload
     def _keys_key_id_put(
         self,
-        body: str,
+        body: typing.Union[
+            private_key_pem.PrivateKeyPemDictInput,
+            private_key_pem.PrivateKeyPemDict,
+        ],
         path_params: typing.Union[
             PathParametersDictInput,
             PathParametersDict
         ],
-        query_params: typing.Union[
-            QueryParametersDictInput,
-            QueryParametersDict,
-            None
-        ] = None,
         *,
         skip_deserialization: typing.Literal[False] = False,
-        content_type: typing.Literal["application/x-pem-file"],
+        content_type: typing.Literal["multipart/form-data"],
         security_index: typing.Optional[int] = None,
         server_index: typing.Optional[int] = None,
         stream: bool = False,
@@ -151,19 +130,17 @@ class BaseApi(api_client.Api):
     @typing.overload
     def _keys_key_id_put(
         self,
-        body: str,
+        body: typing.Union[
+            private_key_pem.PrivateKeyPemDictInput,
+            private_key_pem.PrivateKeyPemDict,
+        ],
         path_params: typing.Union[
             PathParametersDictInput,
             PathParametersDict
         ],
-        query_params: typing.Union[
-            QueryParametersDictInput,
-            QueryParametersDict,
-            None
-        ] = None,
         *,
         skip_deserialization: typing.Literal[True],
-        content_type: typing.Literal["application/x-pem-file"],
+        content_type: typing.Literal["multipart/form-data"],
         security_index: typing.Optional[int] = None,
         server_index: typing.Optional[int] = None,
         stream: bool = False,
@@ -177,22 +154,20 @@ class BaseApi(api_client.Api):
                 private_key.PrivateKeyDictInput,
                 private_key.PrivateKeyDict,
             ],
-            str,
+            typing.Union[
+                private_key_pem.PrivateKeyPemDictInput,
+                private_key_pem.PrivateKeyPemDict,
+            ],
         ],
         path_params: typing.Union[
             PathParametersDictInput,
             PathParametersDict
         ],
-        query_params: typing.Union[
-            QueryParametersDictInput,
-            QueryParametersDict,
-            None
-        ] = None,
         *,
         skip_deserialization: bool = False,
         content_type: typing.Literal[
             "application/json",
-            "application/x-pem-file",
+            "multipart/form-data",
         ] = "application/json",
         security_index: typing.Optional[int] = None,
         server_index: typing.Optional[int] = None,
@@ -208,17 +183,10 @@ class BaseApi(api_client.Api):
             path_params,
             configuration=self.api_client.schema_configuration
         )
-        if query_params is not None:
-            query_params = QueryParameters.validate(
-                query_params,
-                configuration=self.api_client.schema_configuration
-            )
         used_path, query_params_suffix = self._get_used_path(
             path,
             path_parameters=path_parameter_classes,
             path_params=path_params,
-            query_parameters=query_parameter_classes,
-            query_params=query_params,
             skip_validation=True
         )
         headers = self._get_headers()
@@ -241,7 +209,6 @@ class BaseApi(api_client.Api):
 
         raw_response = self.api_client.call_api(
             resource_path=used_path,
-            query_params_suffix=query_params_suffix,
             method='put',
             host=host,
             headers=headers,

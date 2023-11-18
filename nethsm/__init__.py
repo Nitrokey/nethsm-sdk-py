@@ -13,7 +13,6 @@ __version__ = "0.4.0"
 import contextlib
 import enum
 import json
-import re
 from base64 import b64encode
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -23,7 +22,6 @@ from urllib.parse import urlencode
 
 import urllib3
 from urllib3 import HTTPResponse, _collections
-from urllib3._collections import HTTPHeaderDict
 
 # Avoid direct imports from .client at runtime to reduce the module load time
 if TYPE_CHECKING:
@@ -471,31 +469,20 @@ class NetHSM:
             )
         return response
 
+    def _get_create_resource_id(self, response: HTTPResponse) -> str:
+        # Endpoints that return CreateResourceId cannot be deserialized because
+        # they also set a header which our generator does not support.  We need
+        # to deserialize them manually.
+        data = response.json()
+        assert "id" in data
+        value = data["id"]
+        assert isinstance(value, str)
+        return value
+
     def _get_api(self) -> "DefaultApi":
         from .client.apis.tags.default_api import DefaultApi
 
         return DefaultApi(self.client)
-
-    def _get_location(self, headers: HTTPHeaderDict) -> Optional[str]:
-        return headers.get("location")
-
-    def _get_key_id_from_location(self, headers: HTTPHeaderDict) -> str:
-        location = self._get_location(headers)
-        if not location:
-            raise NetHSMError("Could not determine the ID of the new key")
-        key_id_match = re.fullmatch(f"/api/{self.version}/keys/(.*)", location)
-        if not key_id_match:
-            raise NetHSMError("Could not determine the ID of the new key")
-        return key_id_match[1]
-
-    def _get_user_id_from_location(self, headers: HTTPHeaderDict) -> str:
-        location = self._get_location(headers)
-        if not location:
-            raise NetHSMError("Could not determine the ID of the new key")
-        user_id_match = re.fullmatch(f"/api/{self.version}/users/(.*)", location)
-        if not user_id_match:
-            raise NetHSMError("Could not determine the ID of the new user")
-        return user_id_match[1]
 
     def unlock(self, passphrase: str) -> None:
         from .client.components.schema.unlock_request_data import UnlockRequestDataDict
@@ -604,10 +591,10 @@ class NetHSM:
                 path_params = PathParametersDict(UserID=user_id)
                 self._get_api().users_user_id_put(path_params=path_params, body=body)
             else:
-                response = self._get_api().users_post(body=body)
-                user_id = self._get_user_id_from_location(
-                    response.response.getheaders()
+                response = self._get_api().users_post(
+                    body=body, skip_deserialization=True
                 )
+                user_id = self._get_create_resource_id(response.response)
         except Exception as e:
             _handle_exception(
                 e,
@@ -817,7 +804,7 @@ class NetHSM:
                 state=State.OPERATIONAL,
                 roles=[Role.ADMINISTRATOR, Role.OPERATOR],
             )
-        return [item.key for item in response.body]
+        return [item.id for item in response.body]
 
     def get_key(self, key_id: str) -> Key:
         from .client.paths.keys_key_id.get.path_parameters import PathParametersDict
@@ -848,25 +835,25 @@ class NetHSM:
 
         public_key: PublicKey
         if key_type == KeyType.RSA:
-            assert not isinstance(key.key, Unset)
-            assert isinstance(key.key.data, Unset)
-            assert not isinstance(key.key.modulus, Unset)
-            assert not isinstance(key.key.publicExponent, Unset)
+            assert not isinstance(key.public, Unset)
+            assert isinstance(key.public.data, Unset)
+            assert not isinstance(key.public.modulus, Unset)
+            assert not isinstance(key.public.publicExponent, Unset)
             public_key = RsaPublicKey(
-                modulus=key.key.modulus, public_exponent=key.key.publicExponent
+                modulus=key.public.modulus, public_exponent=key.public.publicExponent
             )
         elif key_type == KeyType.GENERIC:
-            if not isinstance(key.key, Unset):
-                assert isinstance(key.key.data, Unset)
-                assert isinstance(key.key.modulus, Unset)
-                assert isinstance(key.key.publicExponent, Unset)
+            if not isinstance(key.public, Unset):
+                assert isinstance(key.public.data, Unset)
+                assert isinstance(key.public.modulus, Unset)
+                assert isinstance(key.public.publicExponent, Unset)
             public_key = None
         else:
-            assert not isinstance(key.key, Unset)
-            assert not isinstance(key.key.data, Unset)
-            assert isinstance(key.key.modulus, Unset)
-            assert isinstance(key.key.publicExponent, Unset)
-            public_key = EcPublicKey(data=key.key.data)
+            assert not isinstance(key.public, Unset)
+            assert not isinstance(key.public.data, Unset)
+            assert isinstance(key.public.modulus, Unset)
+            assert isinstance(key.public.publicExponent, Unset)
+            public_key = EcPublicKey(data=key.public.data)
 
         return Key(
             key_id=key_id,
@@ -932,7 +919,7 @@ class NetHSM:
             body = PrivateKeyDict(
                 type=type.value,
                 mechanisms=mechanism_tuple,
-                key=key_data,
+                private=key_data,
                 restrictions=KeyRestrictionsDict(
                     tags=TagListTuple([tag for tag in tags])
                 ),
@@ -941,7 +928,7 @@ class NetHSM:
             body = PrivateKeyDict(
                 type=type.value,
                 mechanisms=mechanism_tuple,
-                key=key_data,
+                private=key_data,
             )
 
         try:
@@ -951,18 +938,12 @@ class NetHSM:
                 )
 
                 path_params = PathParametersDict(KeyID=key_id)
-                self._get_api().keys_key_id_put(
-                    path_params=path_params,
-                    body=body,
-                    content_type="application/json",
-                )
+                self._get_api().keys_key_id_put(path_params=path_params, body=body)
             else:
                 response = self._get_api().keys_post(
-                    body=body,
-                    content_type="application/json",
-                    skip_deserialization=True,
+                    body=body, skip_deserialization=True
                 )
-                key_id = self._get_key_id_from_location(response.response.getheaders())
+                key_id = self._get_create_resource_id(response.response)
         except Exception as e:
             _handle_exception(
                 e,
@@ -1034,9 +1015,7 @@ class NetHSM:
                     409: f"Conflict -- a key with the ID {key_id} already exists",
                 },
             )
-        return key_id or str(
-            self._get_key_id_from_location(response.response.getheaders())
-        )
+        return self._get_create_resource_id(response.response)
 
     def get_config_logging(self) -> LoggingConfig:
         try:
@@ -1411,15 +1390,13 @@ class NetHSM:
 
     def restore(self, backup: Bytes, passphrase: str, time: datetime) -> None:
         try:
-            from .client.paths.system_restore.post.request_body.content.multipart_form_data.schema import (
+            from .client.components.schema.restore_request import (
                 ArgumentsDict,
-                SchemaDict,
+                RestoreRequestDict,
             )
 
-            body = SchemaDict(
-                arguments=ArgumentsDict(
-                    backupPassphrase=passphrase, systemTime=time.isoformat()
-                ),
+            body = RestoreRequestDict(
+                arguments=ArgumentsDict(backupPassphrase=passphrase, systemTime=time),
                 backup_file=backup,
             )
 

@@ -7,7 +7,7 @@
 from nethsm.client.shared_imports.header_imports import *  # pyright: ignore [reportWildcardImportFromLibrary]
 
 from .content.application_json import schema as application_json_schema
-from .content.application_x_pem_file import schema as application_x_pem_file_schema
+from .content.multipart_form_data import schema as multipart_form_data_schema
 
 
 class RequestBody(api_client.RequestBody):
@@ -17,10 +17,10 @@ class RequestBody(api_client.RequestBody):
         schema: typing_extensions.TypeAlias = application_json_schema.Schema
 
 
-    class ApplicationXPemFileMediaType(api_client.MediaType):
-        schema: typing_extensions.TypeAlias = application_x_pem_file_schema.Schema
+    class MultipartFormDataMediaType(api_client.MediaType):
+        schema: typing_extensions.TypeAlias = multipart_form_data_schema.Schema
     content = {
         'application/json': ApplicationJsonMediaType,
-        'application/x-pem-file': ApplicationXPemFileMediaType,
+        'multipart/form-data': MultipartFormDataMediaType,
     }
     required = True

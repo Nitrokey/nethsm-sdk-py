@@ -9,8 +9,6 @@ from nethsm.client.shared_imports.header_imports import *  # pyright: ignore [re
 from . import schema
 
 
-class Parameter0(api_client.QueryParameter):
-    name = "mechanisms"
-    style = api_client.ParameterStyle.FORM
+class Location(api_client.HeaderParameterWithoutName):
+    style = api_client.ParameterStyle.SIMPLE
     schema: typing_extensions.TypeAlias = schema.Schema
-    explode = True

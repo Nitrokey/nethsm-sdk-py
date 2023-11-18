@@ -6,7 +6,7 @@
 
 from nethsm.client import api_client, exceptions
 from nethsm.client.shared_imports.operation_imports import *  # pyright: ignore [reportWildcardImportFromLibrary]
-from nethsm.client.paths.system_restore.post.request_body.content.multipart_form_data import schema
+from nethsm.client.components.schema import restore_request
 
 from .. import path
 from .responses import (
@@ -48,8 +48,8 @@ class BaseApi(api_client.Api):
     def _system_restore_post(
         self,
         body: typing.Union[
-            schema.SchemaDictInput,
-            schema.SchemaDict,
+            restore_request.RestoreRequestDictInput,
+            restore_request.RestoreRequestDict,
             schemas.Unset
         ] = schemas.unset,
         *,
@@ -64,8 +64,8 @@ class BaseApi(api_client.Api):
     def _system_restore_post(
         self,
         body: typing.Union[
-            schema.SchemaDictInput,
-            schema.SchemaDict,
+            restore_request.RestoreRequestDictInput,
+            restore_request.RestoreRequestDict,
             schemas.Unset
         ] = schemas.unset,
         *,
@@ -79,8 +79,8 @@ class BaseApi(api_client.Api):
     def _system_restore_post(
         self,
         body: typing.Union[
-            schema.SchemaDictInput,
-            schema.SchemaDict,
+            restore_request.RestoreRequestDictInput,
+            restore_request.RestoreRequestDict,
             schemas.Unset
         ] = schemas.unset,
         *,

@@ -6,8 +6,8 @@
 
 from nethsm.client import api_client, exceptions, security_schemes
 from nethsm.client.shared_imports.operation_imports import *  # pyright: ignore [reportWildcardImportFromLibrary]
-from nethsm.client.components.schema import pem_private_key
 from nethsm.client.components.schema import private_key
+from nethsm.client.components.schema import private_key_pem
 
 from .. import path
 from .responses import (
@@ -19,16 +19,7 @@ from .responses import (
     response_412,
 )
 from . import request_body
-from .parameters import (
-    parameter_0,
-    parameter_1,
-)
 from .security import security_requirement_object_0
-from .query_parameters import QueryParameters, QueryParametersDictInput, QueryParametersDict
-query_parameter_classes = (
-    parameter_0.Parameter0,
-    parameter_1.Parameter1,
-)
 
 _security: typing.List[security_schemes.SecurityRequirementObject] = [
     security_requirement_object_0.security_requirement_object,
@@ -65,6 +56,10 @@ _error_status_codes = frozenset({
     '412',
 })
 
+_all_accept_content_types = (
+    "application/json",
+)
+
 
 class BaseApi(api_client.Api):
     @typing.overload
@@ -74,14 +69,10 @@ class BaseApi(api_client.Api):
             private_key.PrivateKeyDictInput,
             private_key.PrivateKeyDict,
         ],
-        query_params: typing.Union[
-            QueryParametersDictInput,
-            QueryParametersDict,
-            None
-        ] = None,
         *,
         skip_deserialization: typing.Literal[False] = False,
         content_type: typing.Literal["application/json"] = "application/json",
+        accept_content_types: typing.Tuple[str, ...] = _all_accept_content_types,
         security_index: typing.Optional[int] = None,
         server_index: typing.Optional[int] = None,
         stream: bool = False,
@@ -95,14 +86,10 @@ class BaseApi(api_client.Api):
             private_key.PrivateKeyDictInput,
             private_key.PrivateKeyDict,
         ],
-        query_params: typing.Union[
-            QueryParametersDictInput,
-            QueryParametersDict,
-            None
-        ] = None,
         *,
         skip_deserialization: typing.Literal[True],
         content_type: typing.Literal["application/json"] = "application/json",
+        accept_content_types: typing.Tuple[str, ...] = _all_accept_content_types,
         security_index: typing.Optional[int] = None,
         server_index: typing.Optional[int] = None,
         stream: bool = False,
@@ -112,15 +99,14 @@ class BaseApi(api_client.Api):
     @typing.overload
     def _keys_post(
         self,
-        body: str,
-        query_params: typing.Union[
-            QueryParametersDictInput,
-            QueryParametersDict,
-            None
-        ] = None,
+        body: typing.Union[
+            private_key_pem.PrivateKeyPemDictInput,
+            private_key_pem.PrivateKeyPemDict,
+        ],
         *,
         skip_deserialization: typing.Literal[False] = False,
-        content_type: typing.Literal["application/x-pem-file"],
+        content_type: typing.Literal["multipart/form-data"],
+        accept_content_types: typing.Tuple[str, ...] = _all_accept_content_types,
         security_index: typing.Optional[int] = None,
         server_index: typing.Optional[int] = None,
         stream: bool = False,
@@ -130,15 +116,14 @@ class BaseApi(api_client.Api):
     @typing.overload
     def _keys_post(
         self,
-        body: str,
-        query_params: typing.Union[
-            QueryParametersDictInput,
-            QueryParametersDict,
-            None
-        ] = None,
+        body: typing.Union[
+            private_key_pem.PrivateKeyPemDictInput,
+            private_key_pem.PrivateKeyPemDict,
+        ],
         *,
         skip_deserialization: typing.Literal[True],
-        content_type: typing.Literal["application/x-pem-file"],
+        content_type: typing.Literal["multipart/form-data"],
+        accept_content_types: typing.Tuple[str, ...] = _all_accept_content_types,
         security_index: typing.Optional[int] = None,
         server_index: typing.Optional[int] = None,
         stream: bool = False,
@@ -152,19 +137,18 @@ class BaseApi(api_client.Api):
                 private_key.PrivateKeyDictInput,
                 private_key.PrivateKeyDict,
             ],
-            str,
+            typing.Union[
+                private_key_pem.PrivateKeyPemDictInput,
+                private_key_pem.PrivateKeyPemDict,
+            ],
         ],
-        query_params: typing.Union[
-            QueryParametersDictInput,
-            QueryParametersDict,
-            None
-        ] = None,
         *,
         skip_deserialization: bool = False,
         content_type: typing.Literal[
             "application/json",
-            "application/x-pem-file",
+            "multipart/form-data",
         ] = "application/json",
+        accept_content_types: typing.Tuple[str, ...] = _all_accept_content_types,
         security_index: typing.Optional[int] = None,
         server_index: typing.Optional[int] = None,
         stream: bool = False,
@@ -175,18 +159,8 @@ class BaseApi(api_client.Api):
             api_response.body and api_response.headers will not be deserialized into schema
             class instances
         """
-        if query_params is not None:
-            query_params = QueryParameters.validate(
-                query_params,
-                configuration=self.api_client.schema_configuration
-            )
-        used_path, query_params_suffix = self._get_used_path(
-            path,
-            query_parameters=query_parameter_classes,
-            query_params=query_params,
-            skip_validation=True
-        )
-        headers = self._get_headers()
+        used_path = path
+        headers = self._get_headers(accept_content_types=accept_content_types)
         # TODO add cookie handling
 
         fields, serialized_body = self._get_fields_and_body(
@@ -206,7 +180,6 @@ class BaseApi(api_client.Api):
 
         raw_response = self.api_client.call_api(
             resource_path=used_path,
-            query_params_suffix=query_params_suffix,
             method='post',
             host=host,
             headers=headers,

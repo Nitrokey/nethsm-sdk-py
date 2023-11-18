@@ -9,5 +9,5 @@
 
 
 from nethsm.client.shared_imports.schema_imports import *  # pyright: ignore [reportWildcardImportFromLibrary]
-from nethsm.client.components.schema import pem_private_key
-Schema: typing_extensions.TypeAlias = pem_private_key.PemPrivateKey
+from nethsm.client.components.schema import create_resource_id
+Schema: typing_extensions.TypeAlias = create_resource_id.CreateResourceId
