@@ -888,7 +888,7 @@ class NetHSM:
 
     def add_key(
         self,
-        key_id: str,
+        key_id: Optional[str],
         type: KeyType,
         mechanisms: list[KeyMechanism],
         private_key: PrivateKey,
@@ -954,6 +954,7 @@ class NetHSM:
                     409: f"Conflict -- a key with the ID {key_id} already exists",
                 },
             )
+        assert key_id
         return key_id
 
     def delete_key(self, key_id: str) -> None:
