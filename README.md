@@ -18,19 +18,40 @@ pip install nethsm
 Example program:
 
 ```py
+import datetime
 import nethsm
 
-host="nethsmdemo.nitrokey.com"
-version="v1"
-username="admin"
-password="Administrator"
-verify_tls=False
+admin_passphrase = "adminadmin"
+unlock_passphrase = "unlockunlock"
 
 with nethsm.connect(
-        host, version, username, password, verify_tls
-    ) as nethsm_instance:
-  print(nethsm_instance.list_keys())
+    host="nethsmdemo.nitrokey.com",
+    auth=nethsm.Authentication(username="admin", password=admin_passphrase),
+) as client:
+    if client.get_state() == nethsm.State.UNPROVISIONED:
+        client.provision(
+            unlock_passphrase=unlock_passphrase,
+            admin_passphrase=admin_passphrase,
+            system_time=datetime.datetime.now(datetime.timezone.utc),
+        )
 
+    if client.get_state() == nethsm.State.LOCKED:
+        client.unlock(unlock_passphrase)
+
+    assert client.get_state() == nethsm.State.OPERATIONAL
+
+    client.generate_key(
+        type=nethsm.KeyType.RSA,
+        length=2048,
+        mechanisms=[
+            nethsm.KeyMechanism.RSA_SIGNATURE_PKCS1,
+            nethsm.KeyMechanism.RSA_DECRYPTION_PKCS1,
+            nethsm.KeyMechanism.RSA_SIGNATURE_PSS_SHA256,
+            nethsm.KeyMechanism.RSA_DECRYPTION_OAEP_SHA256, 
+        ],
+    )
+
+    print(client.list_keys())
 ```
 
 ## Development
@@ -60,11 +81,11 @@ Be sure to run the linter, tests and check that everything is working as expecte
 ### Custom functions
 
 The generator doesn't support upload of binary files and custom `Content-Type` headers (fails to serialize).
-To work around this, some functions are written manually, using `NetHSM.request()` to send the request.
+To work around this, some functions are written manually, using `NetHSM._request()` to send the request.
 
 The current list of such functions is:
 
-- `NetHSM.set_key_certificate()` : `/keys/{KeyID}/cert`
+- `NetHSM.set_certificate()` : `/config/tls/cert.pem`
 
 Also, the generator cannot deserialize responses with a header that is specified in the OpenAPI document.
 Therefore, the following functions manually deserialize the API response:
