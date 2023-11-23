@@ -22,7 +22,7 @@ Properties = typing.TypedDict(
         "mechanisms": typing.Type[key_mechanisms.KeyMechanisms],
         "type": typing.Type[key_type.KeyType],
         "restrictions": typing.Type[key_restrictions.KeyRestrictions],
-        "key": typing.Type[key_public_data.KeyPublicData],
+        "public": typing.Type[key_public_data.KeyPublicData],
         "operations": typing.Type[Operations],
     }
 )
@@ -37,7 +37,7 @@ class PublicKeyDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES]):
         "type",
     })
     __optional_keys__: typing.FrozenSet[str] = frozenset({
-        "key",
+        "public",
     })
     
     def __new__(
@@ -61,7 +61,7 @@ class PublicKeyDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES]):
             "EC_P521",
             "Generic"
         ],
-        key: typing.Union[
+        public: typing.Union[
             key_public_data.KeyPublicDataDictInput,
             key_public_data.KeyPublicDataDict,
             schemas.Unset
@@ -76,7 +76,7 @@ class PublicKeyDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES]):
             "type": type,
         }
         for key_, val in (
-            ("key", key),
+            ("public", public),
         ):
             if isinstance(val, schemas.Unset):
                 continue
@@ -124,8 +124,8 @@ class PublicKeyDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES]):
         )
     
     @property
-    def key(self) -> typing.Union[key_public_data.KeyPublicDataDict, schemas.Unset]:
-        val = self.get("key", schemas.unset)
+    def public(self) -> typing.Union[key_public_data.KeyPublicDataDict, schemas.Unset]:
+        val = self.get("public", schemas.unset)
         if isinstance(val, schemas.Unset):
             return val
         return typing.cast(

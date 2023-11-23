@@ -12,100 +12,70 @@ from nethsm.client.shared_imports.schema_imports import *  # pyright: ignore [re
 
 AdditionalProperties: typing_extensions.TypeAlias = schemas.NotAnyTypeSchema
 
-from nethsm.client.paths.keys.post.parameters.parameter_0 import schema
-from nethsm.client.paths.keys.post.parameters.parameter_1 import schema as schema_2
+from nethsm.client.paths.users.post.responses.response_201.headers.header_location import schema
 Properties = typing.TypedDict(
     'Properties',
     {
-        "mechanisms": typing.Type[schema.Schema],
-        "tags": typing.Type[schema_2.Schema],
+        "location": typing.Type[schema.Schema],
     }
 )
 
 
-class QueryParametersDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES]):
+class HeadersDict(schemas.immutabledict[str, str]):
 
     __required_keys__: typing.FrozenSet[str] = frozenset({
     })
     __optional_keys__: typing.FrozenSet[str] = frozenset({
-        "mechanisms",
-        "tags",
+        "location",
     })
     
     def __new__(
         cls,
         *,
-        mechanisms: typing.Union[
-            schema.SchemaTupleInput,
-            schema.SchemaTuple,
-            schemas.Unset
-        ] = schemas.unset,
-        tags: typing.Union[
-            schema_2.SchemaTupleInput,
-            schema_2.SchemaTuple,
+        location: typing.Union[
+            str,
             schemas.Unset
         ] = schemas.unset,
         configuration_: typing.Optional[schema_configuration.SchemaConfiguration] = None,
     ):
         arg_: typing.Dict[str, typing.Any] = {}
         for key_, val in (
-            ("mechanisms", mechanisms),
-            ("tags", tags),
+            ("location", location),
         ):
             if isinstance(val, schemas.Unset):
                 continue
             arg_[key_] = val
-        used_arg_ = typing.cast(QueryParametersDictInput, arg_)
-        return QueryParameters.validate(used_arg_, configuration=configuration_)
+        used_arg_ = typing.cast(HeadersDictInput, arg_)
+        return Headers.validate(used_arg_, configuration=configuration_)
     
     @staticmethod
     def from_dict_(
         arg: typing.Union[
-            QueryParametersDictInput,
-            QueryParametersDict
+            HeadersDictInput,
+            HeadersDict
         ],
         configuration: typing.Optional[schema_configuration.SchemaConfiguration] = None
-    ) -> QueryParametersDict:
-        return QueryParameters.validate(arg, configuration=configuration)
+    ) -> HeadersDict:
+        return Headers.validate(arg, configuration=configuration)
     
     @property
-    def mechanisms(self) -> typing.Union[schema.SchemaTuple, schemas.Unset]:
-        val = self.get("mechanisms", schemas.unset)
+    def location(self) -> typing.Union[str, schemas.Unset]:
+        val = self.get("location", schemas.unset)
         if isinstance(val, schemas.Unset):
             return val
-        return typing.cast(
-            schema.SchemaTuple,
-            val
-        )
-    
-    @property
-    def tags(self) -> typing.Union[schema_2.SchemaTuple, schemas.Unset]:
-        val = self.get("tags", schemas.unset)
-        if isinstance(val, schemas.Unset):
-            return val
-        return typing.cast(
-            schema_2.SchemaTuple,
-            val
-        )
-QueryParametersDictInput = typing.TypedDict(
-    'QueryParametersDictInput',
+        return val
+HeadersDictInput = typing.TypedDict(
+    'HeadersDictInput',
     {
-        "mechanisms": typing.Union[
-            schema.SchemaTupleInput,
-            schema.SchemaTuple
-        ],
-        "tags": typing.Union[
-            schema_2.SchemaTupleInput,
-            schema_2.SchemaTuple
-        ],
+        "location": str,
     },
     total=False
 )
 
 
 @dataclasses.dataclass(frozen=True)
-class QueryParameters(
-    schemas.Schema[QueryParametersDict, tuple]
+class Headers(
+    schemas.Schema[HeadersDict, tuple]
 ):
     types: typing.FrozenSet[typing.Type] = frozenset({schemas.immutabledict})
     properties: Properties = dataclasses.field(default_factory=lambda: schemas.typed_dict_to_instance(Properties)) # type: ignore
@@ -115,7 +85,7 @@ class QueryParameters(
         typing.Type
     ] = dataclasses.field(
         default_factory=lambda: {
-            schemas.immutabledict: QueryParametersDict
+            schemas.immutabledict: HeadersDict
         }
     )
 
@@ -123,11 +93,11 @@ class QueryParameters(
     def validate(
         cls,
         arg: typing.Union[
-            QueryParametersDictInput,
-            QueryParametersDict,
+            HeadersDictInput,
+            HeadersDict,
         ],
         configuration: typing.Optional[schema_configuration.SchemaConfiguration] = None
-    ) -> QueryParametersDict:
+    ) -> HeadersDict:
         return super().validate_base(
             arg,
             configuration=configuration,

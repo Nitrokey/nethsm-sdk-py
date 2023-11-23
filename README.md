@@ -65,7 +65,13 @@ To work around this, some functions are written manually, using `NetHSM.request(
 The current list of such functions is:
 
 - `NetHSM.set_key_certificate()` : `/keys/{KeyID}/cert`
-- `NetHSM.set_certificate()` : `/config/tls/cert.pem`
+
+Also, the generator cannot deserialize responses with a header that is specified in the OpenAPI document.
+Therefore, the following functions manually deserialize the API response:
+
+- `NetHSM.add_key()`: `/keys`
+- `NetHSM.generate_key()`: `/keys/generate`
+- `NetHSM.add_user()`: `/users`
 
 ### Publishing a new version
 

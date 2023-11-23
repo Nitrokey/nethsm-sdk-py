@@ -20,7 +20,7 @@ Properties = typing.TypedDict(
     {
         "mechanisms": typing.Type[key_mechanisms.KeyMechanisms],
         "type": typing.Type[key_type.KeyType],
-        "key": typing.Type[key_private_data.KeyPrivateData],
+        "private": typing.Type[key_private_data.KeyPrivateData],
         "restrictions": typing.Type[key_restrictions.KeyRestrictions],
     }
 )
@@ -29,8 +29,8 @@ Properties = typing.TypedDict(
 class PrivateKeyDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES]):
 
     __required_keys__: typing.FrozenSet[str] = frozenset({
-        "key",
         "mechanisms",
+        "private",
         "type",
     })
     __optional_keys__: typing.FrozenSet[str] = frozenset({
@@ -40,13 +40,13 @@ class PrivateKeyDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES]):
     def __new__(
         cls,
         *,
-        key: typing.Union[
-            key_private_data.KeyPrivateDataDictInput,
-            key_private_data.KeyPrivateDataDict,
-        ],
         mechanisms: typing.Union[
             key_mechanisms.KeyMechanismsTupleInput,
             key_mechanisms.KeyMechanismsTuple
+        ],
+        private: typing.Union[
+            key_private_data.KeyPrivateDataDictInput,
+            key_private_data.KeyPrivateDataDict,
         ],
         type: typing.Literal[
             "RSA",
@@ -66,8 +66,8 @@ class PrivateKeyDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES]):
         **kwargs: schemas.INPUT_TYPES_ALL,
     ):
         arg_: typing.Dict[str, typing.Any] = {
-            "key": key,
             "mechanisms": mechanisms,
+            "private": private,
             "type": type,
         }
         for key_, val in (
@@ -91,17 +91,17 @@ class PrivateKeyDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES]):
         return PrivateKey.validate(arg, configuration=configuration)
     
     @property
-    def key(self) -> key_private_data.KeyPrivateDataDict:
-        return typing.cast(
-            key_private_data.KeyPrivateDataDict,
-            self.__getitem__("key")
-        )
-    
-    @property
     def mechanisms(self) -> key_mechanisms.KeyMechanismsTuple:
         return typing.cast(
             key_mechanisms.KeyMechanismsTuple,
             self.__getitem__("mechanisms")
+        )
+    
+    @property
+    def private(self) -> key_private_data.KeyPrivateDataDict:
+        return typing.cast(
+            key_private_data.KeyPrivateDataDict,
+            self.__getitem__("private")
         )
     
     @property
@@ -138,8 +138,8 @@ class PrivateKey(
     """
     types: typing.FrozenSet[typing.Type] = frozenset({schemas.immutabledict})
     required: typing.FrozenSet[str] = frozenset({
-        "key",
         "mechanisms",
+        "private",
         "type",
     })
     properties: Properties = dataclasses.field(default_factory=lambda: schemas.typed_dict_to_instance(Properties)) # type: ignore

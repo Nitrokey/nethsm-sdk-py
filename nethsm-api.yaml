@@ -256,6 +256,10 @@ paths:
               description: Where to find the newly added key.
               schema:
                 type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateResourceId"
           description: |
             Successful import of a private key.
             The response contains a Location header,
@@ -279,23 +283,13 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/PrivateKey"
-          application/x-pem-file:
+          multipart/form-data:
             schema:
-              $ref: "#/components/schemas/PemPrivateKey"
+              $ref: "#/components/schemas/PrivateKeyPem"
+            encoding:
+              key_file:
+                contentType: application/x-pem-file
         required: true
-      parameters:
-        - name: mechanisms
-          in: query
-          schema:
-            type: array
-            items:
-              $ref: "#/components/schemas/KeyMechanism"
-        - name: tags
-          in: query
-          schema:
-            type: array
-            items:
-              $ref: "#/components/schemas/ID"
       security:
         - basic: []
       x-annotation-role:
@@ -314,6 +308,10 @@ paths:
               description: Where to find the newly added key.
               schema:
                 type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateResourceId"
         "400":
           description: Bad request (specified properties are invalid).
         "401":
@@ -364,7 +362,7 @@ paths:
                     restrictions:
                       tags:
                         - berlin
-                    key:
+                    public:
                       modulus: FhJQl11CiY0ifRHXeAqFh4rdSl6
                       publicExponent: FhJQl11CiY0ifRHXeAqFh4rdSl6
                     operations: 242
@@ -379,7 +377,7 @@ paths:
                     restrictions:
                       tags:
                         - berlin
-                    key:
+                    public:
                       data: BMKlPJ60PNFgsekRwg7n5mTIJkWWy6XLy0ORj14HumKi5qH63JaJzFOWLxYiaB6KH0NOgEKb7rUt
                 eddsa:
                   summary: "Curve25519"
@@ -391,7 +389,7 @@ paths:
                     restrictions:
                       tags:
                         - berlin
-                    key:
+                    public:
                       data: htnjTKRUz3XnLys5YD2+bKvzXZuu9cvXKwsCnWdzR+4=
                 generic:
                   summary: Generic
@@ -465,7 +463,7 @@ paths:
                   type: RSA
                   mechanisms:
                     - RSA_Signature_PSS_SHA256
-                  key:
+                  private:
                     primeP: AOnWFZ+JrI/xOXJU04uYCZOiPVUWd6CSbVseEYrYQYxc7dVroePshz29tc+VEOUP5T0O8lXMEkjFAwjW6C9QTAsPyl6jwyOQluMRIkdN4/7BAg3HAMuGd7VmkGyYrnZWW54sLWp1JD6XJG33kF+9OSar9ETPoVyBgK5punfiUFEL
                     primeQ: ANT1kWDdP9hZoFKT49dwdM/S+3ZDnxQa7kZk9p+JKU5RaU9e8pS2GOJljHwkES1FH6CUGeIaUi81tRKe2XZhe/163sEyMcxkaaRbBbTc1v6ZDKILFKKt4eX7LAQfhL/iFlgi6pcyUM8QDrm1QeFgGz11ChM0JuQw1WwkX06lg8iv
                     publicExponent: AQAB
@@ -478,7 +476,7 @@ paths:
                   type: EC_P224
                   mechanisms:
                     - ECDSA_Signature
-                  key:
+                  private:
                     data: "BgcqhkjOPQIBBgUrgQQAIQM6AATZOhHS/Sed4w=="
                   restrictions:
                     tags:
@@ -489,28 +487,18 @@ paths:
                   type: Curve25519
                   mechanisms:
                     - EdDSA_Signature
-                  key:
+                  private:
                     data: "m0o4HHT5tiwxxJ3hCzK6H9pXt9R854qyJ+q4Lmei/Kg="
                   restrictions:
                     tags:
                       - berlin
-          application/x-pem-file:
+          multipart/form-data:
             schema:
-              $ref: "#/components/schemas/PemPrivateKey"
+              $ref: "#/components/schemas/PrivateKeyPem"
+            encoding:
+              key_file:
+                contentType: application/x-pem-file
         required: true
-      parameters:
-        - name: mechanisms
-          in: query
-          schema:
-            type: array
-            items:
-              $ref: "#/components/schemas/KeyMechanism"
-        - name: tags
-          in: query
-          schema:
-            type: array
-            items:
-              $ref: "#/components/schemas/ID"
       security:
         - basic: []
       x-annotation-role:
@@ -972,6 +960,15 @@ paths:
             Successful creation of user.
             The response contains a Location header,
             e.g. "https://nethsm.local/v1/users/I8mhHYJ1T3uk2lXrwXehVaw9KZzg7K".
+          headers:
+            location:
+              description: Where to find the newly added user.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateResourceId"
         "400":
           description: Bad request (specified properties are invalid, e.g. weak passphrase).
         "401":
@@ -1841,19 +1838,7 @@ paths:
         content:
           multipart/form-data:
             schema:
-              type: object
-              properties:
-                arguments:
-                  type: object
-                  properties:
-                    backupPassphrase:
-                      $ref: "#/components/schemas/Passphrase"
-                    systemTime:
-                      type: string
-                      format: date-time
-                backup_file:
-                  type: string
-                  format: binary
+              $ref: "#/components/schemas/RestoreRequest"
       x-annotation-role:
         - Public
       x-annotation-state:
@@ -1897,6 +1882,15 @@ components:
         - warning
         - error
       type: string
+    CreateResourceId:
+      example:
+        id: ab0d5df406ddad1075ab
+      type: object
+      properties:
+        id:
+          type: string
+      required:
+        - id
     KeyType:
       enum:
         - RSA
@@ -1968,19 +1962,19 @@ components:
       type: string
     KeyList:
       example:
-        - key: KeyID
+        - id: KeyID
       type: array
       items:
         $ref: "#/components/schemas/KeyItem"
     KeyItem:
       example:
-        key: KeyID
+        id: KeyID
       type: object
       properties:
-        key:
+        id:
           $ref: "#/components/schemas/ID"
       required:
-        - key
+        - id
     KeyRestrictions:
       type: object
       properties:
@@ -2018,7 +2012,7 @@ components:
         mechanisms:
           - RSA_Signature_PSS_SHA256
         type: RSA
-        key:
+        private:
           primeP: AOnWFZ+JrI/xOXJU04uYCZOiPVUWd6CSbVseEYrYQYxc7dVroePshz29tc+VEOUP5T0O8lXMEkjFAwjW6C9QTAsPyl6jwyOQluMRIkdN4/7BAg3HAMuGd7VmkGyYrnZWW54sLWp1JD6XJG33kF+9OSar9ETPoVyBgK5punfiUFEL
           primeQ: ANT1kWDdP9hZoFKT49dwdM/S+3ZDnxQa7kZk9p+JKU5RaU9e8pS2GOJljHwkES1FH6CUGeIaUi81tRKe2XZhe/163sEyMcxkaaRbBbTc1v6ZDKILFKKt4eX7LAQfhL/iFlgi6pcyUM8QDrm1QeFgGz11ChM0JuQw1WwkX06lg8iv
           publicExponent: AQAB
@@ -2031,14 +2025,34 @@ components:
           $ref: "#/components/schemas/KeyMechanisms"
         type:
           $ref: "#/components/schemas/KeyType"
-        key:
+        private:
           $ref: "#/components/schemas/KeyPrivateData"
         restrictions:
           $ref: "#/components/schemas/KeyRestrictions"
       required:
         - mechanisms
         - type
-        - key
+        - private
+    PrivateKeyPem:
+      example:
+        arguments:
+          mechanisms:
+            - RSA_Signature_PSS_SHA256
+          restrictions:
+            tags:
+              - munich
+        key_file: privatekey.pem
+      type: object
+      properties:
+        arguments:
+          type: object
+          properties:
+            mechanisms:
+              $ref: "#/components/schemas/KeyMechanisms"
+            restrictions:
+              $ref: "#/components/schemas/KeyRestrictions"
+        key_file:
+          $ref: "#/components/schemas/PemPrivateKey"
     KeyPrivateData:
       type: object
       properties:
@@ -2058,7 +2072,7 @@ components:
         restrictions:
           tags:
             - berlin
-        key:
+        public:
           modulus: FhJQl11CiY0ifRHXeAqFh4rdSl6
           publicExponent: FhJQl11CiY0ifRHXeAqFh4rdSl6
         operations: 242
@@ -2070,7 +2084,7 @@ components:
           $ref: "#/components/schemas/KeyType"
         restrictions:
           $ref: "#/components/schemas/KeyRestrictions"
-        key:
+        public:
           $ref: "#/components/schemas/KeyPublicData"
         operations:
           type: integer
@@ -2414,6 +2428,20 @@ components:
       required:
         - newPassphrase
         - currentPassphrase
+    RestoreRequest:
+      type: object
+      properties:
+        arguments:
+          type: object
+          properties:
+            backupPassphrase:
+              $ref: "#/components/schemas/Passphrase"
+            systemTime:
+              type: string
+              format: date-time
+        backup_file:
+          type: string
+          format: binary
     TimeConfig:
       example:
         time: "2018-10-30T11:20:50Z"
