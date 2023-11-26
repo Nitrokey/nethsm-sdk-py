@@ -540,11 +540,14 @@ class NetHSM:
         self,
         unlock_passphrase: str,
         admin_passphrase: str,
-        system_time: Union[str, datetime],
+        system_time: Optional[Union[str, datetime]] = None,
     ) -> None:
         from .client.components.schema.provision_request_data import (
             ProvisionRequestDataDict,
         )
+
+        if system_time is None:
+            system_time = datetime.now(timezone.utc)
 
         request_body = ProvisionRequestDataDict(
             unlockPassphrase=unlock_passphrase,
@@ -1413,12 +1416,15 @@ class NetHSM:
             )
         return response.response.data
 
-    def restore(self, backup: Bytes, passphrase: str, time: datetime) -> None:
+    def restore(self, backup: Bytes, passphrase: str, time: Optional[datetime]) -> None:
         try:
             from .client.components.schema.restore_request import (
                 ArgumentsDict,
                 RestoreRequestDict,
             )
+
+            if not time:
+                time = datetime.now(timezone.utc)
 
             body = RestoreRequestDict(
                 arguments=ArgumentsDict(backupPassphrase=passphrase, systemTime=time),
