@@ -10,10 +10,11 @@
 
 __version__ = "0.5.0"
 
+import binascii
 import contextlib
 import enum
 import json
-from base64 import b64encode
+from base64 import b64decode, b64encode
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from io import BufferedReader, FileIO
@@ -197,6 +198,28 @@ class TlsKeyType(enum.Enum):
 
 
 @dataclass
+class Base64:
+    data: str
+
+    def decode(self) -> bytes:
+        return b64decode(self.data)
+
+    @classmethod
+    def from_encoded(cls, data: Union[bytes, str]) -> "Base64":
+        try:
+            b64decode(data, validate=True)
+            if isinstance(data, bytes):
+                data = data.decode()
+            return cls(data=data)
+        except binascii.Error:
+            raise ValueError(f"Invalid base64 data: {data!r}")
+
+    @classmethod
+    def encode(cls, data: bytes) -> "Base64":
+        return cls(data=b64encode(data).decode())
+
+
+@dataclass
 class Authentication:
     username: str
     password: str
@@ -225,13 +248,13 @@ class User:
 
 @dataclass
 class RsaPublicKey:
-    modulus: str
-    public_exponent: str
+    modulus: Base64
+    public_exponent: Base64
 
 
 @dataclass
 class EcPublicKey:
-    data: str
+    data: Base64
 
 
 PublicKey = Union[RsaPublicKey, EcPublicKey, None]
@@ -239,14 +262,14 @@ PublicKey = Union[RsaPublicKey, EcPublicKey, None]
 
 @dataclass
 class RsaPrivateKey:
-    prime_p: str
-    prime_q: str
-    public_exponent: str
+    prime_p: Base64
+    prime_q: Base64
+    public_exponent: Base64
 
 
 @dataclass
 class GenericPrivateKey:
-    data: str
+    data: Base64
 
 
 PrivateKey = Union[RsaPrivateKey, GenericPrivateKey]
@@ -264,8 +287,8 @@ class Key:
 
 @dataclass
 class EncryptionResult:
-    encrypted: str
-    iv: str
+    encrypted: Base64
+    iv: Base64
 
 
 @dataclass
@@ -765,7 +788,7 @@ class NetHSM:
             _handle_exception(e)
         return State.from_string(response.body.state)
 
-    def get_random_data(self, n: int) -> str:
+    def get_random_data(self, n: int) -> Base64:
         from .client.components.schema.random_request_data import RandomRequestDataDict
 
         body = RandomRequestDataDict(length=n)
@@ -780,7 +803,7 @@ class NetHSM:
                     400: "Invalid length. Must be between 1 and 1024",
                 },
             )
-        return response.body.random
+        return Base64.from_encoded(response.body.random)
 
     def get_metrics(self) -> Mapping[str, Any]:
         try:
@@ -840,7 +863,8 @@ class NetHSM:
             assert not isinstance(key.public.modulus, Unset)
             assert not isinstance(key.public.publicExponent, Unset)
             public_key = RsaPublicKey(
-                modulus=key.public.modulus, public_exponent=key.public.publicExponent
+                modulus=Base64.from_encoded(key.public.modulus),
+                public_exponent=Base64.from_encoded(key.public.publicExponent),
             )
         elif key_type == KeyType.GENERIC:
             if not isinstance(key.public, Unset):
@@ -853,7 +877,7 @@ class NetHSM:
             assert not isinstance(key.public.data, Unset)
             assert isinstance(key.public.modulus, Unset)
             assert isinstance(key.public.publicExponent, Unset)
-            public_key = EcPublicKey(data=key.public.data)
+            public_key = EcPublicKey(data=Base64.from_encoded(key.public.data))
 
         return Key(
             key_id=key_id,
@@ -903,13 +927,13 @@ class NetHSM:
         if type == KeyType.RSA:
             assert isinstance(private_key, RsaPrivateKey)
             key_data = KeyPrivateDataDict(
-                primeP=private_key.prime_p,
-                primeQ=private_key.prime_q,
-                publicExponent=private_key.public_exponent,
+                primeP=private_key.prime_p.data,
+                primeQ=private_key.prime_q.data,
+                publicExponent=private_key.public_exponent.data,
             )
         else:
             assert isinstance(private_key, GenericPrivateKey)
-            key_data = KeyPrivateDataDict(data=private_key.data)
+            key_data = KeyPrivateDataDict(data=private_key.data.data)
 
         mechanism_tuple: KeyMechanismsTupleInput = [
             mechanism.value for mechanism in mechanisms
@@ -1485,7 +1509,7 @@ class NetHSM:
             )
 
     def encrypt(
-        self, key_id: str, data: str, mode: EncryptMode, iv: str
+        self, key_id: str, data: Base64, mode: EncryptMode, iv: Optional[Base64] = None
     ) -> EncryptionResult:
         from .client.components.schema.encrypt_request_data import (
             EncryptRequestDataDict,
@@ -1493,9 +1517,12 @@ class NetHSM:
         from .client.paths.keys_key_id_encrypt.post.path_parameters import (
             PathParametersDict,
         )
+        from .client.schemas import Unset
 
         path_params = PathParametersDict(KeyID=key_id)
-        body = EncryptRequestDataDict(message=data, mode=mode.value, iv=iv)
+        body = EncryptRequestDataDict(
+            message=data.data, mode=mode.value, iv=iv.data if iv else Unset()
+        )
         try:
             response = self._get_api().keys_key_id_encrypt_post(
                 path_params=path_params, body=body
@@ -1510,26 +1537,29 @@ class NetHSM:
                     404: f"Key {key_id} not found",
                 },
             )
-        return EncryptionResult(encrypted=response.body.encrypted, iv=response.body.iv)
+        return EncryptionResult(
+            encrypted=Base64.from_encoded(response.body.encrypted),
+            iv=Base64.from_encoded(response.body.iv),
+        )
 
     def decrypt(
         self,
         key_id: str,
-        data: str,
+        data: Base64,
         mode: DecryptMode,
-        iv: str,
-    ) -> str:
+        iv: Optional[Base64] = None,
+    ) -> Base64:
         from .client.components.schema.decrypt_request_data import (
             DecryptRequestDataDict,
         )
         from .client.paths.keys_key_id_decrypt.post.path_parameters import (
             PathParametersDict,
         )
+        from .client.schemas import Unset
 
-        body = DecryptRequestDataDict(encrypted=data, mode=mode.value, iv=iv)
-
-        if len(iv) == 0:
-            body = DecryptRequestDataDict(encrypted=data, mode=mode.value)
+        body = DecryptRequestDataDict(
+            encrypted=data.data, mode=mode.value, iv=iv.data if iv else Unset()
+        )
 
         path_params = PathParametersDict(KeyID=key_id)
         try:
@@ -1546,21 +1576,21 @@ class NetHSM:
                     404: f"Key {key_id} not found",
                 },
             )
-        return response.body.decrypted
+        return Base64.from_encoded(response.body.decrypted)
 
     def sign(
         self,
         key_id: str,
-        data: str,
+        data: Base64,
         mode: SignMode,
-    ) -> str:
+    ) -> Base64:
         from .client.components.schema.sign_request_data import SignRequestDataDict
         from .client.paths.keys_key_id_sign.post.path_parameters import (
             PathParametersDict,
         )
 
         path_params = PathParametersDict(KeyID=key_id)
-        body = SignRequestDataDict(message=data, mode=mode.value)
+        body = SignRequestDataDict(message=data.data, mode=mode.value)
         try:
             response = self._get_api().keys_key_id_sign_post(
                 path_params=path_params, body=body
@@ -1575,7 +1605,7 @@ class NetHSM:
                     404: f"Key {key_id} not found",
                 },
             )
-        return response.body.signature
+        return Base64.from_encoded(response.body.signature)
 
 
 @contextlib.contextmanager

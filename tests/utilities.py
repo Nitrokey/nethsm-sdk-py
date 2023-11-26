@@ -1,4 +1,3 @@
-import base64
 import contextlib
 import datetime
 import os
@@ -22,7 +21,7 @@ from cryptography.hazmat.primitives.serialization import Encoding
 from cryptography.x509.oid import NameOID
 
 import nethsm as nethsm_module
-from nethsm import Authentication, NetHSM
+from nethsm import Authentication, Base64, NetHSM, RsaPrivateKey
 
 
 @pytest.fixture(scope="module")
@@ -172,17 +171,18 @@ def add_user(nethsm: NetHSM, user: UserData) -> None:
         nethsm.add_user(user.real_name, user.role, C.PASSPHRASE, user.user_id)
 
 
-def generate_rsa_key_pair(length_in_bit: int) -> tuple[str, str, str]:
+def generate_rsa_key_pair(length_in_bit: int) -> RsaPrivateKey:
     key_pair = RSA.generate(length_in_bit)
     length_in_byte = int(length_in_bit / 8)
     # "big" byteorder is needed, it's the dominant order in networking
-    p = base64.b64encode(key_pair.p.to_bytes(length_in_byte, "big"))
-    q = base64.b64encode(key_pair.q.to_bytes(length_in_byte, "big"))
-    e = base64.b64encode(key_pair.e.to_bytes(length_in_byte, "big"))
-    ps = str(p, "utf-8").strip()
-    qs = str(q, "utf-8").strip()
-    es = str(e, "utf-8").strip()
-    return ps, qs, es
+    p = key_pair.p.to_bytes(length_in_byte, "big")
+    q = key_pair.q.to_bytes(length_in_byte, "big")
+    e = key_pair.e.to_bytes(length_in_byte, "big")
+    return RsaPrivateKey(
+        prime_p=Base64.encode(p),
+        prime_q=Base64.encode(q),
+        public_exponent=Base64.encode(e),
+    )
 
 
 def verify_rsa_signature(
