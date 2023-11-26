@@ -1,5 +1,3 @@
-import base64
-
 import pytest
 from conftest import Constants as C
 from Crypto import Random
@@ -16,6 +14,7 @@ from utilities import (
 
 import nethsm as nethsm_module
 from nethsm import (
+    Base64,
     DecryptMode,
     EncryptMode,
     KeyMechanism,
@@ -46,13 +45,13 @@ def add_key(nethsm: NetHSM) -> None:
     if C.KEY_ID_ADDED in nethsm.list_keys(None):
         nethsm.delete_key(C.KEY_ID_ADDED)
 
-    p, q, e = generate_rsa_key_pair(1024)
+    private_key = generate_rsa_key_pair(1024)
 
     nethsm.add_key(
         key_id=C.KEY_ID_ADDED,
         type=C.TYPE,
         mechanisms=C.MECHANISM,
-        private_key=RsaPrivateKey(prime_p=p, prime_q=q, public_exponent=e),
+        private_key=private_key,
     )
 
 
@@ -272,11 +271,11 @@ def test_sign(nethsm: NetHSM) -> None:  # mit dem privaten schlüssel signieren
     with connect(C.OPERATOR_USER) as nethsm:
         signature = nethsm.sign(
             C.KEY_ID_GENERATED,
-            base64.b64encode(hash_object.digest()).decode(),
+            Base64.encode(hash_object.digest()),
             SignMode.PSS_SHA256,
         )
-        print(signature)
-        verify_rsa_signature(key, hash_object, base64.b64decode(signature))
+        print(signature.data)
+        verify_rsa_signature(key, hash_object, signature.decode())
 
 
 def test_decrypt(nethsm: NetHSM) -> None:
@@ -292,11 +291,10 @@ def test_decrypt(nethsm: NetHSM) -> None:
     with connect(C.OPERATOR_USER) as nethsm:
         decrypt = nethsm.decrypt(
             C.KEY_ID_GENERATED,
-            base64.b64encode(encrypted).decode(),
+            Base64.encode(encrypted),
             C.MODE,
-            "arstasrta",
         )
-        assert base64.b64decode(decrypt).decode() == C.DATA
+        assert decrypt.decode().decode() == C.DATA
 
 
 def test_encrypt_decrypt(nethsm: NetHSM) -> None:
@@ -305,9 +303,9 @@ def test_encrypt_decrypt(nethsm: NetHSM) -> None:
     add_user(nethsm, C.OPERATOR_USER)
     IV = Random.new().read(AES.block_size)
 
-    iv_b64 = base64.b64encode(IV).decode()
+    iv_b64 = Base64.encode(IV)
 
-    data_b64 = base64.b64encode(C.DATA.encode()).decode()
+    data_b64 = Base64.encode(C.DATA.encode())
 
     with connect(C.OPERATOR_USER) as nethsm:
 

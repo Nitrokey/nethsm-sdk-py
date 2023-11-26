@@ -147,16 +147,11 @@ def test_state_provision_add_user_get_random_data(nethsm_no_provision: NetHSM) -
         random_data1 = nethsm.get_random_data(100)
         random_data2 = nethsm.get_random_data(100)
         random_data3 = nethsm.get_random_data(100)
-        assert (
-            len(str(random_data1)) == 136
-            and len(str(random_data2)) == 136
-            and len(str(random_data3)) == 136
-        )
-        assert (
-            random_data1 != random_data2
-            and random_data1 != random_data3
-            and random_data2 != random_data3
-        )
-        # Todo: check if decoded function is the same length as given
-        # assert len(base64.b64decode(bytes(nethsm.get_random_data(100)))) ==
-        # 100
+
+        assert len(random_data1.decode()) == 100
+        assert len(random_data2.decode()) == 100
+        assert len(random_data3.decode()) == 100
+
+        assert random_data1 != random_data2
+        assert random_data1 != random_data3
+        assert random_data2 != random_data3

@@ -1,4 +1,3 @@
-import base64
 import datetime
 import os
 
@@ -16,7 +15,7 @@ from utilities import (
     update,
 )
 
-from nethsm import NetHSM, NetHSMError
+from nethsm import Base64, NetHSM, NetHSMError
 from nethsm.backup import Backup, EncryptedBackup
 
 """######################### Preparation for the Tests #########################
@@ -131,11 +130,10 @@ def test_state_restore(nethsm: NetHSM) -> None:
     with connect(C.OPERATOR_USER) as nethsm:
         decrypt = nethsm.decrypt(
             C.KEY_ID_GENERATED,
-            base64.b64encode(encrypted).decode(),
+            Base64.encode(encrypted),
             C.MODE,
-            "arstasrta",
         )
-        assert base64.b64decode(decrypt).decode() == C.DATA
+        assert decrypt.decode().decode() == C.DATA
 
 
 def test_state_provision_update(nethsm: NetHSM) -> None:
