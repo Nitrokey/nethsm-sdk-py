@@ -35,17 +35,13 @@ def test_provision_system_info(nethsm: NetHSM) -> None:
     """Get system information for a NetHSM instance.
 
     This command requires authentication as a user with the Administrator
-    role.
-    TODO: do not rely on string constants, as nethsm:testing version changes
-    """
+    role."""
     info = nethsm.get_system_info()
-    assert type(info.firmware_version) is str
-    assert type(info.software_version) is str
-    assert type(info.hardware_version) is str
-    assert type(info.build_tag) is str
-    assert len(info.build_tag) == C.BUILD_TAG_LEN
-
-    # fixme: this changes between the NetHSM instances
+    assert len(info.firmware_version) > 0
+    assert len(info.software_version) > 0
+    assert len(info.hardware_version) > 0
+    # build tag should be vx.y with an optional suffix, so at least length 4
+    assert len(info.build_tag) >= 4
 
 
 def test_passphrase_add_user_retrieve_backup(nethsm: NetHSM) -> None:

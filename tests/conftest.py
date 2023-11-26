@@ -45,7 +45,6 @@ class Constants:
     FIRMWARE_VERSION = "N/A"
     SOFTWARE_VERSION = "0.9"
     HARDWARE_VERSION = "N/A"
-    BUILD_TAG_LEN = 7
 
     # test_nethsm_users, test_nethsm_config
     UNLOCK_PASSPHRASE_CHANGED = "unlockiunlocki"
