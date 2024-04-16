@@ -15,8 +15,9 @@ SoftwareBuild: typing_extensions.TypeAlias = schemas.StrSchema
 FirmwareVersion: typing_extensions.TypeAlias = schemas.StrSchema
 HardwareVersion: typing_extensions.TypeAlias = schemas.StrSchema
 DeviceId: typing_extensions.TypeAlias = schemas.StrSchema
-AkPub: typing_extensions.TypeAlias = schemas.DictSchema
-Pcr: typing_extensions.TypeAlias = schemas.DictSchema
+
+from nethsm.client.components.schema import ak_pub
+from nethsm.client.components.schema import pcr
 Properties = typing.TypedDict(
     'Properties',
     {
@@ -25,8 +26,8 @@ Properties = typing.TypedDict(
         "firmwareVersion": typing.Type[FirmwareVersion],
         "hardwareVersion": typing.Type[HardwareVersion],
         "deviceId": typing.Type[DeviceId],
-        "akPub": typing.Type[AkPub],
-        "pcr": typing.Type[Pcr],
+        "akPub": typing.Type[ak_pub.AkPub],
+        "pcr": typing.Type[pcr.Pcr],
     }
 )
 
@@ -49,15 +50,15 @@ class SystemInfoDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES]):
         cls,
         *,
         akPub: typing.Union[
-            typing.Mapping[str, schemas.INPUT_TYPES_ALL],
-            schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES],
+            ak_pub.AkPubDictInput,
+            ak_pub.AkPubDict,
         ],
         deviceId: str,
         firmwareVersion: str,
         hardwareVersion: str,
         pcr: typing.Union[
-            typing.Mapping[str, schemas.INPUT_TYPES_ALL],
-            schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES],
+            pcr.PcrDictInput,
+            pcr.PcrDict,
         ],
         softwareBuild: str,
         softwareVersion: str,
@@ -88,9 +89,9 @@ class SystemInfoDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES]):
         return SystemInfo.validate(arg, configuration=configuration)
     
     @property
-    def akPub(self) -> schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES]:
+    def akPub(self) -> ak_pub.AkPubDict:
         return typing.cast(
-            schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES],
+            ak_pub.AkPubDict,
             self.__getitem__("akPub")
         )
     
@@ -116,9 +117,9 @@ class SystemInfoDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES]):
         )
     
     @property
-    def pcr(self) -> schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES]:
+    def pcr(self) -> pcr.PcrDict:
         return typing.cast(
-            schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES],
+            pcr.PcrDict,
             self.__getitem__("pcr")
         )
     
