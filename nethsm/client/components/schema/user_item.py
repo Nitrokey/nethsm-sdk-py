@@ -11,11 +11,11 @@ from __future__ import annotations
 from nethsm.client.shared_imports.schema_imports import *  # pyright: ignore [reportWildcardImportFromLibrary]
 
 
-from nethsm.client.components.schema import id
+from nethsm.client.components.schema import user_id
 Properties = typing.TypedDict(
     'Properties',
     {
-        "user": typing.Type[id.ID],
+        "user": typing.Type[user_id.UserID],
     }
 )
 

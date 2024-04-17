@@ -214,8 +214,9 @@ class KeyfenderCIManager(KeyfenderManager):
 
 
 @contextlib.contextmanager
-def connect(user: UserData) -> Iterator[NetHSM]:
-    auth = Authentication(user.user_id, C.PASSWORD)
+def connect(user: UserData, password: Optional[str] = None) -> Iterator[NetHSM]:
+    password = password or C.PASSWORD
+    auth = Authentication(user.user_id, password)
     with nethsm_module.connect(C.HOST, auth, C.VERIFY_TLS) as nethsm_out:
         yield nethsm_out
 

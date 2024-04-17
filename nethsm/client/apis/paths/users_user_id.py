@@ -6,12 +6,14 @@
 
 from nethsm.client.paths.users_user_id.delete.operation import ApiForDelete
 from nethsm.client.paths.users_user_id.get.operation import ApiForGet
+from nethsm.client.paths.users_user_id.post.operation import ApiForPost
 from nethsm.client.paths.users_user_id.put.operation import ApiForPut
 
 
 class UsersUserID(
     ApiForDelete,
     ApiForGet,
+    ApiForPost,
     ApiForPut,
 ):
     pass

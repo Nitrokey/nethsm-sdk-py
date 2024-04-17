@@ -26,6 +26,8 @@ from nethsm.client.paths.keys_key_id_encrypt.post.operation import KeysKeyIDEncr
 from nethsm.client.paths.system_cancel_update.post.operation import SystemCancelUpdatePost
 from nethsm.client.paths.keys_key_id_public_pem.get.operation import KeysKeyIDPublicPemGet
 from nethsm.client.paths.config_unlock_passphrase.put.operation import ConfigUnlockPassphrasePut
+from nethsm.client.paths.namespaces_namespace_id.delete.operation import NamespacesNamespaceIDDelete
+from nethsm.client.paths.namespaces_namespace_id.put.operation import NamespacesNamespaceIDPut
 from nethsm.client.paths.system_reboot.post.operation import SystemRebootPost
 from nethsm.client.paths.keys_key_id_restrictions_tags_tag.delete.operation import KeysKeyIDRestrictionsTagsTagDelete
 from nethsm.client.paths.keys_key_id_restrictions_tags_tag.put.operation import KeysKeyIDRestrictionsTagsTagPut
@@ -53,6 +55,7 @@ from nethsm.client.paths.metrics.get.operation import MetricsGet
 from nethsm.client.paths.users_user_id_passphrase.post.operation import UsersUserIDPassphrasePost
 from nethsm.client.paths.users_user_id.delete.operation import UsersUserIDDelete
 from nethsm.client.paths.users_user_id.get.operation import UsersUserIDGet
+from nethsm.client.paths.users_user_id.post.operation import UsersUserIDPost
 from nethsm.client.paths.users_user_id.put.operation import UsersUserIDPut
 from nethsm.client.paths.system_restore.post.operation import SystemRestorePost
 from nethsm.client.paths.users_user_id_tags_tag.delete.operation import UsersUserIDTagsTagDelete
@@ -60,6 +63,7 @@ from nethsm.client.paths.users_user_id_tags_tag.put.operation import UsersUserID
 from nethsm.client.paths.keys.get.operation import KeysGet
 from nethsm.client.paths.keys.post.operation import KeysPost
 from nethsm.client.paths.random.post.operation import RandomPost
+from nethsm.client.paths.namespaces.get.operation import NamespacesGet
 from nethsm.client.paths.users.get.operation import UsersGet
 from nethsm.client.paths.users.post.operation import UsersPost
 
@@ -87,6 +91,8 @@ class DefaultApi(
     SystemCancelUpdatePost,
     KeysKeyIDPublicPemGet,
     ConfigUnlockPassphrasePut,
+    NamespacesNamespaceIDDelete,
+    NamespacesNamespaceIDPut,
     SystemRebootPost,
     KeysKeyIDRestrictionsTagsTagDelete,
     KeysKeyIDRestrictionsTagsTagPut,
@@ -114,6 +120,7 @@ class DefaultApi(
     UsersUserIDPassphrasePost,
     UsersUserIDDelete,
     UsersUserIDGet,
+    UsersUserIDPost,
     UsersUserIDPut,
     SystemRestorePost,
     UsersUserIDTagsTagDelete,
@@ -121,6 +128,7 @@ class DefaultApi(
     KeysGet,
     KeysPost,
     RandomPost,
+    NamespacesGet,
     UsersGet,
     UsersPost,
 ):

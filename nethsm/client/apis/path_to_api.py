@@ -27,6 +27,8 @@ from nethsm.client.apis.paths.keys_key_id_restrictions_tags_tag import KeysKeyID
 from nethsm.client.apis.paths.keys_key_id_sign import KeysKeyIDSign
 from nethsm.client.apis.paths.lock import Lock
 from nethsm.client.apis.paths.metrics import Metrics
+from nethsm.client.apis.paths.namespaces import Namespaces
+from nethsm.client.apis.paths.namespaces_namespace_id import NamespacesNamespaceID
 from nethsm.client.apis.paths.provision import Provision
 from nethsm.client.apis.paths.random import Random
 from nethsm.client.apis.paths.system_backup import SystemBackup
@@ -74,6 +76,8 @@ PathToApi = typing.TypedDict(
     "/keys/{KeyID}/sign": typing.Type[KeysKeyIDSign],
     "/lock": typing.Type[Lock],
     "/metrics": typing.Type[Metrics],
+    "/namespaces": typing.Type[Namespaces],
+    "/namespaces/{NamespaceID}": typing.Type[NamespacesNamespaceID],
     "/provision": typing.Type[Provision],
     "/random": typing.Type[Random],
     "/system/backup": typing.Type[SystemBackup],
@@ -122,6 +126,8 @@ path_to_api = PathToApi(
     "/keys/{KeyID}/sign": KeysKeyIDSign,
     "/lock": Lock,
     "/metrics": Metrics,
+    "/namespaces": Namespaces,
+    "/namespaces/{NamespaceID}": NamespacesNamespaceID,
     "/provision": Provision,
     "/random": Random,
     "/system/backup": SystemBackup,

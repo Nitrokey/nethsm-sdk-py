@@ -3,8 +3,7 @@ from conftest import Constants as C
 from conftest import UserData
 from utilities import add_user, connect
 
-import nethsm as nethsm_module
-from nethsm import NetHSM
+from nethsm import NetHSM, NetHSMError
 
 """######################### Preparation for the Tests #########################
 
@@ -50,7 +49,7 @@ def login_user_get_state(username: UserData) -> None:
 
 def login_user_with_wrong_passphrase(user: UserData) -> None:
     with connect(user) as nethsm:
-        with pytest.raises(nethsm_module.NetHSMError):
+        with pytest.raises(NetHSMError):
             nethsm.get_user(user_id=user.user_id)
 
 
@@ -127,12 +126,12 @@ def test_add_users_set_passphrases_connect(nethsm: NetHSM) -> None:
 
     "Set with Operator user the passphrase of another user"
     with connect(C.OPERATOR_USER) as nethsm:
-        with pytest.raises(nethsm_module.NetHSMError):
+        with pytest.raises(NetHSMError):
             nethsm.set_passphrase(C.METRICS_USER.user_id, C.PASSPHRASE_CHANGED)
 
     "Set with another user which do not have Administrator or Operator Role"
     with connect(C.BACKUP_USER) as nethsm:
-        with pytest.raises(nethsm_module.NetHSMError):
+        with pytest.raises(NetHSMError):
             nethsm.set_passphrase(C.BACKUP_USER.user_id, C.PASSPHRASE_CHANGED)
 
 
@@ -143,11 +142,11 @@ def test_add_delete_user_administrator(nethsm: NetHSM) -> None:
     role."""
     try:
         add_user(nethsm, C.ADMINISTRATOR_USER)
-    except nethsm_module.NetHSMError:
+    except NetHSMError:
         pass
 
     nethsm.delete_user(C.ADMINISTRATOR_USER.user_id)
-    with pytest.raises(nethsm_module.NetHSMError):
+    with pytest.raises(NetHSMError):
         nethsm.get_user(user_id=C.ADMINISTRATOR_USER.user_id)
 
 
@@ -158,7 +157,7 @@ def test_add_operator_tags(nethsm: NetHSM) -> None:
     role."""
     try:
         add_user(nethsm, C.OPERATOR_USER)
-    except nethsm_module.NetHSMError:
+    except NetHSMError:
         pass
     add_operator_tags(nethsm)
 
@@ -170,11 +169,11 @@ def test_add_list_operator_tags(nethsm: NetHSM) -> None:
     role."""
     try:
         add_user(nethsm, C.OPERATOR_USER)
-    except nethsm_module.NetHSMError:
+    except NetHSMError:
         pass
     try:
         add_operator_tags(nethsm)
-    except nethsm_module.NetHSMError:
+    except NetHSMError:
         pass
     tags = nethsm.list_operator_tags(user_id=C.OPERATOR_USER.user_id)
     if tags:
@@ -189,14 +188,25 @@ def test_add_delete_list_operator_tags(nethsm: NetHSM) -> None:
     role."""
     try:
         add_user(nethsm, C.OPERATOR_USER)
-    except nethsm_module.NetHSMError:
+    except NetHSMError:
         pass
     try:
         add_operator_tags(nethsm)
-    except nethsm_module.NetHSMError:
+    except NetHSMError:
         pass
 
     nethsm.delete_operator_tag(user_id=C.OPERATOR_USER.user_id, tag=C.TAG1)
     nethsm.delete_operator_tag(user_id=C.OPERATOR_USER.user_id, tag=C.TAG2)
     tag = nethsm.list_operator_tags(user_id=C.OPERATOR_USER.user_id)
     assert C.TAG1 not in tag and C.TAG2 not in tag
+
+
+def test_delete_self(nethsm: NetHSM) -> None:
+    with pytest.raises(NetHSMError, match="Bad Request"):
+        nethsm.delete_user("admin")
+
+    # cannot use ADMINISTRATOR_USER here as we are rate-limited from a previous test
+    # add_user(nethsm, C.ADMINISTRATOR_USER)
+    # with connect(C.ADMINISTRATOR_USER) as nethsm:
+    #     with pytest.raises(NetHSMError, match="Bad Request"):
+    #         nethsm.delete_user(C.ADMINISTRATOR_USER.user_id)
