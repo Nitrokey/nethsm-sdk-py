@@ -6,24 +6,26 @@
 
 from nethsm.client import api_client, exceptions, security_schemes
 from nethsm.client.shared_imports.operation_imports import *  # pyright: ignore [reportWildcardImportFromLibrary]
-from nethsm.client.components.schema import restore_request
 
 from .. import path
 from .responses import (
     response_204,
     response_400,
+    response_401,
+    response_403,
     response_406,
+    response_409,
     response_412,
 )
-from . import request_body
-from .security import (
-    security_requirement_object_0,
-    security_requirement_object_1,
+from ..parameters import parameter_0 as path_item_parameter_0
+from .security import security_requirement_object_0
+from .path_parameters import PathParameters, PathParametersDictInput, PathParametersDict
+path_parameter_classes = (
+    path_item_parameter_0.Parameter0,
 )
 
 _security: typing.List[security_schemes.SecurityRequirementObject] = [
     security_requirement_object_0.security_requirement_object,
-    security_requirement_object_1.security_requirement_object,
 ]
 
 
@@ -32,14 +34,20 @@ __StatusCodeToResponse = typing.TypedDict(
     {
         '204': typing.Type[response_204.ResponseFor204],
         '400': typing.Type[response_400.ResponseFor400],
+        '401': typing.Type[response_401.ResponseFor401],
+        '403': typing.Type[response_403.ResponseFor403],
         '406': typing.Type[response_406.ResponseFor406],
+        '409': typing.Type[response_409.ResponseFor409],
         '412': typing.Type[response_412.ResponseFor412],
     }
 )
 _status_code_to_response: __StatusCodeToResponse = {
     '204': response_204.ResponseFor204,
     '400': response_400.ResponseFor400,
+    '401': response_401.ResponseFor401,
+    '403': response_403.ResponseFor403,
     '406': response_406.ResponseFor406,
+    '409': response_409.ResponseFor409,
     '412': response_412.ResponseFor412,
 }
 _non_error_status_codes = frozenset({
@@ -47,23 +55,24 @@ _non_error_status_codes = frozenset({
 })
 _error_status_codes = frozenset({
     '400',
+    '401',
+    '403',
     '406',
+    '409',
     '412',
 })
 
 
 class BaseApi(api_client.Api):
     @typing.overload
-    def _system_restore_post(
+    def _namespaces_namespace_id_put(
         self,
-        body: typing.Union[
-            restore_request.RestoreRequestDictInput,
-            restore_request.RestoreRequestDict,
-            schemas.Unset
-        ] = schemas.unset,
+        path_params: typing.Union[
+            PathParametersDictInput,
+            PathParametersDict
+        ],
         *,
         skip_deserialization: typing.Literal[False] = False,
-        content_type: typing.Literal["multipart/form-data"] = "multipart/form-data",
         security_index: typing.Optional[int] = None,
         server_index: typing.Optional[int] = None,
         stream: bool = False,
@@ -71,32 +80,28 @@ class BaseApi(api_client.Api):
     ) -> response_204.ApiResponse: ...
 
     @typing.overload
-    def _system_restore_post(
+    def _namespaces_namespace_id_put(
         self,
-        body: typing.Union[
-            restore_request.RestoreRequestDictInput,
-            restore_request.RestoreRequestDict,
-            schemas.Unset
-        ] = schemas.unset,
+        path_params: typing.Union[
+            PathParametersDictInput,
+            PathParametersDict
+        ],
         *,
         skip_deserialization: typing.Literal[True],
-        content_type: typing.Literal["multipart/form-data"] = "multipart/form-data",
         security_index: typing.Optional[int] = None,
         server_index: typing.Optional[int] = None,
         stream: bool = False,
         timeout: typing.Optional[typing.Union[int, float, typing.Tuple]] = None,
     ) -> api_response.ApiResponseWithoutDeserialization: ...
 
-    def _system_restore_post(
+    def _namespaces_namespace_id_put(
         self,
-        body: typing.Union[
-            restore_request.RestoreRequestDictInput,
-            restore_request.RestoreRequestDict,
-            schemas.Unset
-        ] = schemas.unset,
+        path_params: typing.Union[
+            PathParametersDictInput,
+            PathParametersDict
+        ],
         *,
         skip_deserialization: bool = False,
-        content_type: typing.Literal["multipart/form-data"] = "multipart/form-data",
         security_index: typing.Optional[int] = None,
         server_index: typing.Optional[int] = None,
         stream: bool = False,
@@ -107,32 +112,30 @@ class BaseApi(api_client.Api):
             api_response.body and api_response.headers will not be deserialized into schema
             class instances
         """
-        used_path = path
-        headers = self._get_headers()
-        # TODO add cookie handling
-
-        fields, serialized_body = self._get_fields_and_body(
-            request_body=request_body.RequestBody,
-            body=body,
-            content_type=content_type,
-            headers=headers
+        path_params = PathParameters.validate(
+            path_params,
+            configuration=self.api_client.schema_configuration
         )
+        used_path, query_params_suffix = self._get_used_path(
+            path,
+            path_parameters=path_parameter_classes,
+            path_params=path_params,
+            skip_validation=True
+        )
+        # TODO add cookie handling
         host = self.api_client.configuration.get_server_url(
             "servers", server_index
         )
         security_requirement_object = self.api_client.configuration.get_security_requirement_object(
-            "paths//system/restore/post/security",
+            "paths//namespaces/{NamespaceID}/put/security",
             _security,
             security_index
         )
 
         raw_response = self.api_client.call_api(
             resource_path=used_path,
-            method='post',
+            method='put',
             host=host,
-            headers=headers,
-            fields=fields,
-            body=serialized_body,
             security_requirement_object=security_requirement_object,
             stream=stream,
             timeout=timeout,
@@ -157,7 +160,10 @@ class BaseApi(api_client.Api):
             error_status_code = typing.cast(
                 typing.Literal[
                     '400',
+                    '401',
+                    '403',
                     '406',
+                    '409',
                     '412',
                 ],
                 status
@@ -175,11 +181,11 @@ class BaseApi(api_client.Api):
         return response
 
 
-class SystemRestorePost(BaseApi):
+class NamespacesNamespaceIDPut(BaseApi):
     # this class is used by api classes that refer to endpoints with operationId.snakeCase fn names
-    system_restore_post = BaseApi._system_restore_post
+    namespaces_namespace_id_put = BaseApi._namespaces_namespace_id_put
 
 
-class ApiForPost(BaseApi):
+class ApiForPut(BaseApi):
     # this class is used by api classes that refer to endpoints by path and http method names
-    post = BaseApi._system_restore_post
+    put = BaseApi._namespaces_namespace_id_put

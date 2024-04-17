@@ -627,20 +627,45 @@ class NetHSM:
             role=Role.from_string(response.body.role),
         )
 
+    def get_user_namespace(self, user_id: str) -> str:
+        from .client.paths.users_user_id_namespace.get.path_parameters import (
+            PathParametersDict,
+        )
+
+        path_params = PathParametersDict(UserID=user_id)
+        try:
+            response = self._get_api().users_user_id_namespace_get(
+                path_params=path_params
+            )
+        except Exception as e:
+            _handle_exception(
+                e,
+                state=State.OPERATIONAL,
+                roles=[Role.ADMINISTRATOR, Role.OPERATOR],
+                messages={
+                    400: f"Invalid character in the user ID {user_id}",
+                    404: f"User {user_id} not found",
+                },
+            )
+        return response.body.namespace
+
     def add_user(
         self,
         real_name: str,
         role: Role,
         passphrase: str,
         user_id: Optional[str] = None,
+        namespace: Optional[str] = None,
     ) -> str:
         from .client.components.schema.user_post_data import UserPostDataDict
         from .client.paths.users_user_id.put.path_parameters import PathParametersDict
+        from .client.schemas import Unset
 
         body = UserPostDataDict(
             realName=real_name,
             role=role.value,
             passphrase=passphrase,
+            namespace=namespace if namespace is not None else Unset(),
         )
         try:
             if user_id:
@@ -704,6 +729,47 @@ class NetHSM:
                     400: "Bad request -- e. g. weak passphrase",
                     404: f"User {user_id} not found",
                 },
+            )
+
+    def list_namespaces(self) -> list[str]:
+        try:
+            response = self._get_api().namespaces_get()
+        except Exception as e:
+            _handle_exception(
+                e,
+                state=State.OPERATIONAL,
+                roles=[Role.ADMINISTRATOR],
+            )
+        return [item.id for item in response.body]
+
+    def add_namespace(self, namespace: str) -> None:
+        from .client.paths.namespaces_namespace_id.put.path_parameters import (
+            PathParametersDict,
+        )
+
+        path_params = PathParametersDict(NamespaceID=namespace)
+        try:
+            self._get_api().namespaces_namespace_id_put(path_params=path_params)
+        except Exception as e:
+            _handle_exception(
+                e,
+                state=State.OPERATIONAL,
+                roles=[Role.ADMINISTRATOR],
+            )
+
+    def delete_namespace(self, namespace: str) -> None:
+        from .client.paths.namespaces_namespace_id.delete.path_parameters import (
+            PathParametersDict,
+        )
+
+        path_params = PathParametersDict(NamespaceID=namespace)
+        try:
+            self._get_api().namespaces_namespace_id_delete(path_params=path_params)
+        except Exception as e:
+            _handle_exception(
+                e,
+                state=State.OPERATIONAL,
+                roles=[Role.ADMINISTRATOR],
             )
 
     def list_operator_tags(self, user_id: str) -> list[str]:

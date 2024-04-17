@@ -10,6 +10,7 @@ from nethsm.client.shared_imports.operation_imports import *  # pyright: ignore 
 from .. import path
 from .responses import (
     response_204,
+    response_400,
     response_401,
     response_403,
     response_404,
@@ -32,6 +33,7 @@ __StatusCodeToResponse = typing.TypedDict(
     '__StatusCodeToResponse',
     {
         '204': typing.Type[response_204.ResponseFor204],
+        '400': typing.Type[response_400.ResponseFor400],
         '401': typing.Type[response_401.ResponseFor401],
         '403': typing.Type[response_403.ResponseFor403],
         '404': typing.Type[response_404.ResponseFor404],
@@ -41,6 +43,7 @@ __StatusCodeToResponse = typing.TypedDict(
 )
 _status_code_to_response: __StatusCodeToResponse = {
     '204': response_204.ResponseFor204,
+    '400': response_400.ResponseFor400,
     '401': response_401.ResponseFor401,
     '403': response_403.ResponseFor403,
     '404': response_404.ResponseFor404,
@@ -51,6 +54,7 @@ _non_error_status_codes = frozenset({
     '204',
 })
 _error_status_codes = frozenset({
+    '400',
     '401',
     '403',
     '404',
@@ -155,6 +159,7 @@ class BaseApi(api_client.Api):
         elif status in _error_status_codes:
             error_status_code = typing.cast(
                 typing.Literal[
+                    '400',
                     '401',
                     '403',
                     '404',
