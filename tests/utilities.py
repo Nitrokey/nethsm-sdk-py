@@ -6,6 +6,7 @@ from time import sleep
 from typing import Iterator
 
 import docker  # type: ignore
+import podman  # type: ignore
 import pytest
 import urllib3
 from conftest import Constants as C
@@ -91,6 +92,45 @@ class KeyfenderDockerManager(KeyfenderManager):
             pass
 
 
+class KeyfenderPodmanManager(KeyfenderManager):
+    def __init__(self) -> None:
+        client = podman.from_env()
+
+        while True:
+            containers = client.containers.list(
+                filters={"ancestor": C.IMAGE}, ignore_removed=True
+            )
+            print(containers)
+            if len(containers) == 0:
+                break
+
+            for container in containers:
+                try:
+                    container.remove(force=True)
+                except docker.errors.APIError as e:
+                    print(e)
+                    pass
+            sleep(1)
+
+        repository, tag = C.IMAGE.split(":")
+        image = client.images.pull(repository, tag=tag)
+
+        container = client.containers.run(
+            image,
+            "",
+            ports={"8443": 8443},
+            remove=True,
+            detach=True,
+        )
+        self.container = container
+
+    def kill(self) -> None:
+        try:
+            self.container.kill()
+        except podman.errors.APIError:
+            pass
+
+
 class KeyfenderCIManager(KeyfenderManager):
     def __init__(self) -> None:
         os.system("pkill keyfender.unix")
@@ -117,6 +157,8 @@ def start_nethsm() -> KeyfenderManager:
     context: KeyfenderManager
     if C.TEST_MODE == "docker":
         context = KeyfenderDockerManager()
+    elif C.TEST_MODE == "podman":
+        context = KeyfenderPodmanManager()
     elif C.TEST_MODE == "ci":
         context = KeyfenderCIManager()
     else:
