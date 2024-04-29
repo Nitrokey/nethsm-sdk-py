@@ -3,7 +3,6 @@ from typing import Iterator
 import docker  # type: ignore
 import pytest
 from conftest import Constants as C
-from utilities import nethsm  # noqa: F401
 from utilities import add_user, connect, lock, provision, start_nethsm, unlock
 
 import nethsm as nethsm_sdk

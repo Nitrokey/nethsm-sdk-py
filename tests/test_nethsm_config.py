@@ -3,7 +3,7 @@ from io import BytesIO
 
 import pytest
 from conftest import Constants as C
-from utilities import lock, nethsm, self_sign_csr, unlock  # noqa: F401
+from utilities import lock, self_sign_csr, unlock
 
 import nethsm as nethsm_module
 from nethsm import NetHSM, TlsKeyType

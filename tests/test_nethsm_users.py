@@ -1,7 +1,6 @@
 import pytest
 from conftest import Constants as C
 from conftest import UserData
-from utilities import nethsm  # noqa: F401
 from utilities import add_user, connect
 
 import nethsm as nethsm_module

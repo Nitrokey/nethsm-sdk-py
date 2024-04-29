@@ -4,7 +4,6 @@ import os
 import pytest
 from conftest import Constants as C
 from test_nethsm_keys import generate_key
-from utilities import nethsm  # noqa: F401
 from utilities import (
     add_user,
     connect,

@@ -25,26 +25,6 @@ import nethsm as nethsm_module
 from nethsm import Authentication, Base64, NetHSM, RsaPrivateKey
 
 
-@pytest.fixture(scope="module")
-def nethsm() -> Iterator[NetHSM]:
-    """Start Docker container with Nethsm image and connect to Nethsm
-
-    This Pytest Fixture will run before the tests to provide the tests with
-    a nethsm instance via Docker container, also the first provision of the
-    NetHSM will be done in here"""
-
-    container = start_nethsm()
-
-    with connect(C.ADMIN_USER) as nethsm:
-        provision(nethsm)
-        yield nethsm
-
-    try:
-        container.kill()
-    except docker.errors.APIError:
-        pass
-
-
 class KeyfenderManager:
     def __init__(self) -> None:
         pass

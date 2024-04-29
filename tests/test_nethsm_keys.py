@@ -3,7 +3,6 @@ from conftest import Constants as C
 from Crypto import Random
 from Crypto.Cipher import AES
 from Crypto.Hash import SHA256
-from utilities import nethsm  # noqa: F401
 from utilities import (
     add_user,
     connect,
