@@ -5,12 +5,12 @@ import pytest
 from conftest import Constants as C
 from test_nethsm_keys import generate_key
 from utilities import (
+    Container,
     add_user,
     connect,
     encrypt_rsa,
     provision,
     set_backup_passphrase,
-    start_nethsm,
     update,
 )
 
@@ -73,13 +73,13 @@ def test_passphrase_add_user_retrieve_backup(nethsm: NetHSM) -> None:
             assert False
 
 
-def test_factory_reset(nethsm: NetHSM) -> None:
+def test_factory_reset(container: Container, nethsm: NetHSM) -> None:
     """Perform a factory reset for a NetHSM instance.
 
     This command requires authentication as a user with the Administrator
     role."""
     nethsm.factory_reset()
-    start_nethsm()
+    container.restart()
 
     # make sure that we really cleared the data
     assert nethsm.get_state().value == "Unprovisioned"
@@ -87,7 +87,7 @@ def test_factory_reset(nethsm: NetHSM) -> None:
     assert nethsm.list_keys() == []
 
     nethsm.factory_reset()
-    start_nethsm()
+    container.restart()
 
 
 def test_state_restore(nethsm: NetHSM) -> None:
@@ -135,24 +135,24 @@ def test_state_restore(nethsm: NetHSM) -> None:
         assert decrypt.decode().decode() == C.DATA
 
 
-def test_state_provision_update(nethsm: NetHSM) -> None:
+def test_state_provision_update(container: Container, nethsm: NetHSM) -> None:
     """Load an update to a NetHSM instance.
 
     This command requires authentication as a user with the Administrator
     role."""
-    start_nethsm()
+    container.restart()
 
     provision(nethsm)
 
     update(nethsm)
 
 
-def test_state_provision_update_cancel_update(nethsm: NetHSM) -> None:
+def test_state_provision_update_cancel_update(container: Container, nethsm: NetHSM) -> None:
     """Cancel a queued update on a NetHSM instance.
 
     This command requires authentication as a user with the Administrator
     role."""
-    start_nethsm()
+    container.restart()
 
     provision(nethsm)
 
@@ -160,12 +160,12 @@ def test_state_provision_update_cancel_update(nethsm: NetHSM) -> None:
     nethsm.cancel_update()
 
 
-def test_update_commit_update(nethsm: NetHSM) -> None:
+def test_update_commit_update(container: Container, nethsm: NetHSM) -> None:
     """Commit a queued update on a NetHSM instance.
 
     This command requires authentication as a user with the Administrator
     role."""
-    start_nethsm()
+    container.restart()
 
     provision(nethsm)
 
@@ -173,24 +173,24 @@ def test_update_commit_update(nethsm: NetHSM) -> None:
     nethsm.commit_update()
 
 
-def test_provision_reboot(nethsm: NetHSM) -> None:
+def test_provision_reboot(container: Container, nethsm: NetHSM) -> None:
     """Reboot a NetHSM instance.
 
     This command requires authentication as a user with the Administrator
     role."""
-    start_nethsm()
+    container.restart()
 
     provision(nethsm)
 
     nethsm.reboot()
 
 
-def test_provision_shutdown(nethsm: NetHSM) -> None:
+def test_provision_shutdown(container: Container, nethsm: NetHSM) -> None:
     """Shutdown a NetHSM instance.
 
     This command requires authentication as a user with the Administrator
     role."""
-    start_nethsm()
+    container.restart()
 
     provision(nethsm)
 

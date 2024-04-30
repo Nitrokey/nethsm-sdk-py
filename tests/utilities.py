@@ -2,8 +2,9 @@ import contextlib
 import datetime
 import os
 import subprocess
+from abc import ABC, abstractmethod
 from time import sleep
-from typing import Iterator
+from typing import Iterator, Optional
 
 import docker  # type: ignore
 import podman  # type: ignore
@@ -25,12 +26,124 @@ import nethsm as nethsm_module
 from nethsm import Authentication, Base64, NetHSM, RsaPrivateKey
 
 
-class KeyfenderManager:
-    def __init__(self) -> None:
-        pass
+class Container(ABC):
+    def restart(self) -> None:
+        self.kill()
+        self.start()
+        self.wait()
+
+    def wait(self) -> None:
+        http = urllib3.PoolManager(cert_reqs="CERT_NONE")
+        print("Waiting for container to be ready")
+        while True:
+            try:
+                response = http.request("GET", f"https://{C.HOST}/api/v1/health/alive")
+                print(f"Response: {response.status}")
+                if response.status == 200:
+                    break
+            except Exception as e:
+                print(e)
+                pass
+            sleep(0.5)
+
+    @abstractmethod
+    def start(self) -> None:
+        ...
+
+    @abstractmethod
+    def kill(self) -> None:
+        ...
+
+
+class DockerContainer(Container):
+    def __init__(self, client: docker.client.DockerClient, image: docker.models.images.Image) -> None:
+        self.client = client
+        self.image = image
+        self.container = None
+
+    def start(self) -> None:
+        self.container = self.client.containers.run(
+            self.image,
+            "",
+            ports={"8443": 8443},
+            remove=True,
+            detach=True,
+        )
 
     def kill(self) -> None:
-        pass
+        if self.container:
+            try:
+                self.container.kill()
+                self.container.wait()
+            except docker.errors.APIError:
+                pass
+
+
+class PodmanContainer(Container):
+    def __init__(self, client: podman.client.PodmanClient, image: podman.domain.images.Image) -> None:
+        self.client = client
+        self.image = image
+        self.container = None
+
+    def start(self) -> None:
+        self.container = self.client.containers.run(
+            self.image,
+            "",
+            ports={"8443": 8443},
+            remove=True,
+            detach=True,
+        )
+
+    def kill(self) -> None:
+        if self.container:
+            try:
+                self.container.kill()
+                self.container.wait()
+            except podman.errors.APIError:
+                pass
+
+
+class CIContainer(Container):
+    def __init__(self) -> None:
+        self.process: Optional[subprocess.Popen[bytes]] = None
+
+    def start(self) -> None:
+        os.system("pkill keyfender.unix")
+        os.system("pkill etcd")
+
+        # Wait for everything to shut down, creates problems otherwise on the gitlab ci
+        sleep(1)
+
+        os.system("rm -rf /data")
+
+        self.process = subprocess.Popen(
+            [
+                "/bin/sh",
+                "-c",
+                "/start.sh",
+            ]
+        )
+
+    def kill(self) -> None:
+        if self.process:
+            self.process.kill()
+
+
+class KeyfenderManager(ABC):
+    @abstractmethod
+    def spawn(self) -> Container:
+        ...
+
+    @staticmethod
+    def get() -> "KeyfenderManager":
+        if C.TEST_MODE == "docker":
+            return KeyfenderDockerManager()
+        elif C.TEST_MODE == "podman":
+            return KeyfenderPodmanManager()
+        elif C.TEST_MODE == "ci":
+            return KeyfenderCIManager()
+        else:
+            raise Exception("Invalid Test Mode")
 
 
 class KeyfenderDockerManager(KeyfenderManager):
@@ -56,20 +169,11 @@ class KeyfenderDockerManager(KeyfenderManager):
         repository, tag = C.IMAGE.split(":")
         image = client.images.pull(repository, tag=tag)
 
-        container = client.containers.run(
-            image,
-            "",
-            ports={"8443": 8443},
-            remove=True,
-            detach=True,
-        )
-        self.container = container
+        self.client = client
+        self.image = image
 
-    def kill(self) -> None:
-        try:
-            self.container.kill()
-        except docker.errors.APIError:
-            pass
+    def spawn(self) -> Container:
+        return DockerContainer(self.client, self.image)
 
 
 class KeyfenderPodmanManager(KeyfenderManager):
@@ -95,69 +199,16 @@ class KeyfenderPodmanManager(KeyfenderManager):
         repository, tag = C.IMAGE.split(":")
         image = client.images.pull(repository, tag=tag)
 
-        container = client.containers.run(
-            image,
-            "",
-            ports={"8443": 8443},
-            remove=True,
-            detach=True,
-        )
-        self.container = container
+        self.client = client
+        self.image = image
 
-    def kill(self) -> None:
-        try:
-            self.container.kill()
-        except podman.errors.APIError:
-            pass
+    def spawn(self) -> Container:
+        return PodmanContainer(self.client, self.image)
 
 
 class KeyfenderCIManager(KeyfenderManager):
-    def __init__(self) -> None:
-        os.system("pkill keyfender.unix")
-        os.system("pkill etcd")
-
-        # Wait for everything to shut down, creates problems otherwise on the gitlab ci
-        sleep(1)
-
-        os.system("rm -rf /data")
-
-        self.process = subprocess.Popen(
-            [
-                "/bin/sh",
-                "-c",
-                "/start.sh",
-            ]
-        )
-
-    def kill(self) -> None:
-        self.process.kill()
-
-
-def start_nethsm() -> KeyfenderManager:
-    context: KeyfenderManager
-    if C.TEST_MODE == "docker":
-        context = KeyfenderDockerManager()
-    elif C.TEST_MODE == "podman":
-        context = KeyfenderPodmanManager()
-    elif C.TEST_MODE == "ci":
-        context = KeyfenderCIManager()
-    else:
-        raise Exception("Invalid Test Mode")
-
-    http = urllib3.PoolManager(cert_reqs="CERT_NONE")
-    print("Waiting for container to be ready")
-    while True:
-        try:
-            response = http.request("GET", f"https://{C.HOST}/api/v1/health/alive")
-            print(f"Response: {response.status}")
-            if response.status == 200:
-                break
-        except Exception as e:
-            print(e)
-            pass
-        sleep(0.5)
-
-    return context
+    def spawn(self) -> Container:
+        return CIContainer()
 
 
 @contextlib.contextmanager

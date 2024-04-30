@@ -3,7 +3,7 @@ from typing import Iterator
 import docker  # type: ignore
 import pytest
 from conftest import Constants as C
-from utilities import add_user, connect, lock, provision, start_nethsm, unlock
+from utilities import Container, add_user, connect, lock, provision, unlock
 
 import nethsm as nethsm_sdk
 from nethsm import NetHSM
@@ -18,37 +18,25 @@ https://stackoverflow.com/questions/36530082/running-pycharm-as-root-from-launch
 
 
 @pytest.fixture(scope="module")
-def nethsm_no_provision() -> Iterator[NetHSM]:
+def nethsm_no_provision(container: Container) -> Iterator[NetHSM]:
     """Start Docker container with Nethsm image and connect to Nethsm
 
     This Pytest Fixture will run before the tests to provide the tests with
     a nethsm instance via Docker container"""
-    container = start_nethsm()
 
     with connect(C.ADMIN_USER) as nethsm:
         yield nethsm
 
-    try:
-        container.kill()
-    except docker.errors.APIError:
-        pass
-
 
 @pytest.fixture(scope="module")
-def nethsm_no_provision_no_auth() -> Iterator[NetHSM]:
+def nethsm_no_provision_no_auth(container: Container) -> Iterator[NetHSM]:
     """Start Docker container with Nethsm image and connect to Nethsm
 
     This Pytest Fixture will run before the tests to provide the tests with
     a nethsm instance via Docker container"""
-    container = start_nethsm()
 
     with nethsm_sdk.connect(C.HOST, verify_tls=C.VERIFY_TLS) as nethsm:
         yield nethsm
-
-    try:
-        container.kill()
-    except docker.errors.APIError:
-        pass
 
 
 """######################### Start of Tests #########################"""
