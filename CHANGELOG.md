@@ -2,7 +2,9 @@
 
 ## Unreleased
 
--
+### Features
+
+- Support key import from PEM files ([#99](https://github.com/Nitrokey/nethsm-sdk-py/issues/99))
 
 [All Changes](https://github.com/Nitrokey/nethsm-sdk-py/compare/v0.5.0...HEAD)
 

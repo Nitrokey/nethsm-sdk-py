@@ -3,6 +3,8 @@ from conftest import Constants as C
 from Crypto import Random
 from Crypto.Cipher import AES
 from Crypto.Hash import SHA256
+from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.hazmat.primitives.asymmetric import padding, rsa
 from utilities import (
     add_user,
     connect,
@@ -116,6 +118,51 @@ def test_add_key(nethsm: NetHSM) -> None:
     This command requires authentication as a user with the Administrator
     role."""
     add_key(nethsm)
+
+
+@pytest.mark.parametrize("generate_key_id", [True, False])
+def test_add_key_pem(nethsm: NetHSM, generate_key_id: bool) -> None:
+    add_user(nethsm, C.OPERATOR_USER)
+
+    key = rsa.generate_private_key(65537, 1024)
+    pem = key.private_bytes(
+        serialization.Encoding.PEM,
+        serialization.PrivateFormat.PKCS8,
+        serialization.NoEncryption(),
+    ).decode()
+
+    if generate_key_id:
+        key_id = None
+    else:
+        key_id = C.KEY_ID_ADDED
+        if key_id in nethsm.list_keys():
+            nethsm.delete_key(key_id)
+
+    key_id = nethsm.add_key_pem(
+        key_id=key_id,
+        private_key=pem,
+        mechanisms=[KeyMechanism.RSA_SIGNATURE_PSS_SHA256],
+    )
+
+    h = SHA256.new(data=C.DATA.encode())
+    with connect(C.OPERATOR_USER) as nethsm:
+        signature = nethsm.sign(
+            key_id,
+            Base64.encode(h.digest()),
+            SignMode.PSS_SHA256,
+        )
+
+    with connect(C.ADMIN_USER) as nethsm:
+        nethsm.delete_key(key_id)
+
+    key.public_key().verify(
+        signature.decode(),
+        C.DATA.encode(),
+        padding.PSS(
+            padding.MGF1(hashes.SHA256()), salt_length=padding.PSS.DIGEST_LENGTH
+        ),
+        hashes.SHA256(),
+    )
 
 
 def test_add_get_key_by_public_key(nethsm: NetHSM) -> None:

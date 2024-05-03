@@ -984,6 +984,70 @@ class NetHSM:
         assert key_id
         return key_id
 
+    def add_key_pem(
+        self,
+        key_id: Optional[str],
+        mechanisms: list[KeyMechanism],
+        private_key: str,
+        tags: list[str] = [],
+    ) -> str:
+        from .client.components.schema.key_mechanisms import KeyMechanismsTupleInput
+        from .client.components.schema.key_restrictions import KeyRestrictionsDict
+        from .client.components.schema.private_key_pem import (
+            ArgumentsDict,
+            PrivateKeyPemDict,
+        )
+        from .client.components.schema.tag_list import TagListTuple
+
+        mechanism_tuple: KeyMechanismsTupleInput = [
+            mechanism.value for mechanism in mechanisms
+        ]
+
+        if tags:
+            arguments = ArgumentsDict(
+                mechanisms=mechanism_tuple,
+                restrictions=KeyRestrictionsDict(
+                    tags=TagListTuple([tag for tag in tags])
+                ),
+            )
+        else:
+            arguments = ArgumentsDict(
+                mechanisms=mechanism_tuple,
+            )
+        body = PrivateKeyPemDict(arguments=arguments, key_file=private_key)
+
+        try:
+            if key_id:
+                from .client.paths.keys_key_id.put.path_parameters import (
+                    PathParametersDict,
+                )
+
+                path_params = PathParametersDict(KeyID=key_id)
+                self._get_api().keys_key_id_put(
+                    path_params=path_params,
+                    body=body,
+                    content_type="multipart/form-data",
+                )
+            else:
+                response = self._get_api().keys_post(
+                    body=body,
+                    content_type="multipart/form-data",
+                    skip_deserialization=True,
+                )
+                key_id = self._get_create_resource_id(response.response)
+        except Exception as e:
+            _handle_exception(
+                e,
+                state=State.OPERATIONAL,
+                roles=[Role.ADMINISTRATOR],
+                messages={
+                    400: "Bad request -- specified properties are invalid",
+                    409: f"Conflict -- a key with the ID {key_id} already exists",
+                },
+            )
+        assert key_id
+        return key_id
+
     def delete_key(self, key_id: str) -> None:
         from .client.paths.keys_key_id.delete.path_parameters import PathParametersDict
 
