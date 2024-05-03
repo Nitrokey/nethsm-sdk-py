@@ -19,7 +19,6 @@ from nethsm import (
     KeyMechanism,
     KeyType,
     NetHSM,
-    RsaPrivateKey,
     RsaPublicKey,
     SignMode,
 )

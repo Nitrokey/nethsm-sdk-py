@@ -8,7 +8,6 @@ from typing import Iterator, Optional
 
 import docker  # type: ignore
 import podman  # type: ignore
-import pytest
 import urllib3
 from conftest import Constants as C
 from conftest import UserData
@@ -20,7 +19,6 @@ from cryptography import x509
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives.serialization import Encoding
-from cryptography.x509.oid import NameOID
 
 import nethsm as nethsm_module
 from nethsm import Authentication, Base64, NetHSM, RsaPrivateKey
@@ -56,7 +54,9 @@ class Container(ABC):
 
 
 class DockerContainer(Container):
-    def __init__(self, client: docker.client.DockerClient, image: docker.models.images.Image) -> None:
+    def __init__(
+        self, client: docker.client.DockerClient, image: docker.models.images.Image
+    ) -> None:
         self.client = client
         self.image = image
         self.container = None
@@ -80,7 +80,9 @@ class DockerContainer(Container):
 
 
 class PodmanContainer(Container):
-    def __init__(self, client: podman.client.PodmanClient, image: podman.domain.images.Image) -> None:
+    def __init__(
+        self, client: podman.client.PodmanClient, image: podman.domain.images.Image
+    ) -> None:
         self.client = client
         self.image = image
         self.container = None

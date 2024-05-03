@@ -1,5 +1,4 @@
 import datetime
-from io import BytesIO
 
 import pytest
 from conftest import Constants as C

@@ -1,4 +1,4 @@
-from typing import Any, Callable, Protocol, Type
+from typing import Any, Protocol, Type
 
 import pytest
 

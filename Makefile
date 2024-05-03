@@ -2,7 +2,7 @@ PACKAGE_NAME=nethsm
 VENV=venv
 PYTHON3=python3
 PYTHON3_VENV=venv/bin/python3
-FLAKE8_DIRS=$(PACKAGE_NAME)/
+CHECK_DIRS=$(PACKAGE_NAME)/ tests/
 
 all: init
 
@@ -10,17 +10,16 @@ init: update-venv
 
 # code checks
 check-format:
-	$(PYTHON3_VENV) -m black --check $(PACKAGE_NAME)/
+	$(PYTHON3_VENV) -m black --check $(CHECK_DIRS)
 
 check-import-sorting:
-	$(PYTHON3_VENV) -m isort --check-only $(PACKAGE_NAME)/
+	$(PYTHON3_VENV) -m isort --check-only $(CHECK_DIRS)
 
 check-style:
-	$(PYTHON3_VENV) -m flake8 $(FLAKE8_DIRS)
+	$(PYTHON3_VENV) -m flake8 $(CHECK_DIRS)
 
 check-typing:
-	@echo "Note: run semi-clean target in case this fails without any proper reason"
-	$(PYTHON3_VENV) -m mypy $(PACKAGE_NAME)/ tests/
+	$(PYTHON3_VENV) -m mypy $(CHECK_DIRS)
 
 check: check-format check-import-sorting check-style check-typing test 
 
@@ -34,8 +33,8 @@ clean: semi-clean
 
 # automatic code fixes
 fix:
-	$(PYTHON3_VENV) -m black $(BLACK_FLAGS) $(PACKAGE_NAME)/ tests/
-	$(PYTHON3_VENV) -m isort $(ISORT_FLAGS) $(PACKAGE_NAME)/ tests/
+	$(PYTHON3_VENV) -m black $(BLACK_FLAGS) $(CHECK_DIRS)
+	$(PYTHON3_VENV) -m isort $(ISORT_FLAGS) $(CHECK_DIRS)
 
 $(VENV):
 	$(PYTHON3) -m venv $(VENV)

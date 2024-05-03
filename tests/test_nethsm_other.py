@@ -1,6 +1,5 @@
 from typing import Iterator
 
-import docker  # type: ignore
 import pytest
 from conftest import Constants as C
 from utilities import Container, add_user, connect, lock, provision, unlock

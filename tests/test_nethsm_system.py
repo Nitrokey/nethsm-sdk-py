@@ -1,7 +1,6 @@
 import datetime
 import os
 
-import pytest
 from conftest import Constants as C
 from test_nethsm_keys import generate_key
 from utilities import (
@@ -15,7 +14,7 @@ from utilities import (
 )
 
 from nethsm import Base64, NetHSM, NetHSMError
-from nethsm.backup import Backup, EncryptedBackup
+from nethsm.backup import EncryptedBackup
 
 """######################### Preparation for the Tests #########################
 
@@ -147,7 +146,9 @@ def test_state_provision_update(container: Container, nethsm: NetHSM) -> None:
     update(nethsm)
 
 
-def test_state_provision_update_cancel_update(container: Container, nethsm: NetHSM) -> None:
+def test_state_provision_update_cancel_update(
+    container: Container, nethsm: NetHSM
+) -> None:
     """Cancel a queued update on a NetHSM instance.
 
     This command requires authentication as a user with the Administrator
