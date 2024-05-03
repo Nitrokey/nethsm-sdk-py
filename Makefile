@@ -66,4 +66,5 @@ nethsm-client: nethsm-api.yaml
 
 .PHONY: test
 test:
+	$(PYTHON3_VENV) -m doctest nethsm/__init__.py
 	$(PYTHON3_VENV) -m pytest --cov nethsm --cov-report=xml $(PYTEST_FLAGS)

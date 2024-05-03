@@ -14,6 +14,7 @@ import binascii
 import contextlib
 import enum
 import json
+import string
 from base64 import b64decode, b64encode
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -205,14 +206,43 @@ class Base64:
         return b64decode(self.data)
 
     @classmethod
-    def from_encoded(cls, data: Union[bytes, str]) -> "Base64":
+    def from_encoded(
+        cls, data: Union[bytes, str], ignore_whitespace: bool = False
+    ) -> "Base64":
+        """
+        >>> Base64.from_encoded("dGVzdAo=")
+        Base64(data='dGVzdAo=')
+        >>> Base64.from_encoded(b"dGVzdAo=")
+        Base64(data='dGVzdAo=')
+        >>> Base64.from_encoded("dGV zdAo=")
+        Traceback (most recent call last):
+            ...
+        ValueError: Invalid base64 data: Non-base64 digit found: dGV zdAo=
+        >>> Base64.from_encoded(b"dGV zdAo=")
+        Traceback (most recent call last):
+            ...
+        ValueError: Invalid base64 data: Non-base64 digit found: dGV zdAo=
+        >>> Base64.from_encoded("dGV zdAo=", ignore_whitespace=True)
+        Base64(data='dGVzdAo=')
+        >>> Base64.from_encoded(b"dGV zdAo=", ignore_whitespace=True)
+        Base64(data='dGVzdAo=')
+        """
+        if ignore_whitespace:
+            if isinstance(data, bytes):
+                data = data.translate(None, delete=string.whitespace.encode())
+            else:
+                data = data.translate(str.maketrans("", "", string.whitespace))
+
         try:
             b64decode(data, validate=True)
+        except binascii.Error as e:
             if isinstance(data, bytes):
-                data = data.decode()
-            return cls(data=data)
-        except binascii.Error:
-            raise ValueError(f"Invalid base64 data: {data!r}")
+                data = data.decode(errors="replace")
+            raise ValueError(f"Invalid base64 data: {e}: {data}") from None
+
+        if isinstance(data, bytes):
+            data = data.decode()
+        return cls(data=data)
 
     @classmethod
     def encode(cls, data: bytes) -> "Base64":
