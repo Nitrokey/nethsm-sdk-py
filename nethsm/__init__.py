@@ -18,7 +18,7 @@ from base64 import b64decode, b64encode
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from io import BufferedReader, FileIO
-from typing import TYPE_CHECKING, Any, Iterator, Mapping, Optional, Union
+from typing import TYPE_CHECKING, Any, Iterator, Mapping, NoReturn, Optional, Union
 from urllib.parse import urlencode
 
 import urllib3
@@ -310,7 +310,7 @@ def _handle_exception(
     messages: dict[int, str] = {},
     roles: list[Role] = [],
     state: Optional[State] = None,
-) -> None:
+) -> NoReturn:
     from .client import ApiException
 
     if isinstance(e, ApiException):
@@ -328,7 +328,7 @@ def _handle_api_exception(
     messages: dict[int, str] = {},
     roles: list[Role] = [],
     state: Optional[State] = None,
-) -> None:
+) -> NoReturn:
     if e.status in messages:
         message = messages[e.status]
         raise NetHSMError(message)
@@ -631,8 +631,6 @@ class NetHSM:
                     409: f"Conflict -- a user with the ID {user_id} already exists",
                 },
             )
-        if user_id is None:
-            raise NetHSMError("Could not determine the ID of the new user")
         return user_id
 
     def delete_user(self, user_id: str) -> None:
@@ -981,7 +979,6 @@ class NetHSM:
                     409: f"Conflict -- a key with the ID {key_id} already exists",
                 },
             )
-        assert key_id
         return key_id
 
     def add_key_pem(
@@ -1045,7 +1042,6 @@ class NetHSM:
                     409: f"Conflict -- a key with the ID {key_id} already exists",
                 },
             )
-        assert key_id
         return key_id
 
     def delete_key(self, key_id: str) -> None:
