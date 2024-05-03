@@ -2,12 +2,20 @@
 
 ## Unreleased
 
+-
+
+[All Changes](https://github.com/Nitrokey/nethsm-sdk-py/compare/v0.5.0...HEAD)
+
+## [v1.1.0][] (2024-05-03)
+
+[v1.1.0]: https://github.com/Nitrokey/nethsm-sdk-py/releases/tag/v1.1.0
+
 ### Features
 
 - Support key import from PEM files ([#99](https://github.com/Nitrokey/nethsm-sdk-py/issues/99))
 - Add `ignore_whitespace` option to `Base64.from_encoded` ([#108](https://github.com/Nitrokey/nethsm-sdk-py/issues/108))
 
-[All Changes](https://github.com/Nitrokey/nethsm-sdk-py/compare/v0.5.0...HEAD)
+[All Changes](https://github.com/Nitrokey/nethsm-sdk-py/compare/v1.0.0...v1.1.0)
 
 ## [v1.0.0][] (2023-11-27)
 
