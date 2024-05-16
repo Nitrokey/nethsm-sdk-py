@@ -200,6 +200,7 @@ def test_add_delete_list_operator_tags(nethsm: NetHSM) -> None:
     tag = nethsm.list_operator_tags(user_id=C.OPERATOR_USER.user_id)
     assert C.TAG1 not in tag and C.TAG2 not in tag
 
+
 def test_delete_self(nethsm: NetHSM) -> None:
     with pytest.raises(NetHSMError, match="Bad Request"):
         nethsm.delete_user("admin")
