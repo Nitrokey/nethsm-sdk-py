@@ -80,6 +80,9 @@ def test_keys(nethsm: NetHSM) -> None:
         )
         assert nethsm_ns.list_keys() == [key_id_ns]
 
+        with pytest.raises(NetHSMError, match="Bad Request"):
+            nethsm_ns.delete_user("test")
+
     assert nethsm.list_keys() == [key_id_root]
 
     with login(user) as nethsm_ns:
