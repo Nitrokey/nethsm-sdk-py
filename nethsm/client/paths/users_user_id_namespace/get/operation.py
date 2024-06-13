@@ -9,7 +9,7 @@ from nethsm.client.shared_imports.operation_imports import *  # pyright: ignore 
 
 from .. import path
 from .responses import (
-    response_204,
+    response_200,
     response_400,
     response_401,
     response_403,
@@ -32,7 +32,7 @@ _security: typing.List[security_schemes.SecurityRequirementObject] = [
 __StatusCodeToResponse = typing.TypedDict(
     '__StatusCodeToResponse',
     {
-        '204': typing.Type[response_204.ResponseFor204],
+        '200': typing.Type[response_200.ResponseFor200],
         '400': typing.Type[response_400.ResponseFor400],
         '401': typing.Type[response_401.ResponseFor401],
         '403': typing.Type[response_403.ResponseFor403],
@@ -42,7 +42,7 @@ __StatusCodeToResponse = typing.TypedDict(
     }
 )
 _status_code_to_response: __StatusCodeToResponse = {
-    '204': response_204.ResponseFor204,
+    '200': response_200.ResponseFor200,
     '400': response_400.ResponseFor400,
     '401': response_401.ResponseFor401,
     '403': response_403.ResponseFor403,
@@ -51,7 +51,7 @@ _status_code_to_response: __StatusCodeToResponse = {
     '412': response_412.ResponseFor412,
 }
 _non_error_status_codes = frozenset({
-    '204',
+    '200',
 })
 _error_status_codes = frozenset({
     '400',
@@ -62,10 +62,14 @@ _error_status_codes = frozenset({
     '412',
 })
 
+_all_accept_content_types = (
+    "application/json",
+)
+
 
 class BaseApi(api_client.Api):
     @typing.overload
-    def _users_user_id_delete(
+    def _users_user_id_namespace_get(
         self,
         path_params: typing.Union[
             PathParametersDictInput,
@@ -73,14 +77,15 @@ class BaseApi(api_client.Api):
         ],
         *,
         skip_deserialization: typing.Literal[False] = False,
+        accept_content_types: typing.Tuple[str, ...] = _all_accept_content_types,
         security_index: typing.Optional[int] = None,
         server_index: typing.Optional[int] = None,
         stream: bool = False,
         timeout: typing.Optional[typing.Union[int, float, typing.Tuple]] = None,
-    ) -> response_204.ApiResponse: ...
+    ) -> response_200.ApiResponse: ...
 
     @typing.overload
-    def _users_user_id_delete(
+    def _users_user_id_namespace_get(
         self,
         path_params: typing.Union[
             PathParametersDictInput,
@@ -88,13 +93,14 @@ class BaseApi(api_client.Api):
         ],
         *,
         skip_deserialization: typing.Literal[True],
+        accept_content_types: typing.Tuple[str, ...] = _all_accept_content_types,
         security_index: typing.Optional[int] = None,
         server_index: typing.Optional[int] = None,
         stream: bool = False,
         timeout: typing.Optional[typing.Union[int, float, typing.Tuple]] = None,
     ) -> api_response.ApiResponseWithoutDeserialization: ...
 
-    def _users_user_id_delete(
+    def _users_user_id_namespace_get(
         self,
         path_params: typing.Union[
             PathParametersDictInput,
@@ -102,6 +108,7 @@ class BaseApi(api_client.Api):
         ],
         *,
         skip_deserialization: bool = False,
+        accept_content_types: typing.Tuple[str, ...] = _all_accept_content_types,
         security_index: typing.Optional[int] = None,
         server_index: typing.Optional[int] = None,
         stream: bool = False,
@@ -122,20 +129,22 @@ class BaseApi(api_client.Api):
             path_params=path_params,
             skip_validation=True
         )
+        headers = self._get_headers(accept_content_types=accept_content_types)
         # TODO add cookie handling
         host = self.api_client.configuration.get_server_url(
             "servers", server_index
         )
         security_requirement_object = self.api_client.configuration.get_security_requirement_object(
-            "paths//users/{UserID}/delete/security",
+            "paths//users/{UserID}/namespace/get/security",
             _security,
             security_index
         )
 
         raw_response = self.api_client.call_api(
             resource_path=used_path,
-            method='delete',
+            method='get',
             host=host,
+            headers=headers,
             security_requirement_object=security_requirement_object,
             stream=stream,
             timeout=timeout,
@@ -150,7 +159,7 @@ class BaseApi(api_client.Api):
         if status in _non_error_status_codes:
             status_code = typing.cast(
                 typing.Literal[
-                    '204',
+                    '200',
                 ],
                 status
             )
@@ -181,11 +190,11 @@ class BaseApi(api_client.Api):
         return response
 
 
-class UsersUserIDDelete(BaseApi):
+class UsersUserIDNamespaceGet(BaseApi):
     # this class is used by api classes that refer to endpoints with operationId.snakeCase fn names
-    users_user_id_delete = BaseApi._users_user_id_delete
+    users_user_id_namespace_get = BaseApi._users_user_id_namespace_get
 
 
-class ApiForDelete(BaseApi):
+class ApiForGet(BaseApi):
     # this class is used by api classes that refer to endpoints by path and http method names
-    delete = BaseApi._users_user_id_delete
+    get = BaseApi._users_user_id_namespace_get

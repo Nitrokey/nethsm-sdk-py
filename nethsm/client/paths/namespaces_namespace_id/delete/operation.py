@@ -14,7 +14,6 @@ from .responses import (
     response_401,
     response_403,
     response_404,
-    response_406,
     response_412,
 )
 from ..parameters import parameter_0 as path_item_parameter_0
@@ -37,7 +36,6 @@ __StatusCodeToResponse = typing.TypedDict(
         '401': typing.Type[response_401.ResponseFor401],
         '403': typing.Type[response_403.ResponseFor403],
         '404': typing.Type[response_404.ResponseFor404],
-        '406': typing.Type[response_406.ResponseFor406],
         '412': typing.Type[response_412.ResponseFor412],
     }
 )
@@ -47,7 +45,6 @@ _status_code_to_response: __StatusCodeToResponse = {
     '401': response_401.ResponseFor401,
     '403': response_403.ResponseFor403,
     '404': response_404.ResponseFor404,
-    '406': response_406.ResponseFor406,
     '412': response_412.ResponseFor412,
 }
 _non_error_status_codes = frozenset({
@@ -58,14 +55,13 @@ _error_status_codes = frozenset({
     '401',
     '403',
     '404',
-    '406',
     '412',
 })
 
 
 class BaseApi(api_client.Api):
     @typing.overload
-    def _users_user_id_delete(
+    def _namespaces_namespace_id_delete(
         self,
         path_params: typing.Union[
             PathParametersDictInput,
@@ -80,7 +76,7 @@ class BaseApi(api_client.Api):
     ) -> response_204.ApiResponse: ...
 
     @typing.overload
-    def _users_user_id_delete(
+    def _namespaces_namespace_id_delete(
         self,
         path_params: typing.Union[
             PathParametersDictInput,
@@ -94,7 +90,7 @@ class BaseApi(api_client.Api):
         timeout: typing.Optional[typing.Union[int, float, typing.Tuple]] = None,
     ) -> api_response.ApiResponseWithoutDeserialization: ...
 
-    def _users_user_id_delete(
+    def _namespaces_namespace_id_delete(
         self,
         path_params: typing.Union[
             PathParametersDictInput,
@@ -127,7 +123,7 @@ class BaseApi(api_client.Api):
             "servers", server_index
         )
         security_requirement_object = self.api_client.configuration.get_security_requirement_object(
-            "paths//users/{UserID}/delete/security",
+            "paths//namespaces/{NamespaceID}/delete/security",
             _security,
             security_index
         )
@@ -163,7 +159,6 @@ class BaseApi(api_client.Api):
                     '401',
                     '403',
                     '404',
-                    '406',
                     '412',
                 ],
                 status
@@ -181,11 +176,11 @@ class BaseApi(api_client.Api):
         return response
 
 
-class UsersUserIDDelete(BaseApi):
+class NamespacesNamespaceIDDelete(BaseApi):
     # this class is used by api classes that refer to endpoints with operationId.snakeCase fn names
-    users_user_id_delete = BaseApi._users_user_id_delete
+    namespaces_namespace_id_delete = BaseApi._namespaces_namespace_id_delete
 
 
 class ApiForDelete(BaseApi):
     # this class is used by api classes that refer to endpoints by path and http method names
-    delete = BaseApi._users_user_id_delete
+    delete = BaseApi._namespaces_namespace_id_delete

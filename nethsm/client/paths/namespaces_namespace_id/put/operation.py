@@ -13,8 +13,8 @@ from .responses import (
     response_400,
     response_401,
     response_403,
-    response_404,
     response_406,
+    response_409,
     response_412,
 )
 from ..parameters import parameter_0 as path_item_parameter_0
@@ -36,8 +36,8 @@ __StatusCodeToResponse = typing.TypedDict(
         '400': typing.Type[response_400.ResponseFor400],
         '401': typing.Type[response_401.ResponseFor401],
         '403': typing.Type[response_403.ResponseFor403],
-        '404': typing.Type[response_404.ResponseFor404],
         '406': typing.Type[response_406.ResponseFor406],
+        '409': typing.Type[response_409.ResponseFor409],
         '412': typing.Type[response_412.ResponseFor412],
     }
 )
@@ -46,8 +46,8 @@ _status_code_to_response: __StatusCodeToResponse = {
     '400': response_400.ResponseFor400,
     '401': response_401.ResponseFor401,
     '403': response_403.ResponseFor403,
-    '404': response_404.ResponseFor404,
     '406': response_406.ResponseFor406,
+    '409': response_409.ResponseFor409,
     '412': response_412.ResponseFor412,
 }
 _non_error_status_codes = frozenset({
@@ -57,15 +57,15 @@ _error_status_codes = frozenset({
     '400',
     '401',
     '403',
-    '404',
     '406',
+    '409',
     '412',
 })
 
 
 class BaseApi(api_client.Api):
     @typing.overload
-    def _users_user_id_delete(
+    def _namespaces_namespace_id_put(
         self,
         path_params: typing.Union[
             PathParametersDictInput,
@@ -80,7 +80,7 @@ class BaseApi(api_client.Api):
     ) -> response_204.ApiResponse: ...
 
     @typing.overload
-    def _users_user_id_delete(
+    def _namespaces_namespace_id_put(
         self,
         path_params: typing.Union[
             PathParametersDictInput,
@@ -94,7 +94,7 @@ class BaseApi(api_client.Api):
         timeout: typing.Optional[typing.Union[int, float, typing.Tuple]] = None,
     ) -> api_response.ApiResponseWithoutDeserialization: ...
 
-    def _users_user_id_delete(
+    def _namespaces_namespace_id_put(
         self,
         path_params: typing.Union[
             PathParametersDictInput,
@@ -127,14 +127,14 @@ class BaseApi(api_client.Api):
             "servers", server_index
         )
         security_requirement_object = self.api_client.configuration.get_security_requirement_object(
-            "paths//users/{UserID}/delete/security",
+            "paths//namespaces/{NamespaceID}/put/security",
             _security,
             security_index
         )
 
         raw_response = self.api_client.call_api(
             resource_path=used_path,
-            method='delete',
+            method='put',
             host=host,
             security_requirement_object=security_requirement_object,
             stream=stream,
@@ -162,8 +162,8 @@ class BaseApi(api_client.Api):
                     '400',
                     '401',
                     '403',
-                    '404',
                     '406',
+                    '409',
                     '412',
                 ],
                 status
@@ -181,11 +181,11 @@ class BaseApi(api_client.Api):
         return response
 
 
-class UsersUserIDDelete(BaseApi):
+class NamespacesNamespaceIDPut(BaseApi):
     # this class is used by api classes that refer to endpoints with operationId.snakeCase fn names
-    users_user_id_delete = BaseApi._users_user_id_delete
+    namespaces_namespace_id_put = BaseApi._namespaces_namespace_id_put
 
 
-class ApiForDelete(BaseApi):
+class ApiForPut(BaseApi):
     # this class is used by api classes that refer to endpoints by path and http method names
-    delete = BaseApi._users_user_id_delete
+    put = BaseApi._namespaces_namespace_id_put

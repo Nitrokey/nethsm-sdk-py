@@ -13,6 +13,7 @@ from nethsm.client.paths.config_tls_csr_pem.post.operation import ConfigTlsCsrPe
 from nethsm.client.paths.config_tls_generate.post.operation import ConfigTlsGeneratePost
 from nethsm.client.paths.keys_key_id_decrypt.post.operation import KeysKeyIDDecryptPost
 from nethsm.client.paths.users_user_id_tags.get.operation import UsersUserIDTagsGet
+from nethsm.client.paths.users_user_id_namespace.get.operation import UsersUserIDNamespaceGet
 from nethsm.client.paths.config_tls_cert_pem.get.operation import ConfigTlsCertPemGet
 from nethsm.client.paths.config_tls_cert_pem.put.operation import ConfigTlsCertPemPut
 from nethsm.client.paths.system_backup.post.operation import SystemBackupPost
@@ -26,6 +27,8 @@ from nethsm.client.paths.keys_key_id_encrypt.post.operation import KeysKeyIDEncr
 from nethsm.client.paths.system_cancel_update.post.operation import SystemCancelUpdatePost
 from nethsm.client.paths.keys_key_id_public_pem.get.operation import KeysKeyIDPublicPemGet
 from nethsm.client.paths.config_unlock_passphrase.put.operation import ConfigUnlockPassphrasePut
+from nethsm.client.paths.namespaces_namespace_id.delete.operation import NamespacesNamespaceIDDelete
+from nethsm.client.paths.namespaces_namespace_id.put.operation import NamespacesNamespaceIDPut
 from nethsm.client.paths.system_reboot.post.operation import SystemRebootPost
 from nethsm.client.paths.keys_key_id_restrictions_tags_tag.delete.operation import KeysKeyIDRestrictionsTagsTagDelete
 from nethsm.client.paths.keys_key_id_restrictions_tags_tag.put.operation import KeysKeyIDRestrictionsTagsTagPut
@@ -60,6 +63,7 @@ from nethsm.client.paths.users_user_id_tags_tag.put.operation import UsersUserID
 from nethsm.client.paths.keys.get.operation import KeysGet
 from nethsm.client.paths.keys.post.operation import KeysPost
 from nethsm.client.paths.random.post.operation import RandomPost
+from nethsm.client.paths.namespaces.get.operation import NamespacesGet
 from nethsm.client.paths.users.get.operation import UsersGet
 from nethsm.client.paths.users.post.operation import UsersPost
 
@@ -74,6 +78,7 @@ class DefaultApi(
     ConfigTlsGeneratePost,
     KeysKeyIDDecryptPost,
     UsersUserIDTagsGet,
+    UsersUserIDNamespaceGet,
     ConfigTlsCertPemGet,
     ConfigTlsCertPemPut,
     SystemBackupPost,
@@ -87,6 +92,8 @@ class DefaultApi(
     SystemCancelUpdatePost,
     KeysKeyIDPublicPemGet,
     ConfigUnlockPassphrasePut,
+    NamespacesNamespaceIDDelete,
+    NamespacesNamespaceIDPut,
     SystemRebootPost,
     KeysKeyIDRestrictionsTagsTagDelete,
     KeysKeyIDRestrictionsTagsTagPut,
@@ -121,6 +128,7 @@ class DefaultApi(
     KeysGet,
     KeysPost,
     RandomPost,
+    NamespacesGet,
     UsersGet,
     UsersPost,
 ):
