@@ -18,7 +18,6 @@ pip install nethsm
 Example program:
 
 ```py
-import datetime
 import nethsm
 
 admin_passphrase = "adminadmin"
@@ -32,7 +31,6 @@ with nethsm.connect(
         client.provision(
             unlock_passphrase=unlock_passphrase,
             admin_passphrase=admin_passphrase,
-            system_time=datetime.datetime.now(datetime.timezone.utc),
         )
 
     if client.get_state() == nethsm.State.LOCKED:
