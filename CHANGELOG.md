@@ -2,11 +2,21 @@
 
 ## Unreleased
 
+- 
+
+[All Changes](https://github.com/Nitrokey/nethsm-sdk-py/compare/v1.2.0...HEAD)
+
+## [v1.2.0](https://github.com/Nitrokey/nethsm-sdk-py/releases/tag/v1.2.0) (2024-07-16)
+
 ### Features
 
 - Add support for namespaces ([#110](https://github.com/Nitrokey/nethsm-sdk-py/pull/110))
 
-[All Changes](https://github.com/Nitrokey/nethsm-sdk-py/compare/v1.1.0...HEAD)
+### Bugfixes
+
+- Fix authentication for partial restore, i. e. on an operational instance ([#120](https://github.com/Nitrokey/nethsm-sdk-py/pull/120))
+
+[All Changes](https://github.com/Nitrokey/nethsm-sdk-py/compare/v1.1.0...v1.2.0)
 
 ## [v1.1.0][] (2024-05-03)
 
