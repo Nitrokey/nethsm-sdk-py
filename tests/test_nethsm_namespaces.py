@@ -242,3 +242,11 @@ def test_namespace_tag_readd(nethsm: NetHSM) -> None:
 
     nethsm.delete_namespace("ns")
     nethsm.delete_user("ns~test")
+
+
+def test_delete_prefix(nethsm: NetHSM) -> None:
+    assert nethsm.list_namespaces() == ["ns1", "ns2"]
+    nethsm.add_namespace("ns")
+    assert nethsm.list_namespaces() == ["ns", "ns1", "ns2"]
+    nethsm.delete_namespace("ns")
+    assert nethsm.list_namespaces() == ["ns1", "ns2"]
