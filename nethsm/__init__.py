@@ -1584,7 +1584,10 @@ class NetHSM:
                 backup_file=backup,
             )
 
-            self._get_api().system_restore_post(body)
+            if self.auth:
+                self._get_api().system_restore_post(body, security_index=1)
+            else:
+                self._get_api().system_restore_post(body)
         except Exception as e:
             _handle_exception(
                 e,
