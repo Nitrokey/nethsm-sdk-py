@@ -2,7 +2,13 @@
 
 ## Unreleased
 
-- 
+### Features
+
+-
+
+### Bugfixes
+
+- Fix authentication for partial restore, i.e. on an operational instance ([#124](https://github.com/Nitrokey/nethsm-sdk-py/pull/124))
 
 [All Changes](https://github.com/Nitrokey/nethsm-sdk-py/compare/v1.2.0...HEAD)
 
