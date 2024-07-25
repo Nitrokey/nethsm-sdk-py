@@ -134,6 +134,39 @@ def test_state_restore(nethsm: NetHSM) -> None:
         assert decrypt.decode().decode() == C.DATA
 
 
+def test_factory_reset_provision_state_partial_restore(
+    container: Container, nethsm: NetHSM
+) -> None:
+    """Perform a factory reset, provision and partial restore for a NetHSM instance.
+
+    This command requires authentication as a user with the Administrator
+    role."""
+    nethsm.factory_reset()
+    container.restart()
+    provision(nethsm)
+
+    system_time = datetime.datetime.now(datetime.timezone.utc)
+
+    with open(C.FILENAME_BACKUP, "rb") as f:
+        nethsm.restore(f, C.BACKUP_PASSPHRASE, system_time)
+
+    nethsm.unlock(C.UNLOCK_PASSPHRASE)
+
+    assert nethsm.list_keys() == [C.KEY_ID_GENERATED]
+
+    with open(C.FILENAME_ENCRYPTED, "rb") as f:
+        encrypted = f.read()
+
+    # see test_decrypt in test_nethsm_keys
+    with connect(C.OPERATOR_USER) as nethsm:
+        decrypt = nethsm.decrypt(
+            C.KEY_ID_GENERATED,
+            Base64.encode(encrypted),
+            C.MODE,
+        )
+        assert decrypt.decode().decode() == C.DATA
+
+
 def test_state_provision_update(container: Container, nethsm: NetHSM) -> None:
     """Load an update to a NetHSM instance.
 
