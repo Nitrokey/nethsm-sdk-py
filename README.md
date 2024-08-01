@@ -52,6 +52,23 @@ with nethsm.connect(
     print(client.list_keys())
 ```
 
+## Compatibility
+
+The following table provides an overview of the SDK versions that added support for new NetHSM features:
+
+| SDK Version | NetHSM Version | New Features |
+| :---------: | :------------: | ------------ |
+| [v1.0.0][sdk-v1.0.0] | [v1.0][nethsm-v1.0] |  |
+| [v1.2.0][sdk-v1.2.0] | [v2.0][nethsm-v2.0] | Namespaces |
+
+[nethsm-v1.0]: https://github.com/Nitrokey/nethsm/releases/tag/v1.0
+[nethsm-v2.0]: https://github.com/Nitrokey/nethsm/releases/tag/v2.0
+[sdk-v1.0.0]: https://github.com/Nitrokey/nethsm-sdk-py/releases/tag/v1.0.0
+[sdk-v1.2.0]: https://github.com/Nitrokey/nethsm-sdk-py/releases/tag/v1.2.0
+
+New features are added in a backwards-compatible way if possible.
+Trying to use them on older NetHSM versions may result in unexpected error messages.
+
 ## Development
 
 ### Setting Up The Environment
