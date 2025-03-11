@@ -2,7 +2,7 @@
 
 ## Unreleased
 
--
+- Add TPM attestation keys and platform configuration registers to `SystemInfo` ([#128](https://github.com/Nitrokey/nethsm-sdk-py/pull/128))
 
 [All Changes](https://github.com/Nitrokey/nethsm-sdk-py/compare/v1.2.1...HEAD)
 

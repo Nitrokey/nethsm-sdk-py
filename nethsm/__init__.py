@@ -19,7 +19,16 @@ from base64 import b64decode, b64encode
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from io import BufferedReader, FileIO
-from typing import TYPE_CHECKING, Any, Iterator, Mapping, NoReturn, Optional, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    Iterator,
+    Mapping,
+    NoReturn,
+    Optional,
+    Union,
+)
 from urllib.parse import urlencode
 
 import urllib3
@@ -262,11 +271,18 @@ class Info:
 
 
 @dataclass
+class Tpm:
+    attestation_keys: Dict[str, Any]
+    platform_configuration_registers: Dict[str, Any]
+
+
+@dataclass
 class SystemInfo:
     firmware_version: str
     software_version: str
     hardware_version: str
     build_tag: str
+    tpm: Tpm
 
 
 @dataclass
@@ -1553,6 +1569,10 @@ class NetHSM:
             software_version=response.body.softwareVersion,
             hardware_version=response.body.hardwareVersion,
             build_tag=response.body.softwareBuild,
+            tpm=Tpm(
+                attestation_keys=dict(response.body.akPub),
+                platform_configuration_registers=dict(response.body.pcr),
+            ),
         )
 
     def backup(self) -> bytes:
