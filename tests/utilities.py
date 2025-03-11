@@ -7,7 +7,7 @@ from time import sleep
 from typing import Iterator, Optional
 
 import docker  # type: ignore
-import podman  # type: ignore
+import podman
 import urllib3
 from conftest import Constants as C
 from conftest import UserData
@@ -85,16 +85,18 @@ class PodmanContainer(Container):
     ) -> None:
         self.client = client
         self.image = image
-        self.container = None
+        self.container: Optional[podman.domain.containers.Container] = None
 
     def start(self) -> None:
-        self.container = self.client.containers.run(
+        container = self.client.containers.run(
             self.image,
             "",
             ports={"8443": 8443},
             remove=True,
             detach=True,
         )
+        assert isinstance(container, podman.domain.containers.Container)
+        self.container = container
 
     def kill(self) -> None:
         if self.container:
@@ -200,6 +202,7 @@ class KeyfenderPodmanManager(KeyfenderManager):
 
         repository, tag = C.IMAGE.split(":")
         image = client.images.pull(repository, tag=tag)
+        assert isinstance(image, podman.domain.images.Image)
 
         self.client = client
         self.image = image
