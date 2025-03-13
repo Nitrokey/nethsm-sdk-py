@@ -2,9 +2,17 @@
 
 ## Unreleased
 
-- Add TPM attestation keys and platform configuration registers to `SystemInfo` ([#128](https://github.com/Nitrokey/nethsm-sdk-py/pull/128))
+-
 
 [All Changes](https://github.com/Nitrokey/nethsm-sdk-py/compare/v1.2.1...HEAD)
+
+## [v1.3.0](https://github.com/Nitrokey/nethsm-sdk-py/releases/tag/v1.3.0) (2025-03-13)
+
+### Features
+
+- Add TPM attestation keys and platform configuration registers to `SystemInfo` ([#128](https://github.com/Nitrokey/nethsm-sdk-py/pull/128))
+
+[All Changes](https://github.com/Nitrokey/nethsm-sdk-py/compare/v1.2.1...v1.3.0)
 
 ## [v1.2.1](https://github.com/Nitrokey/nethsm-sdk-py/releases/tag/v1.2.1) (2024-07-31)
 
