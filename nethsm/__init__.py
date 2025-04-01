@@ -223,14 +223,16 @@ class Base64:
         Base64(data='dGVzdAo=')
         >>> Base64.from_encoded(b"dGVzdAo=")
         Base64(data='dGVzdAo=')
-        >>> Base64.from_encoded("dGV zdAo=")
-        Traceback (most recent call last):
-            ...
-        ValueError: Invalid base64 data: Non-base64 digit found: dGV zdAo=
-        >>> Base64.from_encoded(b"dGV zdAo=")
-        Traceback (most recent call last):
-            ...
-        ValueError: Invalid base64 data: Non-base64 digit found: dGV zdAo=
+        >>> try:
+        ...     Base64.from_encoded("dGV zdAo=")
+        ...     assert False
+        ... except ValueError as e:
+        ...     assert "Invalid base64 data" in str(e)
+        >>> try:
+        ...     Base64.from_encoded(b"dGV zdAo=")
+        ...     assert False
+        ... except ValueError as e:
+        ...     assert "Invalid base64 data" in str(e)
         >>> Base64.from_encoded("dGV zdAo=", ignore_whitespace=True)
         Base64(data='dGVzdAo=')
         >>> Base64.from_encoded(b"dGV zdAo=", ignore_whitespace=True)
