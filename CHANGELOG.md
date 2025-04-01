@@ -2,7 +2,7 @@
 
 ## Unreleased
 
--
+- Add support for custom CA certificates
 
 [All Changes](https://github.com/Nitrokey/nethsm-sdk-py/compare/v1.2.1...HEAD)
 

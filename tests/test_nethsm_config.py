@@ -1,11 +1,25 @@
 import datetime
+import ipaddress
+import secrets
+from tempfile import NamedTemporaryFile
 
 import pytest
 from conftest import Constants as C
-from utilities import lock, self_sign_csr, unlock
+from cryptography import x509
+from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.hazmat.primitives.asymmetric import ec
+from cryptography.x509.oid import NameOID
+from utilities import Container, lock, self_sign_csr, unlock
 
 import nethsm as nethsm_module
-from nethsm import NetHSM, TlsKeyType
+from nethsm import (
+    Authentication,
+    NetHSM,
+    NetHSMRequestError,
+    RequestErrorType,
+    State,
+    TlsKeyType,
+)
 
 """########## Preparation for the Tests ##########
 
@@ -44,6 +58,261 @@ def get_config_time(nethsm: NetHSM) -> None:
 
 
 """##########Start of Tests##########"""
+
+
+class CA:
+    """
+    CA implementation based on the cryptography documentation:
+    https://cryptography.io/en/latest/x509/tutorial/#creating-a-ca-hierarchy
+    """
+
+    def __init__(self) -> None:
+        self.ca_key = ec.generate_private_key(ec.SECP256R1())
+        self.int_key = ec.generate_private_key(ec.SECP256R1())
+        self.ca_id = secrets.token_hex(8)
+
+        now = datetime.datetime.now(datetime.timezone.utc)
+        key_usage = x509.KeyUsage(
+            digital_signature=True,
+            content_commitment=False,
+            key_encipherment=False,
+            data_encipherment=False,
+            key_agreement=False,
+            key_cert_sign=True,
+            crl_sign=True,
+            encipher_only=False,
+            decipher_only=False,
+        )
+
+        name = x509.Name(
+            [
+                x509.NameAttribute(NameOID.COMMON_NAME, f"NetHSM Test CA {self.ca_id}"),
+            ]
+        )
+        builder = x509.CertificateBuilder()
+        builder = builder.subject_name(name)
+        builder = builder.public_key(self.ca_key.public_key())
+        builder = builder.issuer_name(name)
+        builder = builder.serial_number(x509.random_serial_number())
+        builder = builder.not_valid_before(now)
+        builder = builder.not_valid_after(now + datetime.timedelta(days=1))
+        builder = builder.add_extension(
+            x509.BasicConstraints(ca=True, path_length=None), critical=True
+        )
+        builder = builder.add_extension(key_usage, critical=True)
+        builder = builder.add_extension(
+            x509.SubjectKeyIdentifier.from_public_key(self.ca_key.public_key()),
+            critical=False,
+        )
+        self.ca_cert = builder.sign(self.ca_key, hashes.SHA256())
+
+        name = x509.Name(
+            [
+                x509.NameAttribute(
+                    NameOID.COMMON_NAME, f"NetHSM Intermediate CA {self.ca_id}"
+                ),
+            ]
+        )
+        builder = x509.CertificateBuilder()
+        builder = builder.subject_name(name)
+        builder = builder.issuer_name(self.ca_cert.subject)
+        builder = builder.public_key(self.int_key.public_key())
+        builder = builder.serial_number(x509.random_serial_number())
+        builder = builder.not_valid_before(now)
+        builder = builder.not_valid_after(now + datetime.timedelta(days=1))
+        builder = builder.add_extension(
+            x509.BasicConstraints(ca=True, path_length=0), critical=True
+        )
+        builder = builder.add_extension(key_usage, critical=True)
+        builder = builder.add_extension(
+            x509.SubjectKeyIdentifier.from_public_key(self.int_key.public_key()),
+            critical=False,
+        )
+        builder = builder.add_extension(
+            x509.AuthorityKeyIdentifier.from_issuer_subject_key_identifier(
+                self.ca_cert.extensions.get_extension_for_class(
+                    x509.SubjectKeyIdentifier
+                ).value
+            ),
+            critical=False,
+        )
+        self.int_cert = builder.sign(self.ca_key, hashes.SHA256())
+
+    def sign(self, csr: x509.CertificateSigningRequest) -> bytes:
+        import datetime
+
+        now = datetime.datetime.now(datetime.timezone.utc)
+        ip = x509.IPAddress(ipaddress.IPv4Address("127.0.0.1"))
+
+        builder = x509.CertificateBuilder()
+        builder = builder.subject_name(csr.subject)
+        builder = builder.issuer_name(self.int_cert.subject)
+        builder = builder.public_key(csr.public_key())
+        builder = builder.serial_number(x509.random_serial_number())
+        builder = builder.not_valid_before(now)
+        builder = builder.not_valid_after(now + datetime.timedelta(days=1))
+        builder = builder.add_extension(
+            x509.SubjectAlternativeName([ip]), critical=False
+        )
+        builder = builder.add_extension(
+            x509.BasicConstraints(ca=False, path_length=None), critical=True
+        )
+        builder = builder.add_extension(
+            x509.KeyUsage(
+                digital_signature=True,
+                content_commitment=False,
+                key_encipherment=True,
+                data_encipherment=False,
+                key_agreement=False,
+                key_cert_sign=False,
+                crl_sign=True,
+                encipher_only=False,
+                decipher_only=False,
+            ),
+            critical=True,
+        )
+        builder = builder.add_extension(
+            x509.ExtendedKeyUsage(
+                [
+                    x509.oid.ExtendedKeyUsageOID.CLIENT_AUTH,
+                    x509.oid.ExtendedKeyUsageOID.SERVER_AUTH,
+                ]
+            ),
+            critical=False,
+        )
+        builder = builder.add_extension(
+            x509.SubjectKeyIdentifier.from_public_key(csr.public_key()),
+            critical=False,
+        )
+        builder = builder.add_extension(
+            x509.AuthorityKeyIdentifier.from_issuer_subject_key_identifier(
+                self.int_cert.extensions.get_extension_for_class(
+                    x509.SubjectKeyIdentifier
+                ).value
+            ),
+            critical=False,
+        )
+        cert = builder.sign(self.int_key, hashes.SHA256())
+
+        # sanity check
+        store = x509.verification.Store([self.ca_cert])
+        verifier = (
+            x509.verification.PolicyBuilder().store(store).build_server_verifier(ip)
+        )
+        verifier.verify(cert, [self.int_cert])
+
+        return cert.public_bytes(
+            serialization.Encoding.PEM
+        ) + self.int_cert.public_bytes(serialization.Encoding.PEM)
+
+    @property
+    def ca_cert_pem(self) -> bytes:
+        return self.ca_cert.public_bytes(serialization.Encoding.PEM)
+
+
+def test_ca_certs_none(container: Container) -> None:
+    nethsm = NetHSM(C.HOST, verify_tls=True, ca_certs=None)
+    try:
+        nethsm.get_state()
+        assert False
+    except NetHSMRequestError as e:
+        assert e.type == RequestErrorType.SSL_ERROR
+    finally:
+        nethsm.close()
+
+    nethsm = NetHSM(C.HOST, verify_tls=False, ca_certs=None)
+    try:
+        assert nethsm.get_state() == State.UNPROVISIONED
+    finally:
+        nethsm.close()
+
+
+def test_ca_certs_empty(container: Container) -> None:
+    with NamedTemporaryFile() as f:
+        nethsm = NetHSM(C.HOST, verify_tls=True, ca_certs=f.name)
+        try:
+            nethsm.get_state()
+            assert False
+        except NetHSMRequestError as e:
+            assert e.type == RequestErrorType.SSL_ERROR
+        finally:
+            nethsm.close()
+
+        nethsm = NetHSM(C.HOST, verify_tls=False, ca_certs=f.name)
+        try:
+            nethsm.get_state()
+            assert False
+        except NetHSMRequestError as e:
+            assert e.type == RequestErrorType.SSL_ERROR
+        finally:
+            nethsm.close()
+
+
+def test_ca_certs_valid(container: Container) -> None:
+    with NamedTemporaryFile() as f:
+        ca = CA()
+
+        f.write(ca.ca_cert_pem)
+        f.seek(0)
+
+        nethsm = NetHSM(C.HOST, verify_tls=True, ca_certs=f.name)
+        try:
+            nethsm.get_state()
+            assert False
+        except NetHSMRequestError as e:
+            assert e.type == RequestErrorType.SSL_ERROR
+        finally:
+            nethsm.close()
+
+        nethsm = NetHSM(C.HOST, verify_tls=False)
+        try:
+            nethsm.provision("unlockunlock", "adminadmin")
+        finally:
+            nethsm.close()
+
+        auth = Authentication(username="admin", password="adminadmin")
+        nethsm = NetHSM(C.HOST, auth=auth, verify_tls=False)
+        try:
+            csr_pem = nethsm.csr(
+                C.COUNTRY,
+                C.STATE_OR_PROVINCE,
+                C.LOCALITY,
+                C.ORGANIZATION,
+                C.ORGANIZATIONAL_UNIT,
+                C.COMMON_NAME,
+                C.EMAIL_ADDRESS,
+            )
+            csr = x509.load_pem_x509_csr(csr_pem.encode())
+            cert = ca.sign(csr)
+            nethsm.set_certificate(cert)
+        finally:
+            nethsm.close()
+
+        f.write(ca.ca_cert_pem)
+        f.seek(0)
+
+        nethsm = NetHSM(C.HOST, verify_tls=True, ca_certs=f.name)
+        try:
+            assert nethsm.get_state() == State.OPERATIONAL
+        finally:
+            nethsm.close()
+
+        nethsm = NetHSM(C.HOST, verify_tls=True)
+        try:
+            nethsm.get_state()
+            assert False
+        except NetHSMRequestError as e:
+            assert e.type == RequestErrorType.SSL_ERROR
+        finally:
+            nethsm.close()
+
+        nethsm = NetHSM(C.HOST, auth=auth, verify_tls=True, ca_certs=f.name)
+        try:
+            nethsm.factory_reset()
+        finally:
+            nethsm.close()
+
+    container.restart()
 
 
 def test_csr(nethsm: NetHSM) -> None:

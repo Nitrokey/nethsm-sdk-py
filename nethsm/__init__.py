@@ -449,6 +449,7 @@ class NetHSM:
         host: str,
         auth: Optional[Authentication] = None,
         verify_tls: bool = True,
+        ca_certs: Optional[str] = None,
     ) -> None:
         from .client import ApiClient, ApiConfiguration
         from .client.components.security_schemes import security_scheme_basic
@@ -481,6 +482,7 @@ class NetHSM:
         config = ApiConfiguration(
             server_info=server_config, security_scheme_info=security_info
         )
+        config.ssl_ca_cert = ca_certs  # type: ignore[assignment]
         config.verify_ssl = verify_tls
         self.client = ApiClient(configuration=config)
 
