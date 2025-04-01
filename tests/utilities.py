@@ -323,7 +323,7 @@ def self_sign_csr(csr: str) -> bytes:
     subject = parsed_csr.subject
     issuer = subject
     public_key = parsed_csr.public_key()
-    now = datetime.datetime.utcnow()
+    now = datetime.datetime.now(datetime.timezone.utc)
     cert = (
         x509.CertificateBuilder()
         .subject_name(subject)
