@@ -2,9 +2,15 @@
 
 ## Unreleased
 
+-
+
+[All Changes](https://github.com/Nitrokey/nethsm-sdk-py/compare/v1.4.0...HEAD)
+
+## [v1.4.0](https://github.com/Nitrokey/nethsm-sdk-py/releases/tag/v1.4.0) (2025-04-25)
+
 - Add support for custom CA certificates
 
-[All Changes](https://github.com/Nitrokey/nethsm-sdk-py/compare/v1.2.1...HEAD)
+[All Changes](https://github.com/Nitrokey/nethsm-sdk-py/compare/v1.3.0...v1.4.0)
 
 ## [v1.3.0](https://github.com/Nitrokey/nethsm-sdk-py/releases/tag/v1.3.0) (2025-03-13)
 
