@@ -2,9 +2,15 @@
 
 ## Unreleased
 
+-
+
+[All Changes](https://github.com/Nitrokey/nethsm-sdk-py/compare/v1.4.1...HEAD)
+
+## [v1.4.1](https://github.com/Nitrokey/nethsm-sdk-py/releases/tag/v1.4.1) (2025-06-05)
+
 - Relax `urllib3` version requirement to `>= 2, <3`
 
-[All Changes](https://github.com/Nitrokey/nethsm-sdk-py/compare/v1.4.0...HEAD)
+[All Changes](https://github.com/Nitrokey/nethsm-sdk-py/compare/v1.4.0...v1.4.1)
 
 ## [v1.4.0](https://github.com/Nitrokey/nethsm-sdk-py/releases/tag/v1.4.0) (2025-04-25)
 
