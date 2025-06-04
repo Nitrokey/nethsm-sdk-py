@@ -2,7 +2,7 @@
 
 ## Unreleased
 
--
+- Relax `urllib3` version requirement to `>= 2, <3`
 
 [All Changes](https://github.com/Nitrokey/nethsm-sdk-py/compare/v1.4.0...HEAD)
 
