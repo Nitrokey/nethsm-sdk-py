@@ -183,3 +183,62 @@ def test_add_user(nethsm: NetHSM) -> None:
                     real_name="Test",
                     role=Role.OPERATOR,
                 )
+
+
+def test_namespace_tag_delete(nethsm: NetHSM) -> None:
+    user = add_user(
+        nethsm,
+        user_id="test",
+        namespace="ns",
+        real_name="Test",
+        role=Role.ADMINISTRATOR,
+    )
+    nethsm.add_namespace("ns")
+
+    tag = "nstag"
+    with login(user) as nethsm_ns:
+        key_id_ns = nethsm_ns.generate_key(
+            KeyType.RSA, [KeyMechanism.RSA_DECRYPTION_RAW], 2048
+        )
+
+        nethsm_ns.add_key_tag(key_id_ns, tag)
+        key = nethsm_ns.get_key(key_id_ns)
+        assert key.tags == [tag]
+
+        nethsm_ns.delete_key_tag(key_id_ns, tag)
+        key = nethsm_ns.get_key(key_id_ns)
+        assert key.tags == []
+
+    nethsm.delete_namespace("ns")
+    nethsm.delete_user("ns~test")
+
+
+def test_namespace_tag_readd(nethsm: NetHSM) -> None:
+    user = add_user(
+        nethsm,
+        user_id="test",
+        namespace="ns",
+        real_name="Test",
+        role=Role.ADMINISTRATOR,
+    )
+    nethsm.add_namespace("ns")
+
+    tag = "nstag"
+    with login(user) as nethsm_ns:
+        key_id_ns = nethsm_ns.generate_key(
+            KeyType.RSA, [KeyMechanism.RSA_DECRYPTION_RAW], 2048
+        )
+
+        nethsm_ns.add_key_tag(key_id_ns, tag)
+        key = nethsm_ns.get_key(key_id_ns)
+        assert key.tags == [tag]
+
+        nethsm_ns.delete_key_tag(key_id_ns, tag)
+        key = nethsm_ns.get_key(key_id_ns)
+
+        nethsm_ns.add_key_tag(key_id_ns, tag)
+        key = nethsm_ns.get_key(key_id_ns)
+        assert key.tags == [tag]
+
+    nethsm.delete_namespace("ns")
+    nethsm.delete_user("ns~test")
