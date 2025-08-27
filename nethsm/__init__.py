@@ -27,6 +27,7 @@ from typing import (
     Mapping,
     NoReturn,
     Optional,
+    TypeVar,
     Union,
 )
 from urllib.parse import urlencode
@@ -38,6 +39,7 @@ from urllib3 import HTTPResponse, _collections
 if TYPE_CHECKING:
     from .client import ApiException
     from .client.apis.tags.default_api import DefaultApi
+    from .client.schemas import Unset
 
 
 Bytes = Union[BufferedReader, FileIO, bytes]
@@ -99,10 +101,13 @@ class UnattendedBootStatus(enum.Enum):
 class KeyType(enum.Enum):
     RSA = "RSA"
     CURVE25519 = "Curve25519"
-    EC_P224 = "EC_P224"
     EC_P256 = "EC_P256"
     EC_P384 = "EC_P384"
     EC_P521 = "EC_P521"
+    EC_P256K1 = "EC_P256K1"
+    BRAINPOOL_P256 = "BrainpoolP256"
+    BRAINPOOL_P384 = "BrainpoolP384"
+    BRAINPOOL_P512 = "BrainpoolP512"
     GENERIC = "Generic"
 
     @staticmethod
@@ -131,6 +136,7 @@ class KeyMechanism(enum.Enum):
     RSA_SIGNATURE_PSS_SHA512 = "RSA_Signature_PSS_SHA512"
     EDDSA_SIGNATURE = "EdDSA_Signature"
     ECDSA_SIGNATURE = "ECDSA_Signature"
+    BIP340_SIGNATURE = "BIP340_Signature"
     AES_ENCRYPTION_CBC = "AES_Encryption_CBC"
     AES_DECRYPTION_CBC = "AES_Decryption_CBC"
 
@@ -182,6 +188,7 @@ class SignMode(enum.Enum):
     PSS_SHA512 = "PSS_SHA512"
     EDDSA = "EdDSA"
     ECDSA = "ECDSA"
+    BIP340 = "BIP340"
 
     @staticmethod
     def from_string(s: str) -> "SignMode":
@@ -194,10 +201,12 @@ class SignMode(enum.Enum):
 class TlsKeyType(enum.Enum):
     RSA = "RSA"
     CURVE25519 = "Curve25519"
-    EC_P224 = "EC_P224"
     EC_P256 = "EC_P256"
     EC_P384 = "EC_P384"
     EC_P521 = "EC_P521"
+    BRAINPOOL_P256 = "BrainpoolP256"
+    BRAINPOOL_P384 = "BrainpoolP384"
+    BRAINPOOL_P512 = "BrainpoolP512"
 
     @staticmethod
     def from_string(s: str) -> "TlsKeyType":
@@ -377,6 +386,10 @@ def _handle_api_exception(
     roles: list[Role] = [],
     state: Optional[State] = None,
 ) -> NoReturn:
+    from .client.api_response import ApiResponseWithoutDeserialization
+    from .client.components.schema.error_response import ErrorResponseDict
+    from .client.schemas import Unset
+
     if e.status in messages:
         message = messages[e.status]
         raise NetHSMError(message)
@@ -407,21 +420,22 @@ def _handle_api_exception(
         message = f"Unexpected API error {e.status}: {e.reason}"
 
     if e.api_response:
-        try:
-            body = None
-            # "custom" requests
-            if hasattr(e.api_response, "text") and e.api_response.text != "":
-                body = json.loads(e.api_response.text)
-            # generated code
-            elif (
-                hasattr(e.api_response, "response")
-                and e.api_response.response.data != ""
-            ):
-                body = json.loads(e.api_response.response.data)
-            if body is not None and "message" in body:
-                message += "\n" + body["message"]
-        except json.JSONDecodeError:
-            pass
+        custom_message = None
+        # Raw responses returned by the _request function or for skip_deserialization=True
+        if isinstance(e.api_response, ApiResponseWithoutDeserialization):
+            try:
+                response = e.api_response.response.json()
+                if "message" in response:
+                    custom_message = response["message"]
+            except json.JSONDecodeError:
+                pass
+        # Errors raised by the auto-generated client
+        elif isinstance(e.api_response.body, ErrorResponseDict):
+            if not isinstance(e.api_response.body.message, Unset):
+                custom_message = e.api_response.body.message
+
+        if custom_message is not None:
+            message += "\n" + custom_message
 
     raise NetHSMError(message)
 
@@ -441,6 +455,17 @@ class NetHSMRequestError(Exception):
         super().__init__(f"NetHSM API request error: {type.value} {reason}")
         self.type = type
         self.reason = reason
+
+
+_T = TypeVar("_T")
+
+
+def _optional(value: Optional[_T]) -> Union[_T, "Unset"]:
+    from .client.schemas import Unset
+
+    if value is None:
+        return Unset()
+    return value
 
 
 class NetHSM:
@@ -926,22 +951,42 @@ class NetHSM:
             _handle_exception(e, state=State.OPERATIONAL, roles=[Role.METRICS])
         return response.body
 
-    def list_keys(self, filter: Optional[str] = None) -> list[str]:
+    def list_keys(
+        self, filter: Optional[str] = None, prefix: Optional[str] = None
+    ) -> list[str]:
         from .client.paths.keys.get.query_parameters import QueryParametersDict
+        from .client.paths.keys_key_prefix.get.path_parameters import (
+            PathParametersDict as PrefixPathParametersDict,
+        )
+        from .client.paths.keys_key_prefix.get.query_parameters import (
+            QueryParametersDict as PrefixQueryParametersDict,
+        )
 
         try:
-            if filter:
-                query_params = QueryParametersDict(filter=filter)
-                response = self._get_api().keys_get(query_params=query_params)
+            if prefix is not None:
+                prefix_path_params = PrefixPathParametersDict(KeyPrefix=prefix)
+                prefix_query_params = None
+                if filter is not None:
+                    prefix_query_params = PrefixQueryParametersDict(filter=filter)
+                response = (
+                    self._get_api()
+                    .keys_key_prefix_get(
+                        path_params=prefix_path_params, query_params=prefix_query_params
+                    )
+                    .body
+                )
             else:
-                response = self._get_api().keys_get()
+                query_params = None
+                if filter is not None:
+                    query_params = QueryParametersDict(filter=filter)
+                response = self._get_api().keys_get(query_params=query_params).body
         except Exception as e:
             _handle_exception(
                 e,
                 state=State.OPERATIONAL,
                 roles=[Role.ADMINISTRATOR, Role.OPERATOR],
             )
-        return [item.id for item in response.body]
+        return [item.id for item in response]
 
     def get_key(self, key_id: str) -> Key:
         from .client.paths.keys_key_id.get.path_parameters import PathParametersDict
@@ -1173,6 +1218,27 @@ class NetHSM:
                 },
             )
 
+    def move_key(self, old_key_id: str, new_key_id: str) -> None:
+        from .client.components.schema.move_key_request import MoveKeyRequestDict
+        from .client.paths.keys_key_id_move.post.path_parameters import (
+            PathParametersDict,
+        )
+
+        body = MoveKeyRequestDict(newId=new_key_id)
+        path_params = PathParametersDict(KeyID=old_key_id)
+        try:
+            self._get_api().keys_key_id_move_post(body=body, path_params=path_params)
+        except Exception as e:
+            _handle_exception(
+                e,
+                state=State.OPERATIONAL,
+                roles=[Role.ADMINISTRATOR],
+                messages={
+                    404: f"Key {old_key_id} not found",
+                    409: f"Conflict -- a key with the ID {new_key_id} already exists",
+                },
+            )
+
     def generate_key(
         self,
         type: KeyType,
@@ -1357,23 +1423,28 @@ class NetHSM:
 
     def csr(
         self,
+        *,
+        common_name: str,
         country: Optional[str] = None,
         state_or_province: Optional[str] = None,
         locality: Optional[str] = None,
         organization: Optional[str] = None,
         organizational_unit: Optional[str] = None,
-        common_name: Optional[str] = None,
         email_address: Optional[str] = None,
+        subject_alt_names: Optional[list[str]] = None,
     ) -> str:
-        body = {
-            "countryName": country,
-            "stateOrProvinceName": state_or_province,
-            "localityName": locality,
-            "organizationName": organization,
-            "organizationalUnitName": organizational_unit,
-            "commonName": common_name,
-            "emailAddress": email_address,
-        }
+        from .client.components.schema.distinguished_name import DistinguishedNameDict
+
+        body = DistinguishedNameDict(
+            commonName=common_name,
+            countryName=_optional(country),
+            stateOrProvinceName=_optional(state_or_province),
+            localityName=_optional(locality),
+            organizationName=_optional(organization),
+            organizationalUnitName=_optional(organizational_unit),
+            emailAddress=_optional(email_address),
+            subjectAltNames=_optional(subject_alt_names),
+        )
         try:
             response = self._get_api().config_tls_csr_pem_post(
                 body=body, skip_deserialization=True
@@ -1390,11 +1461,10 @@ class NetHSM:
         from .client.components.schema.tls_key_generate_request_data import (
             TlsKeyGenerateRequestDataDict,
         )
-        from .client.schemas import Unset
 
         body = TlsKeyGenerateRequestDataDict(
             type=type.value,
-            length=length if length is not None else Unset(),
+            length=_optional(length),
         )
 
         try:
@@ -1405,28 +1475,32 @@ class NetHSM:
     def key_csr(
         self,
         key_id: str,
+        *,
+        common_name: str,
         country: Optional[str] = None,
         state_or_province: Optional[str] = None,
         locality: Optional[str] = None,
         organization: Optional[str] = None,
         organizational_unit: Optional[str] = None,
-        common_name: Optional[str] = None,
         email_address: Optional[str] = None,
+        subject_alt_names: Optional[list[str]] = None,
     ) -> str:
+        from .client.components.schema.distinguished_name import DistinguishedNameDict
         from .client.paths.keys_key_id_csr_pem.post.path_parameters import (
             PathParametersDict,
         )
 
         path_params = PathParametersDict(KeyID=key_id)
-        body = {
-            "countryName": country,
-            "stateOrProvinceName": state_or_province,
-            "localityName": locality,
-            "organizationName": organization,
-            "organizationalUnitName": organizational_unit,
-            "commonName": common_name,
-            "emailAddress": email_address,
-        }
+        body = DistinguishedNameDict(
+            commonName=common_name,
+            countryName=_optional(country),
+            stateOrProvinceName=_optional(state_or_province),
+            localityName=_optional(locality),
+            organizationName=_optional(organization),
+            organizationalUnitName=_optional(organizational_unit),
+            emailAddress=_optional(email_address),
+            subjectAltNames=_optional(subject_alt_names),
+        )
         try:
             response = self._get_api().keys_key_id_csr_pem_post(
                 path_params=path_params, body=body, skip_deserialization=True
@@ -1678,11 +1752,7 @@ class NetHSM:
         try:
             self._get_api().system_shutdown_post()
         except Exception as e:
-            _handle_exception(
-                e,
-                state=State.OPERATIONAL,
-                roles=[Role.ADMINISTRATOR],
-            )
+            _handle_exception(e)
 
     def factory_reset(self) -> None:
         try:

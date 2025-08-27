@@ -51,10 +51,13 @@ class PrivateKeyDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES]):
         type: typing.Literal[
             "RSA",
             "Curve25519",
-            "EC_P224",
             "EC_P256",
             "EC_P384",
             "EC_P521",
+            "EC_P256K1",
+            "BrainpoolP256",
+            "BrainpoolP384",
+            "BrainpoolP512",
             "Generic"
         ],
         restrictions: typing.Union[
@@ -105,9 +108,9 @@ class PrivateKeyDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES]):
         )
     
     @property
-    def type(self) -> typing.Literal["RSA", "Curve25519", "EC_P224", "EC_P256", "EC_P384", "EC_P521", "Generic"]:
+    def type(self) -> typing.Literal["RSA", "Curve25519", "EC_P256", "EC_P384", "EC_P521", "EC_P256K1", "BrainpoolP256", "BrainpoolP384", "BrainpoolP512", "Generic"]:
         return typing.cast(
-            typing.Literal["RSA", "Curve25519", "EC_P224", "EC_P256", "EC_P384", "EC_P521", "Generic"],
+            typing.Literal["RSA", "Curve25519", "EC_P256", "EC_P384", "EC_P521", "EC_P256K1", "BrainpoolP256", "BrainpoolP384", "BrainpoolP512", "Generic"],
             self.__getitem__("type")
         )
     

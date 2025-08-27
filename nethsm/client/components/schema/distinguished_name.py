@@ -17,6 +17,57 @@ OrganizationName: typing_extensions.TypeAlias = schemas.StrSchema
 OrganizationalUnitName: typing_extensions.TypeAlias = schemas.StrSchema
 CommonName: typing_extensions.TypeAlias = schemas.StrSchema
 EmailAddress: typing_extensions.TypeAlias = schemas.StrSchema
+Items: typing_extensions.TypeAlias = schemas.StrSchema
+
+
+class SubjectAltNamesTuple(
+    typing.Tuple[
+        str,
+        ...
+    ]
+):
+
+    def __new__(cls, arg: typing.Union[SubjectAltNamesTupleInput, SubjectAltNamesTuple], configuration: typing.Optional[schema_configuration.SchemaConfiguration] = None):
+        return SubjectAltNames.validate(arg, configuration=configuration)
+SubjectAltNamesTupleInput = typing.Union[
+    typing.List[
+        str,
+    ],
+    typing.Tuple[
+        str,
+        ...
+    ]
+]
+
+
+@dataclasses.dataclass(frozen=True)
+class SubjectAltNames(
+    schemas.Schema[schemas.immutabledict, SubjectAltNamesTuple]
+):
+    types: typing.FrozenSet[typing.Type] = frozenset({tuple})
+    items: typing.Type[Items] = dataclasses.field(default_factory=lambda: Items) # type: ignore
+    type_to_output_cls: typing.Mapping[
+        typing.Type,
+        typing.Type
+    ] = dataclasses.field(
+        default_factory=lambda: {
+            tuple: SubjectAltNamesTuple
+        }
+    )
+
+    @classmethod
+    def validate(
+        cls,
+        arg: typing.Union[
+            SubjectAltNamesTupleInput,
+            SubjectAltNamesTuple,
+        ],
+        configuration: typing.Optional[schema_configuration.SchemaConfiguration] = None
+    ) -> SubjectAltNamesTuple:
+        return super().validate_base(
+            arg,
+            configuration=configuration,
+        )
 Properties = typing.TypedDict(
     'Properties',
     {
@@ -27,6 +78,7 @@ Properties = typing.TypedDict(
         "organizationalUnitName": typing.Type[OrganizationalUnitName],
         "commonName": typing.Type[CommonName],
         "emailAddress": typing.Type[EmailAddress],
+        "subjectAltNames": typing.Type[SubjectAltNames],
     }
 )
 
@@ -43,6 +95,7 @@ class DistinguishedNameDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES
         "organizationName",
         "organizationalUnitName",
         "emailAddress",
+        "subjectAltNames",
     })
     
     def __new__(
@@ -73,6 +126,11 @@ class DistinguishedNameDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES
             str,
             schemas.Unset
         ] = schemas.unset,
+        subjectAltNames: typing.Union[
+            SubjectAltNamesTupleInput,
+            SubjectAltNamesTuple,
+            schemas.Unset
+        ] = schemas.unset,
         configuration_: typing.Optional[schema_configuration.SchemaConfiguration] = None,
         **kwargs: schemas.INPUT_TYPES_ALL,
     ):
@@ -86,6 +144,7 @@ class DistinguishedNameDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES
             ("organizationName", organizationName),
             ("organizationalUnitName", organizationalUnitName),
             ("emailAddress", emailAddress),
+            ("subjectAltNames", subjectAltNames),
         ):
             if isinstance(val, schemas.Unset):
                 continue
@@ -171,6 +230,16 @@ class DistinguishedNameDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES
             val
         )
     
+    @property
+    def subjectAltNames(self) -> typing.Union[SubjectAltNamesTuple, schemas.Unset]:
+        val = self.get("subjectAltNames", schemas.unset)
+        if isinstance(val, schemas.Unset):
+            return val
+        return typing.cast(
+            SubjectAltNamesTuple,
+            val
+        )
+    
     def get_additional_property_(self, name: str) -> typing.Union[schemas.OUTPUT_BASE_TYPES, schemas.Unset]:
         schemas.raise_if_key_known(name, self.__required_keys__, self.__optional_keys__)
         return self.get(name, schemas.unset)
@@ -185,6 +254,11 @@ class DistinguishedName(
     Ref: https://github.com/openapi-json-schema-tools/openapi-json-schema-generator
 
     Do not edit the class manually.
+
+    Data used for creation of CSRs.
+If subjectAltNames is omitted, it is set to the same value as
+commonName. If it is set to an empty list, no SAN Extension is added.
+
     """
     types: typing.FrozenSet[typing.Type] = frozenset({schemas.immutabledict})
     required: typing.FrozenSet[str] = frozenset({

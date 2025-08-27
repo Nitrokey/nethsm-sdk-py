@@ -27,5 +27,5 @@ class ID(
     max_length: int = 128
     min_length: int = 1
     pattern: schemas.PatternInfo = schemas.PatternInfo(
-        pattern=r'^[a-zA-Z0-9]+$'  # noqa: E501
+        pattern=r'^[a-zA-Z0-9][a-zA-Z0-9_.-]*$'  # noqa: E501
     )

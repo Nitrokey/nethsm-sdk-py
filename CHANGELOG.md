@@ -2,7 +2,24 @@
 
 ## Unreleased
 
--
+### Breaking Changes
+
+- Remove `KeyType.EC_P224`
+- Change arguments for `NetHSM.csr` and `NetHSM.key_csr`:
+  - Require `common_name` argument
+  - Require using keywords for all arguments (except for `key_id`)
+
+### Features
+
+- Add new enum values:
+  - `KeyType`: `EC_P256K1`, `BrainpoolP256`, `BrainpoolP384`, `BrainpoolP512`
+  - `KeyMechanism`: `BIP340_Signature`
+  - `SignMode`: `BIP340`
+  - `TlsKeyType`: `BrainpoolP256`, `BrainpoolP384`, `BrainpoolP512`
+- Add support for dots, dashes and underscores in user and key IDs
+- Add `NetHSM.move_key` function for changing key IDs
+- Add optional `subject_alt_names` argument for `NetHSM.csr` and `NetHSM.key_csr`
+- Add optional `prefix` argument for `NetHSM.list_keys`
 
 [All Changes](https://github.com/Nitrokey/nethsm-sdk-py/compare/v1.4.1...HEAD)
 

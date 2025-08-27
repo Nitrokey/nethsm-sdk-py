@@ -13,12 +13,15 @@ from .responses import (
     response_401,
     response_403,
     response_406,
-    response_412,
 )
-from .security import security_requirement_object_0
+from .security import (
+    security_requirement_object_0,
+    security_requirement_object_1,
+)
 
 _security: typing.List[security_schemes.SecurityRequirementObject] = [
     security_requirement_object_0.security_requirement_object,
+    security_requirement_object_1.security_requirement_object,
 ]
 
 
@@ -29,7 +32,6 @@ __StatusCodeToResponse = typing.TypedDict(
         '401': typing.Type[response_401.ResponseFor401],
         '403': typing.Type[response_403.ResponseFor403],
         '406': typing.Type[response_406.ResponseFor406],
-        '412': typing.Type[response_412.ResponseFor412],
     }
 )
 _status_code_to_response: __StatusCodeToResponse = {
@@ -37,7 +39,6 @@ _status_code_to_response: __StatusCodeToResponse = {
     '401': response_401.ResponseFor401,
     '403': response_403.ResponseFor403,
     '406': response_406.ResponseFor406,
-    '412': response_412.ResponseFor412,
 }
 _non_error_status_codes = frozenset({
     '204',
@@ -46,7 +47,6 @@ _error_status_codes = frozenset({
     '401',
     '403',
     '406',
-    '412',
 })
 
 
@@ -128,7 +128,6 @@ class BaseApi(api_client.Api):
                     '401',
                     '403',
                     '406',
-                    '412',
                 ],
                 status
             )

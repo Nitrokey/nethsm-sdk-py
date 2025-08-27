@@ -42,6 +42,10 @@ _error_status_codes = frozenset({
     '412',
 })
 
+_all_accept_content_types = (
+    "application/json",
+)
+
 
 class BaseApi(api_client.Api):
     @typing.overload
@@ -54,6 +58,7 @@ class BaseApi(api_client.Api):
         *,
         skip_deserialization: typing.Literal[False] = False,
         content_type: typing.Literal["application/json"] = "application/json",
+        accept_content_types: typing.Tuple[str, ...] = _all_accept_content_types,
         server_index: typing.Optional[int] = None,
         stream: bool = False,
         timeout: typing.Optional[typing.Union[int, float, typing.Tuple]] = None,
@@ -69,6 +74,7 @@ class BaseApi(api_client.Api):
         *,
         skip_deserialization: typing.Literal[True],
         content_type: typing.Literal["application/json"] = "application/json",
+        accept_content_types: typing.Tuple[str, ...] = _all_accept_content_types,
         server_index: typing.Optional[int] = None,
         stream: bool = False,
         timeout: typing.Optional[typing.Union[int, float, typing.Tuple]] = None,
@@ -83,6 +89,7 @@ class BaseApi(api_client.Api):
         *,
         skip_deserialization: bool = False,
         content_type: typing.Literal["application/json"] = "application/json",
+        accept_content_types: typing.Tuple[str, ...] = _all_accept_content_types,
         server_index: typing.Optional[int] = None,
         stream: bool = False,
         timeout: typing.Optional[typing.Union[int, float, typing.Tuple]] = None,
@@ -93,7 +100,7 @@ class BaseApi(api_client.Api):
             class instances
         """
         used_path = path
-        headers = self._get_headers()
+        headers = self._get_headers(accept_content_types=accept_content_types)
         # TODO add cookie handling
 
         fields, serialized_body = self._get_fields_and_body(

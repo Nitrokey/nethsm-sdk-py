@@ -83,6 +83,10 @@ class KeyMechanismEnums:
         return KeyMechanism.validate("ECDSA_Signature")
 
     @schemas.classproperty
+    def BIP340_SIGNATURE(cls) -> typing.Literal["BIP340_Signature"]:
+        return KeyMechanism.validate("BIP340_Signature")
+
+    @schemas.classproperty
     def AES_ENCRYPTION_CBC(cls) -> typing.Literal["AES_Encryption_CBC"]:
         return KeyMechanism.validate("AES_Encryption_CBC")
 
@@ -122,6 +126,7 @@ class KeyMechanism(
             "RSA_Signature_PSS_SHA512": "RSA_SIGNATURE_PSS_SHA512",
             "EdDSA_Signature": "ED_DSA_SIGNATURE",
             "ECDSA_Signature": "ECDSA_SIGNATURE",
+            "BIP340_Signature": "BIP340_SIGNATURE",
             "AES_Encryption_CBC": "AES_ENCRYPTION_CBC",
             "AES_Decryption_CBC": "AES_DECRYPTION_CBC",
         }
@@ -251,6 +256,13 @@ class KeyMechanism(
     @classmethod
     def validate(
         cls,
+        arg: typing.Literal["BIP340_Signature"],
+        configuration: typing.Optional[schema_configuration.SchemaConfiguration] = None
+    ) -> typing.Literal["BIP340_Signature"]: ...
+    @typing.overload
+    @classmethod
+    def validate(
+        cls,
         arg: typing.Literal["AES_Encryption_CBC"],
         configuration: typing.Optional[schema_configuration.SchemaConfiguration] = None
     ) -> typing.Literal["AES_Encryption_CBC"]: ...
@@ -267,7 +279,7 @@ class KeyMechanism(
         cls,
         arg: str,
         configuration: typing.Optional[schema_configuration.SchemaConfiguration] = None
-    ) -> typing.Literal["RSA_Decryption_RAW","RSA_Decryption_PKCS1","RSA_Decryption_OAEP_MD5","RSA_Decryption_OAEP_SHA1","RSA_Decryption_OAEP_SHA224","RSA_Decryption_OAEP_SHA256","RSA_Decryption_OAEP_SHA384","RSA_Decryption_OAEP_SHA512","RSA_Signature_PKCS1","RSA_Signature_PSS_MD5","RSA_Signature_PSS_SHA1","RSA_Signature_PSS_SHA224","RSA_Signature_PSS_SHA256","RSA_Signature_PSS_SHA384","RSA_Signature_PSS_SHA512","EdDSA_Signature","ECDSA_Signature","AES_Encryption_CBC","AES_Decryption_CBC",]: ...
+    ) -> typing.Literal["RSA_Decryption_RAW","RSA_Decryption_PKCS1","RSA_Decryption_OAEP_MD5","RSA_Decryption_OAEP_SHA1","RSA_Decryption_OAEP_SHA224","RSA_Decryption_OAEP_SHA256","RSA_Decryption_OAEP_SHA384","RSA_Decryption_OAEP_SHA512","RSA_Signature_PKCS1","RSA_Signature_PSS_MD5","RSA_Signature_PSS_SHA1","RSA_Signature_PSS_SHA224","RSA_Signature_PSS_SHA256","RSA_Signature_PSS_SHA384","RSA_Signature_PSS_SHA512","EdDSA_Signature","ECDSA_Signature","BIP340_Signature","AES_Encryption_CBC","AES_Decryption_CBC",]: ...
     @classmethod
     def validate(
         cls,
@@ -291,6 +303,7 @@ class KeyMechanism(
         "RSA_Signature_PSS_SHA512",
         "EdDSA_Signature",
         "ECDSA_Signature",
+        "BIP340_Signature",
         "AES_Encryption_CBC",
         "AES_Decryption_CBC",
     ]:
@@ -316,6 +329,7 @@ class KeyMechanism(
                 "RSA_Signature_PSS_SHA512",
                 "EdDSA_Signature",
                 "ECDSA_Signature",
+                "BIP340_Signature",
                 "AES_Encryption_CBC",
                 "AES_Decryption_CBC",
             ],

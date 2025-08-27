@@ -12,11 +12,11 @@ from nethsm.client.shared_imports.schema_imports import *  # pyright: ignore [re
 
 AdditionalProperties: typing_extensions.TypeAlias = schemas.NotAnyTypeSchema
 
-from nethsm.client.paths.keys_key_id_decrypt.parameters.parameter_0 import schema
+from nethsm.client.components.schema import id
 Properties = typing.TypedDict(
     'Properties',
     {
-        "KeyID": typing.Type[schema.Schema],
+        "KeyID": typing.Type[id.ID],
     }
 )
 

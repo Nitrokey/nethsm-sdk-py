@@ -44,7 +44,8 @@ class SignRequestDataDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES])
             "PSS_SHA384",
             "PSS_SHA512",
             "EdDSA",
-            "ECDSA"
+            "ECDSA",
+            "BIP340"
         ],
         configuration_: typing.Optional[schema_configuration.SchemaConfiguration] = None,
         **kwargs: schemas.INPUT_TYPES_ALL,
@@ -75,9 +76,9 @@ class SignRequestDataDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES])
         )
     
     @property
-    def mode(self) -> typing.Literal["PKCS1", "PSS_MD5", "PSS_SHA1", "PSS_SHA224", "PSS_SHA256", "PSS_SHA384", "PSS_SHA512", "EdDSA", "ECDSA"]:
+    def mode(self) -> typing.Literal["PKCS1", "PSS_MD5", "PSS_SHA1", "PSS_SHA224", "PSS_SHA256", "PSS_SHA384", "PSS_SHA512", "EdDSA", "ECDSA", "BIP340"]:
         return typing.cast(
-            typing.Literal["PKCS1", "PSS_MD5", "PSS_SHA1", "PSS_SHA224", "PSS_SHA256", "PSS_SHA384", "PSS_SHA512", "EdDSA", "ECDSA"],
+            typing.Literal["PKCS1", "PSS_MD5", "PSS_SHA1", "PSS_SHA224", "PSS_SHA256", "PSS_SHA384", "PSS_SHA512", "EdDSA", "ECDSA", "BIP340"],
             self.__getitem__("mode")
         )
     

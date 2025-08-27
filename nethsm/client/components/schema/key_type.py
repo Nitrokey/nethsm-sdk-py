@@ -23,10 +23,6 @@ class KeyTypeEnums:
         return KeyType.validate("Curve25519")
 
     @schemas.classproperty
-    def EC_P224(cls) -> typing.Literal["EC_P224"]:
-        return KeyType.validate("EC_P224")
-
-    @schemas.classproperty
     def EC_P256(cls) -> typing.Literal["EC_P256"]:
         return KeyType.validate("EC_P256")
 
@@ -37,6 +33,22 @@ class KeyTypeEnums:
     @schemas.classproperty
     def EC_P521(cls) -> typing.Literal["EC_P521"]:
         return KeyType.validate("EC_P521")
+
+    @schemas.classproperty
+    def EC_P256K1(cls) -> typing.Literal["EC_P256K1"]:
+        return KeyType.validate("EC_P256K1")
+
+    @schemas.classproperty
+    def BRAINPOOL_P256(cls) -> typing.Literal["BrainpoolP256"]:
+        return KeyType.validate("BrainpoolP256")
+
+    @schemas.classproperty
+    def BRAINPOOL_P384(cls) -> typing.Literal["BrainpoolP384"]:
+        return KeyType.validate("BrainpoolP384")
+
+    @schemas.classproperty
+    def BRAINPOOL_P512(cls) -> typing.Literal["BrainpoolP512"]:
+        return KeyType.validate("BrainpoolP512")
 
     @schemas.classproperty
     def GENERIC(cls) -> typing.Literal["Generic"]:
@@ -59,10 +71,13 @@ class KeyType(
         default_factory=lambda: {
             "RSA": "RSA",
             "Curve25519": "CURVE25519",
-            "EC_P224": "EC_P224",
             "EC_P256": "EC_P256",
             "EC_P384": "EC_P384",
             "EC_P521": "EC_P521",
+            "EC_P256K1": "EC_P256K1",
+            "BrainpoolP256": "BRAINPOOL_P256",
+            "BrainpoolP384": "BRAINPOOL_P384",
+            "BrainpoolP512": "BRAINPOOL_P512",
             "Generic": "GENERIC",
         }
     )
@@ -82,13 +97,6 @@ class KeyType(
         arg: typing.Literal["Curve25519"],
         configuration: typing.Optional[schema_configuration.SchemaConfiguration] = None
     ) -> typing.Literal["Curve25519"]: ...
-    @typing.overload
-    @classmethod
-    def validate(
-        cls,
-        arg: typing.Literal["EC_P224"],
-        configuration: typing.Optional[schema_configuration.SchemaConfiguration] = None
-    ) -> typing.Literal["EC_P224"]: ...
     @typing.overload
     @classmethod
     def validate(
@@ -114,6 +122,34 @@ class KeyType(
     @classmethod
     def validate(
         cls,
+        arg: typing.Literal["EC_P256K1"],
+        configuration: typing.Optional[schema_configuration.SchemaConfiguration] = None
+    ) -> typing.Literal["EC_P256K1"]: ...
+    @typing.overload
+    @classmethod
+    def validate(
+        cls,
+        arg: typing.Literal["BrainpoolP256"],
+        configuration: typing.Optional[schema_configuration.SchemaConfiguration] = None
+    ) -> typing.Literal["BrainpoolP256"]: ...
+    @typing.overload
+    @classmethod
+    def validate(
+        cls,
+        arg: typing.Literal["BrainpoolP384"],
+        configuration: typing.Optional[schema_configuration.SchemaConfiguration] = None
+    ) -> typing.Literal["BrainpoolP384"]: ...
+    @typing.overload
+    @classmethod
+    def validate(
+        cls,
+        arg: typing.Literal["BrainpoolP512"],
+        configuration: typing.Optional[schema_configuration.SchemaConfiguration] = None
+    ) -> typing.Literal["BrainpoolP512"]: ...
+    @typing.overload
+    @classmethod
+    def validate(
+        cls,
         arg: typing.Literal["Generic"],
         configuration: typing.Optional[schema_configuration.SchemaConfiguration] = None
     ) -> typing.Literal["Generic"]: ...
@@ -123,7 +159,7 @@ class KeyType(
         cls,
         arg: str,
         configuration: typing.Optional[schema_configuration.SchemaConfiguration] = None
-    ) -> typing.Literal["RSA","Curve25519","EC_P224","EC_P256","EC_P384","EC_P521","Generic",]: ...
+    ) -> typing.Literal["RSA","Curve25519","EC_P256","EC_P384","EC_P521","EC_P256K1","BrainpoolP256","BrainpoolP384","BrainpoolP512","Generic",]: ...
     @classmethod
     def validate(
         cls,
@@ -132,10 +168,13 @@ class KeyType(
     ) -> typing.Literal[
         "RSA",
         "Curve25519",
-        "EC_P224",
         "EC_P256",
         "EC_P384",
         "EC_P521",
+        "EC_P256K1",
+        "BrainpoolP256",
+        "BrainpoolP384",
+        "BrainpoolP512",
         "Generic",
     ]:
         validated_arg = super().validate_base(
@@ -145,10 +184,13 @@ class KeyType(
         return typing.cast(typing.Literal[
                 "RSA",
                 "Curve25519",
-                "EC_P224",
                 "EC_P256",
                 "EC_P384",
                 "EC_P521",
+                "EC_P256K1",
+                "BrainpoolP256",
+                "BrainpoolP384",
+                "BrainpoolP512",
                 "Generic",
             ],
             validated_arg

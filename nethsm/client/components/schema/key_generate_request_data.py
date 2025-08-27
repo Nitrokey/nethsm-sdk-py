@@ -61,10 +61,13 @@ class KeyGenerateRequestDataDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_
         type: typing.Literal[
             "RSA",
             "Curve25519",
-            "EC_P224",
             "EC_P256",
             "EC_P384",
             "EC_P521",
+            "EC_P256K1",
+            "BrainpoolP256",
+            "BrainpoolP384",
+            "BrainpoolP512",
             "Generic"
         ],
         length: typing.Union[
@@ -117,9 +120,9 @@ class KeyGenerateRequestDataDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_
         )
     
     @property
-    def type(self) -> typing.Literal["RSA", "Curve25519", "EC_P224", "EC_P256", "EC_P384", "EC_P521", "Generic"]:
+    def type(self) -> typing.Literal["RSA", "Curve25519", "EC_P256", "EC_P384", "EC_P521", "EC_P256K1", "BrainpoolP256", "BrainpoolP384", "BrainpoolP512", "Generic"]:
         return typing.cast(
-            typing.Literal["RSA", "Curve25519", "EC_P224", "EC_P256", "EC_P384", "EC_P521", "Generic"],
+            typing.Literal["RSA", "Curve25519", "EC_P256", "EC_P384", "EC_P521", "EC_P256K1", "BrainpoolP256", "BrainpoolP384", "BrainpoolP512", "Generic"],
             self.__getitem__("type")
         )
     

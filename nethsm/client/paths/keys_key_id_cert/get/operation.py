@@ -64,6 +64,7 @@ _error_status_codes = frozenset({
 
 _all_accept_content_types = (
     "application/octet-stream",
+    "application/json",
 )
 
 

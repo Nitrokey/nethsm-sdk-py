@@ -227,6 +227,17 @@ def test_delete_key_tag_get_key(nethsm: NetHSM) -> None:
     assert C.TAG3 in key.tags
 
 
+def test_move_key(nethsm: NetHSM) -> None:
+    add_key(nethsm)
+    generate_key(nethsm)
+
+    assert set(nethsm.list_keys()) == set([C.KEY_ID_GENERATED, C.KEY_ID_ADDED])
+    nethsm.move_key(C.KEY_ID_ADDED, "new-key-id")
+    assert set(nethsm.list_keys()) == set([C.KEY_ID_GENERATED, "new-key-id"])
+    nethsm.move_key("new-key-id", C.KEY_ID_ADDED)
+    assert set(nethsm.list_keys()) == set([C.KEY_ID_GENERATED, C.KEY_ID_ADDED])
+
+
 def test_list_get_keys(nethsm: nethsm_module.NetHSM) -> None:
     """List all keys on the NetHSM.
 
@@ -245,6 +256,20 @@ def test_list_get_keys(nethsm: nethsm_module.NetHSM) -> None:
         assert isinstance(key.public_key, RsaPublicKey)
         assert key.public_key.modulus
         assert key.public_key.public_exponent
+
+
+def test_list_keys_prefix(nethsm: NetHSM) -> None:
+    add_key(nethsm)
+    generate_key(nethsm)
+
+    all = set(["KeyIdAdded", "KeyIdGenerated"])
+
+    assert set(nethsm.list_keys()) == all
+    assert nethsm.list_keys(prefix="nothing") == []
+    assert nethsm.list_keys(prefix="key") == []
+    assert set(nethsm.list_keys(prefix="Key")) == all
+    assert nethsm.list_keys(prefix="KeyIdA") == ["KeyIdAdded"]
+    assert nethsm.list_keys(prefix="KeyIdAll") == []
 
 
 def test_delete_key(nethsm: NetHSM) -> None:

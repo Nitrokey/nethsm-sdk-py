@@ -22,9 +22,11 @@ from nethsm.client.apis.paths.keys_key_id_cert import KeysKeyIDCert
 from nethsm.client.apis.paths.keys_key_id_csr_pem import KeysKeyIDCsrPem
 from nethsm.client.apis.paths.keys_key_id_decrypt import KeysKeyIDDecrypt
 from nethsm.client.apis.paths.keys_key_id_encrypt import KeysKeyIDEncrypt
+from nethsm.client.apis.paths.keys_key_id_move import KeysKeyIDMove
 from nethsm.client.apis.paths.keys_key_id_public_pem import KeysKeyIDPublicPem
 from nethsm.client.apis.paths.keys_key_id_restrictions_tags_tag import KeysKeyIDRestrictionsTagsTag
 from nethsm.client.apis.paths.keys_key_id_sign import KeysKeyIDSign
+from nethsm.client.apis.paths.keys_key_prefix import KeysKeyPrefix
 from nethsm.client.apis.paths.lock import Lock
 from nethsm.client.apis.paths.metrics import Metrics
 from nethsm.client.apis.paths.namespaces import Namespaces
@@ -71,9 +73,11 @@ PathToApi = typing.TypedDict(
     "/keys/{KeyID}/csr.pem": typing.Type[KeysKeyIDCsrPem],
     "/keys/{KeyID}/decrypt": typing.Type[KeysKeyIDDecrypt],
     "/keys/{KeyID}/encrypt": typing.Type[KeysKeyIDEncrypt],
+    "/keys/{KeyID}/move": typing.Type[KeysKeyIDMove],
     "/keys/{KeyID}/public.pem": typing.Type[KeysKeyIDPublicPem],
     "/keys/{KeyID}/restrictions/tags/{Tag}": typing.Type[KeysKeyIDRestrictionsTagsTag],
     "/keys/{KeyID}/sign": typing.Type[KeysKeyIDSign],
+    "/keys/{KeyPrefix}*": typing.Type[KeysKeyPrefix],
     "/lock": typing.Type[Lock],
     "/metrics": typing.Type[Metrics],
     "/namespaces": typing.Type[Namespaces],
@@ -121,9 +125,11 @@ path_to_api = PathToApi(
     "/keys/{KeyID}/csr.pem": KeysKeyIDCsrPem,
     "/keys/{KeyID}/decrypt": KeysKeyIDDecrypt,
     "/keys/{KeyID}/encrypt": KeysKeyIDEncrypt,
+    "/keys/{KeyID}/move": KeysKeyIDMove,
     "/keys/{KeyID}/public.pem": KeysKeyIDPublicPem,
     "/keys/{KeyID}/restrictions/tags/{Tag}": KeysKeyIDRestrictionsTagsTag,
     "/keys/{KeyID}/sign": KeysKeyIDSign,
+    "/keys/{KeyPrefix}*": KeysKeyPrefix,
     "/lock": Lock,
     "/metrics": Metrics,
     "/namespaces": Namespaces,

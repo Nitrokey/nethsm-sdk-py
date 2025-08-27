@@ -274,13 +274,13 @@ def test_ca_certs_valid(container: Container) -> None:
         nethsm = NetHSM(C.HOST, auth=auth, verify_tls=False)
         try:
             csr_pem = nethsm.csr(
-                C.COUNTRY,
-                C.STATE_OR_PROVINCE,
-                C.LOCALITY,
-                C.ORGANIZATION,
-                C.ORGANIZATIONAL_UNIT,
-                C.COMMON_NAME,
-                C.EMAIL_ADDRESS,
+                country=C.COUNTRY,
+                state_or_province=C.STATE_OR_PROVINCE,
+                locality=C.LOCALITY,
+                organization=C.ORGANIZATION,
+                organizational_unit=C.ORGANIZATIONAL_UNIT,
+                common_name=C.COMMON_NAME,
+                email_address=C.EMAIL_ADDRESS,
             )
             csr = x509.load_pem_x509_csr(csr_pem.encode())
             cert = ca.sign(csr)
@@ -317,13 +317,13 @@ def test_ca_certs_valid(container: Container) -> None:
 
 def test_csr(nethsm: NetHSM) -> None:
     csr = nethsm.csr(
-        C.COUNTRY,
-        C.STATE_OR_PROVINCE,
-        C.LOCALITY,
-        C.ORGANIZATION,
-        C.ORGANIZATIONAL_UNIT,
-        C.COMMON_NAME,
-        C.EMAIL_ADDRESS,
+        country=C.COUNTRY,
+        state_or_province=C.STATE_OR_PROVINCE,
+        locality=C.LOCALITY,
+        organization=C.ORGANIZATION,
+        organizational_unit=C.ORGANIZATIONAL_UNIT,
+        common_name=C.COMMON_NAME,
+        email_address=C.EMAIL_ADDRESS,
     )
     print(csr)
 
@@ -331,13 +331,13 @@ def test_csr(nethsm: NetHSM) -> None:
 def test_set_certificate(nethsm: NetHSM) -> None:
 
     csr = nethsm.csr(
-        C.COUNTRY,
-        C.STATE_OR_PROVINCE,
-        C.LOCALITY,
-        C.ORGANIZATION,
-        C.ORGANIZATIONAL_UNIT,
-        C.COMMON_NAME,
-        C.EMAIL_ADDRESS,
+        country=C.COUNTRY,
+        state_or_province=C.STATE_OR_PROVINCE,
+        locality=C.LOCALITY,
+        organization=C.ORGANIZATION,
+        organizational_unit=C.ORGANIZATIONAL_UNIT,
+        common_name=C.COMMON_NAME,
+        email_address=C.EMAIL_ADDRESS,
     )
     cert = self_sign_csr(csr)
     nethsm.set_certificate(cert)

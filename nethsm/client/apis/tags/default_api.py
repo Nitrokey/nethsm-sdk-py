@@ -15,6 +15,7 @@ from nethsm.client.paths.keys_key_id_decrypt.post.operation import KeysKeyIDDecr
 from nethsm.client.paths.users_user_id_tags.get.operation import UsersUserIDTagsGet
 from nethsm.client.paths.config_tls_cert_pem.get.operation import ConfigTlsCertPemGet
 from nethsm.client.paths.config_tls_cert_pem.put.operation import ConfigTlsCertPemPut
+from nethsm.client.paths.keys_key_id_move.post.operation import KeysKeyIDMovePost
 from nethsm.client.paths.system_backup.post.operation import SystemBackupPost
 from nethsm.client.paths.provision.post.operation import ProvisionPost
 from nethsm.client.paths.keys_key_id_sign.post.operation import KeysKeyIDSignPost
@@ -42,6 +43,7 @@ from nethsm.client.paths.config_tls_public_pem.get.operation import ConfigTlsPub
 from nethsm.client.paths.info.get.operation import InfoGet
 from nethsm.client.paths.config_backup_passphrase.put.operation import ConfigBackupPassphrasePut
 from nethsm.client.paths.health_ready.get.operation import HealthReadyGet
+from nethsm.client.paths.keys_key_prefix.get.operation import KeysKeyPrefixGet
 from nethsm.client.paths.config_time.get.operation import ConfigTimeGet
 from nethsm.client.paths.config_time.put.operation import ConfigTimePut
 from nethsm.client.paths.system_shutdown.post.operation import SystemShutdownPost
@@ -80,6 +82,7 @@ class DefaultApi(
     UsersUserIDTagsGet,
     ConfigTlsCertPemGet,
     ConfigTlsCertPemPut,
+    KeysKeyIDMovePost,
     SystemBackupPost,
     ProvisionPost,
     KeysKeyIDSignPost,
@@ -107,6 +110,7 @@ class DefaultApi(
     InfoGet,
     ConfigBackupPassphrasePut,
     HealthReadyGet,
+    KeysKeyPrefixGet,
     ConfigTimeGet,
     ConfigTimePut,
     SystemShutdownPost,

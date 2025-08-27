@@ -12,11 +12,11 @@ from nethsm.client.shared_imports.schema_imports import *  # pyright: ignore [re
 
 AdditionalProperties: typing_extensions.TypeAlias = schemas.NotAnyTypeSchema
 
-from nethsm.client.paths.namespaces_namespace_id.parameters.parameter_0 import schema
+from nethsm.client.components.schema import id
 Properties = typing.TypedDict(
     'Properties',
     {
-        "NamespaceID": typing.Type[schema.Schema],
+        "NamespaceID": typing.Type[id.ID],
     }
 )
 

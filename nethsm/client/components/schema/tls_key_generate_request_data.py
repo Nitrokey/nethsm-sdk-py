@@ -48,10 +48,12 @@ class TlsKeyGenerateRequestDataDict(schemas.immutabledict[str, schemas.OUTPUT_BA
         type: typing.Literal[
             "RSA",
             "Curve25519",
-            "EC_P224",
             "EC_P256",
             "EC_P384",
-            "EC_P521"
+            "EC_P521",
+            "BrainpoolP256",
+            "BrainpoolP384",
+            "BrainpoolP512"
         ],
         length: typing.Union[
             int,
@@ -84,9 +86,9 @@ class TlsKeyGenerateRequestDataDict(schemas.immutabledict[str, schemas.OUTPUT_BA
         return TlsKeyGenerateRequestData.validate(arg, configuration=configuration)
     
     @property
-    def type(self) -> typing.Literal["RSA", "Curve25519", "EC_P224", "EC_P256", "EC_P384", "EC_P521"]:
+    def type(self) -> typing.Literal["RSA", "Curve25519", "EC_P256", "EC_P384", "EC_P521", "BrainpoolP256", "BrainpoolP384", "BrainpoolP512"]:
         return typing.cast(
-            typing.Literal["RSA", "Curve25519", "EC_P224", "EC_P256", "EC_P384", "EC_P521"],
+            typing.Literal["RSA", "Curve25519", "EC_P256", "EC_P384", "EC_P521", "BrainpoolP256", "BrainpoolP384", "BrainpoolP512"],
             self.__getitem__("type")
         )
     

@@ -50,6 +50,10 @@ class SignModeEnums:
     def ECDSA(cls) -> typing.Literal["ECDSA"]:
         return SignMode.validate("ECDSA")
 
+    @schemas.classproperty
+    def BIP340(cls) -> typing.Literal["BIP340"]:
+        return SignMode.validate("BIP340")
+
 
 @dataclasses.dataclass(frozen=True)
 class SignMode(
@@ -74,6 +78,7 @@ class SignMode(
             "PSS_SHA512": "PSS_SHA512",
             "EdDSA": "ED_DSA",
             "ECDSA": "ECDSA",
+            "BIP340": "BIP340",
         }
     )
     enums = SignModeEnums
@@ -145,9 +150,16 @@ class SignMode(
     @classmethod
     def validate(
         cls,
+        arg: typing.Literal["BIP340"],
+        configuration: typing.Optional[schema_configuration.SchemaConfiguration] = None
+    ) -> typing.Literal["BIP340"]: ...
+    @typing.overload
+    @classmethod
+    def validate(
+        cls,
         arg: str,
         configuration: typing.Optional[schema_configuration.SchemaConfiguration] = None
-    ) -> typing.Literal["PKCS1","PSS_MD5","PSS_SHA1","PSS_SHA224","PSS_SHA256","PSS_SHA384","PSS_SHA512","EdDSA","ECDSA",]: ...
+    ) -> typing.Literal["PKCS1","PSS_MD5","PSS_SHA1","PSS_SHA224","PSS_SHA256","PSS_SHA384","PSS_SHA512","EdDSA","ECDSA","BIP340",]: ...
     @classmethod
     def validate(
         cls,
@@ -163,6 +175,7 @@ class SignMode(
         "PSS_SHA512",
         "EdDSA",
         "ECDSA",
+        "BIP340",
     ]:
         validated_arg = super().validate_base(
             arg,
@@ -178,6 +191,7 @@ class SignMode(
                 "PSS_SHA512",
                 "EdDSA",
                 "ECDSA",
+                "BIP340",
             ],
             validated_arg
         )

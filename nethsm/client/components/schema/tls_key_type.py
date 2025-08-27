@@ -23,10 +23,6 @@ class TlsKeyTypeEnums:
         return TlsKeyType.validate("Curve25519")
 
     @schemas.classproperty
-    def EC_P224(cls) -> typing.Literal["EC_P224"]:
-        return TlsKeyType.validate("EC_P224")
-
-    @schemas.classproperty
     def EC_P256(cls) -> typing.Literal["EC_P256"]:
         return TlsKeyType.validate("EC_P256")
 
@@ -37,6 +33,18 @@ class TlsKeyTypeEnums:
     @schemas.classproperty
     def EC_P521(cls) -> typing.Literal["EC_P521"]:
         return TlsKeyType.validate("EC_P521")
+
+    @schemas.classproperty
+    def BRAINPOOL_P256(cls) -> typing.Literal["BrainpoolP256"]:
+        return TlsKeyType.validate("BrainpoolP256")
+
+    @schemas.classproperty
+    def BRAINPOOL_P384(cls) -> typing.Literal["BrainpoolP384"]:
+        return TlsKeyType.validate("BrainpoolP384")
+
+    @schemas.classproperty
+    def BRAINPOOL_P512(cls) -> typing.Literal["BrainpoolP512"]:
+        return TlsKeyType.validate("BrainpoolP512")
 
 
 @dataclasses.dataclass(frozen=True)
@@ -55,10 +63,12 @@ class TlsKeyType(
         default_factory=lambda: {
             "RSA": "RSA",
             "Curve25519": "CURVE25519",
-            "EC_P224": "EC_P224",
             "EC_P256": "EC_P256",
             "EC_P384": "EC_P384",
             "EC_P521": "EC_P521",
+            "BrainpoolP256": "BRAINPOOL_P256",
+            "BrainpoolP384": "BRAINPOOL_P384",
+            "BrainpoolP512": "BRAINPOOL_P512",
         }
     )
     enums = TlsKeyTypeEnums
@@ -77,13 +87,6 @@ class TlsKeyType(
         arg: typing.Literal["Curve25519"],
         configuration: typing.Optional[schema_configuration.SchemaConfiguration] = None
     ) -> typing.Literal["Curve25519"]: ...
-    @typing.overload
-    @classmethod
-    def validate(
-        cls,
-        arg: typing.Literal["EC_P224"],
-        configuration: typing.Optional[schema_configuration.SchemaConfiguration] = None
-    ) -> typing.Literal["EC_P224"]: ...
     @typing.overload
     @classmethod
     def validate(
@@ -109,9 +112,30 @@ class TlsKeyType(
     @classmethod
     def validate(
         cls,
+        arg: typing.Literal["BrainpoolP256"],
+        configuration: typing.Optional[schema_configuration.SchemaConfiguration] = None
+    ) -> typing.Literal["BrainpoolP256"]: ...
+    @typing.overload
+    @classmethod
+    def validate(
+        cls,
+        arg: typing.Literal["BrainpoolP384"],
+        configuration: typing.Optional[schema_configuration.SchemaConfiguration] = None
+    ) -> typing.Literal["BrainpoolP384"]: ...
+    @typing.overload
+    @classmethod
+    def validate(
+        cls,
+        arg: typing.Literal["BrainpoolP512"],
+        configuration: typing.Optional[schema_configuration.SchemaConfiguration] = None
+    ) -> typing.Literal["BrainpoolP512"]: ...
+    @typing.overload
+    @classmethod
+    def validate(
+        cls,
         arg: str,
         configuration: typing.Optional[schema_configuration.SchemaConfiguration] = None
-    ) -> typing.Literal["RSA","Curve25519","EC_P224","EC_P256","EC_P384","EC_P521",]: ...
+    ) -> typing.Literal["RSA","Curve25519","EC_P256","EC_P384","EC_P521","BrainpoolP256","BrainpoolP384","BrainpoolP512",]: ...
     @classmethod
     def validate(
         cls,
@@ -120,10 +144,12 @@ class TlsKeyType(
     ) -> typing.Literal[
         "RSA",
         "Curve25519",
-        "EC_P224",
         "EC_P256",
         "EC_P384",
         "EC_P521",
+        "BrainpoolP256",
+        "BrainpoolP384",
+        "BrainpoolP512",
     ]:
         validated_arg = super().validate_base(
             arg,
@@ -132,10 +158,12 @@ class TlsKeyType(
         return typing.cast(typing.Literal[
                 "RSA",
                 "Curve25519",
-                "EC_P224",
                 "EC_P256",
                 "EC_P384",
                 "EC_P521",
+                "BrainpoolP256",
+                "BrainpoolP384",
+                "BrainpoolP512",
             ],
             validated_arg
         )
