@@ -392,9 +392,7 @@ def _handle_api_exception(
 
     if e.status in messages:
         message = messages[e.status]
-        raise NetHSMError(message)
-
-    if e.status == 401 and roles:
+    elif e.status == 401 and roles:
         message = "Unauthorized -- invalid username or password"
     elif e.status == 403 and roles:
         roles_str = [role.value for role in roles]
@@ -435,7 +433,7 @@ def _handle_api_exception(
                 custom_message = e.api_response.body.message
 
         if custom_message is not None:
-            message += "\n" + custom_message
+            message += "\nNetHSM error message: " + custom_message
 
     raise NetHSMError(message)
 

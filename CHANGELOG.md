@@ -20,6 +20,7 @@
 - Add `NetHSM.move_key` function for changing key IDs
 - Add optional `subject_alt_names` argument for `NetHSM.csr` and `NetHSM.key_csr`
 - Add optional `prefix` argument for `NetHSM.list_keys`
+- Always show the message returned by the NetHSM as part of the error message
 
 [All Changes](https://github.com/Nitrokey/nethsm-sdk-py/compare/v1.4.1...HEAD)
 
