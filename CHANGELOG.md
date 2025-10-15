@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+-
+
+[All Changes](https://github.com/Nitrokey/nethsm-sdk-py/compare/v2.0.0...HEAD)
+
+## [v2.0.0](https://github.com/Nitrokey/nethsm-sdk-py/releases/tag/v2.0.0) (2025-10-15)
+
 ### Breaking Changes
 
 - Remove `KeyType.EC_P224`
@@ -11,18 +17,18 @@
 
 ### Features
 
-- Add new enum values:
+- Add new enum values (requires NetHSM v3.0):
   - `KeyType`: `EC_P256K1`, `BrainpoolP256`, `BrainpoolP384`, `BrainpoolP512`
   - `KeyMechanism`: `BIP340_Signature`
   - `SignMode`: `BIP340`
   - `TlsKeyType`: `BrainpoolP256`, `BrainpoolP384`, `BrainpoolP512`
-- Add support for dots, dashes and underscores in user and key IDs
-- Add `NetHSM.move_key` function for changing key IDs
-- Add optional `subject_alt_names` argument for `NetHSM.csr` and `NetHSM.key_csr`
-- Add optional `prefix` argument for `NetHSM.list_keys`
+- Add support for dots, dashes and underscores in user and key IDs (requires NetHSM v3.0)
+- Add `NetHSM.move_key` function for changing key IDs (requires NetHSM v3.0)
+- Add optional `subject_alt_names` argument for `NetHSM.csr` and `NetHSM.key_csr` (requires NetHSM v3.0)
+- Add optional `prefix` argument for `NetHSM.list_keys` (requires NetHSM v3.0)
 - Always show the message returned by the NetHSM as part of the error message
 
-[All Changes](https://github.com/Nitrokey/nethsm-sdk-py/compare/v1.4.1...HEAD)
+[All Changes](https://github.com/Nitrokey/nethsm-sdk-py/compare/v1.4.1...v2.0.0)
 
 ## [v1.4.1](https://github.com/Nitrokey/nethsm-sdk-py/releases/tag/v1.4.1) (2025-06-05)
 

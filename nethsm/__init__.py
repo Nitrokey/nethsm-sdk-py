@@ -8,7 +8,7 @@
 # copied, modified, or distributed except according to those terms.
 """Python Library to manage NetHSM(s)."""
 
-__version__ = "1.4.1"
+__version__ = "2.0.0"
 
 import binascii
 import contextlib
