@@ -2,7 +2,7 @@
 
 ## Unreleased
 
--
+- Add support for unauthenticated shutdown.
 
 [All Changes](https://github.com/Nitrokey/nethsm-sdk-py/compare/v2.0.0...HEAD)
 

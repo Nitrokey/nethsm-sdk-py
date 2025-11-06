@@ -1748,7 +1748,10 @@ class NetHSM:
 
     def shutdown(self) -> None:
         try:
-            self._get_api().system_shutdown_post()
+            if self.auth:
+                self._get_api().system_shutdown_post()
+            else:
+                self._get_api().system_shutdown_post(security_index=1)
         except Exception as e:
             _handle_exception(e)
 
