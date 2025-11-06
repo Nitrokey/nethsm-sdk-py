@@ -2,9 +2,15 @@
 
 ## Unreleased
 
+-
+
+[All Changes](https://github.com/Nitrokey/nethsm-sdk-py/compare/v2.0.1...HEAD)
+
+## [v2.0.1](https://github.com/Nitrokey/nethsm-sdk-py/releases/tag/v2.0.1) (2025-11-06)
+
 - Add support for unauthenticated shutdown.
 
-[All Changes](https://github.com/Nitrokey/nethsm-sdk-py/compare/v2.0.0...HEAD)
+[All Changes](https://github.com/Nitrokey/nethsm-sdk-py/compare/v2.0.0...v2.0.1)
 
 ## [v2.0.0](https://github.com/Nitrokey/nethsm-sdk-py/releases/tag/v2.0.0) (2025-10-15)
 
