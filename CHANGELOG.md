@@ -7,6 +7,10 @@
 - Add support for clustering:
   - Add `ClusterMember`, `InitialClusterMember` and `ClusterJoinData` classes
   - Add `add_cluster_member`, `list_cluster_members`, `set_cluster_member_urls`, `remove_cluster_member`, `join_cluster`, `get_cluster_ca_certificate`, `set_cluster_ca_certificate` functions to `NetHSM`
+- Add support for IPv6 configuration:
+  - Add `Ipv6Config` class
+  - `NetworkConfig`: Add optional `ipv6` field
+  - `NetHSM.set_network_config`: Add optional `ipv6` argument
 
 [All Changes](https://github.com/Nitrokey/nethsm-sdk-py/compare/v2.0.1...HEAD)
 
