@@ -31,6 +31,8 @@ if TYPE_CHECKING:
     from .client.components.schema.cluster_initial_member import ClusterInitialMemberDict
     from .client.components.schema.cluster_member import ClusterMemberDict
     from .client.components.schema.cluster_member_add_response import ClusterMemberAddResponseDict
+    from .client.components.schema.ipv6_config import Ipv6ConfigDict
+    from .client.components.schema.network_config_output import NetworkConfigOutputDict
     from .client.schemas import Unset
 
 
@@ -349,10 +351,36 @@ class LoggingConfig:
 
 
 @dataclass
+class Ipv6Config:
+    cidr: str
+    gateway: Optional[str] = None
+
+    def _to_api(self) -> "Ipv6ConfigDict":
+        from .client.components.schema.ipv6_config import Ipv6ConfigDict
+
+        return Ipv6ConfigDict(cidr=self.cidr, gateway=self.gateway)
+
+    @staticmethod
+    def _from_api(item: "Ipv6ConfigDict") -> "Ipv6Config":
+        return Ipv6Config(cidr=item.cidr, gateway=item.gateway)
+
+
+@dataclass
 class NetworkConfig:
     gateway: str
     ip_address: str
     netmask: str
+    ipv6: Optional[Ipv6Config] = None
+
+    @staticmethod
+    def _from_api(item: "NetworkConfigOutputDict") -> "NetworkConfig":
+        ipv6 = _unset_to_optional(item.ipv6)
+        return NetworkConfig(
+            gateway=item.gateway,
+            ip_address=item.ipAddress,
+            netmask=item.netmask,
+            ipv6=Ipv6Config._from_api(ipv6) if ipv6 is not None else None,
+        )
 
 
 @dataclass
@@ -533,11 +561,19 @@ class NetHSMRequestError(Exception):
 _T = TypeVar("_T")
 
 
-def _optional(value: Optional[_T]) -> Union[_T, "Unset"]:
+def _optional_to_unset(value: Optional[_T]) -> Union[_T, "Unset"]:
     from .client.schemas import Unset
 
     if value is None:
         return Unset()
+    return value
+
+
+def _unset_to_optional(value: Union[_T, "Unset"]) -> Optional[_T]:
+    from .client.schemas import Unset
+
+    if isinstance(value, Unset):
+        return None
     return value
 
 
@@ -1241,11 +1277,7 @@ class NetHSM:
             response = self._get_api().config_network_get()
         except Exception as e:
             _handle_exception(e, state=State.OPERATIONAL, roles=[Role.ADMINISTRATOR])
-        return NetworkConfig(
-            gateway=response.body.gateway,
-            ip_address=response.body.ipAddress,
-            netmask=response.body.netmask,
-        )
+        return NetworkConfig._from_api(response.body)
 
     def get_config_time(self) -> datetime:
         try:
@@ -1363,13 +1395,13 @@ class NetHSM:
 
         body = DistinguishedNameDict(
             commonName=common_name,
-            countryName=_optional(country),
-            stateOrProvinceName=_optional(state_or_province),
-            localityName=_optional(locality),
-            organizationName=_optional(organization),
-            organizationalUnitName=_optional(organizational_unit),
-            emailAddress=_optional(email_address),
-            subjectAltNames=_optional(subject_alt_names),
+            countryName=_optional_to_unset(country),
+            stateOrProvinceName=_optional_to_unset(state_or_province),
+            localityName=_optional_to_unset(locality),
+            organizationName=_optional_to_unset(organization),
+            organizationalUnitName=_optional_to_unset(organizational_unit),
+            emailAddress=_optional_to_unset(email_address),
+            subjectAltNames=_optional_to_unset(subject_alt_names),
         )
         try:
             response = self._get_api().config_tls_csr_pem_post(body=body, skip_deserialization=True)
@@ -1382,7 +1414,7 @@ class NetHSM:
             TlsKeyGenerateRequestDataDict,
         )
 
-        body = TlsKeyGenerateRequestDataDict(type=type.value, length=_optional(length))
+        body = TlsKeyGenerateRequestDataDict(type=type.value, length=_optional_to_unset(length))
 
         try:
             self._get_api().config_tls_generate_post(body=body)
@@ -1408,13 +1440,13 @@ class NetHSM:
         path_params = PathParametersDict(KeyID=key_id)
         body = DistinguishedNameDict(
             commonName=common_name,
-            countryName=_optional(country),
-            stateOrProvinceName=_optional(state_or_province),
-            localityName=_optional(locality),
-            organizationName=_optional(organization),
-            organizationalUnitName=_optional(organizational_unit),
-            emailAddress=_optional(email_address),
-            subjectAltNames=_optional(subject_alt_names),
+            countryName=_optional_to_unset(country),
+            stateOrProvinceName=_optional_to_unset(state_or_province),
+            localityName=_optional_to_unset(locality),
+            organizationName=_optional_to_unset(organization),
+            organizationalUnitName=_optional_to_unset(organizational_unit),
+            emailAddress=_optional_to_unset(email_address),
+            subjectAltNames=_optional_to_unset(subject_alt_names),
         )
         try:
             response = self._get_api().keys_key_id_csr_pem_post(
@@ -1477,10 +1509,18 @@ class NetHSM:
                 messages={400: "Bad request -- invalid input data"},
             )
 
-    def set_network_config(self, ip_address: str, netmask: str, gateway: str) -> None:
+    def set_network_config(
+        self, ip_address: str, netmask: str, gateway: str, ipv6: Optional[Ipv6Config] = None
+    ) -> None:
         from .client.components.schema.network_config_input import NetworkConfigInputDict
 
-        body = NetworkConfigInputDict(ipAddress=ip_address, netmask=netmask, gateway=gateway)
+        ipv6_dict = ipv6._to_api() if ipv6 is not None else None
+        body = NetworkConfigInputDict(
+            ipAddress=ip_address,
+            netmask=netmask,
+            gateway=gateway,
+            ipv6=_optional_to_unset(ipv6_dict),
+        )
         try:
             self._get_api().config_network_put(body=body)
         except Exception as e:

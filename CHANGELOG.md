@@ -8,6 +8,10 @@
 - Add support for clustering (requires NetHSM v4):
   - Add `ClusterMember`, `InitialClusterMember` and `ClusterJoinData` classes
   - Add `add_cluster_member`, `list_cluster_members`, `set_cluster_member_urls`, `remove_cluster_member`, `join_cluster`, `get_cluster_ca_certificate`, `set_cluster_ca_certificate` functions to `NetHSM`
+- Add support for IPv6 configuration (requires NetHSM v4):
+  - Add `Ipv6Config` class
+  - `NetworkConfig`: Add optional `ipv6` field
+  - `NetHSM.set_network_config`: Add optional `ipv6` argument
 
 ### Changes
 
