@@ -2,9 +2,17 @@
 
 ## Unreleased
 
+### Features
+
 - Add support for backup format v1.
-- Use `poetry` as build backend
+- Add support for clustering (requires NetHSM v4):
+  - Add `ClusterMember`, `InitialClusterMember` and `ClusterJoinData` classes
+  - Add `add_cluster_member`, `list_cluster_members`, `set_cluster_member_urls`, `remove_cluster_member`, `join_cluster`, `get_cluster_ca_certificate`, `set_cluster_ca_certificate` functions to `NetHSM`
+
+### Changes
+
 - Improve backup parsing speed
+- Use `poetry` as build backend
 
 [All Changes](https://github.com/Nitrokey/nethsm-sdk-py/compare/v2.0.1...HEAD)
 
