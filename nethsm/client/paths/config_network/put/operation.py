@@ -6,7 +6,7 @@
 
 from nethsm.client import api_client, exceptions, security_schemes
 from nethsm.client.shared_imports.operation_imports import *  # pyright: ignore [reportWildcardImportFromLibrary]
-from nethsm.client.components.schema import network_config
+from nethsm.client.components.schema import network_config_input
 
 from .. import path
 from .responses import (
@@ -65,8 +65,8 @@ class BaseApi(api_client.Api):
     def _config_network_put(
         self,
         body: typing.Union[
-            network_config.NetworkConfigDictInput,
-            network_config.NetworkConfigDict,
+            network_config_input.NetworkConfigInputDictInput,
+            network_config_input.NetworkConfigInputDict,
         ],
         *,
         skip_deserialization: typing.Literal[False] = False,
@@ -82,8 +82,8 @@ class BaseApi(api_client.Api):
     def _config_network_put(
         self,
         body: typing.Union[
-            network_config.NetworkConfigDictInput,
-            network_config.NetworkConfigDict,
+            network_config_input.NetworkConfigInputDictInput,
+            network_config_input.NetworkConfigInputDict,
         ],
         *,
         skip_deserialization: typing.Literal[True],
@@ -98,8 +98,8 @@ class BaseApi(api_client.Api):
     def _config_network_put(
         self,
         body: typing.Union[
-            network_config.NetworkConfigDictInput,
-            network_config.NetworkConfigDict,
+            network_config_input.NetworkConfigInputDictInput,
+            network_config_input.NetworkConfigInputDict,
         ],
         *,
         skip_deserialization: bool = False,

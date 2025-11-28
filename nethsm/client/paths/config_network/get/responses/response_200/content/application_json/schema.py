@@ -9,5 +9,5 @@
 
 
 from nethsm.client.shared_imports.schema_imports import *  # pyright: ignore [reportWildcardImportFromLibrary]
-from nethsm.client.components.schema import network_config
-Schema: typing_extensions.TypeAlias = network_config.NetworkConfig
+from nethsm.client.components.schema import network_config_output
+Schema: typing_extensions.TypeAlias = network_config_output.NetworkConfigOutput

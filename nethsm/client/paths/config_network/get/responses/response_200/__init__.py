@@ -11,7 +11,7 @@ from .content.application_json import schema as application_json_schema
 
 @dataclasses.dataclass(frozen=True)
 class ApiResponse(api_response.ApiResponse):
-    body: application_json_schema.network_config.NetworkConfigDict
+    body: application_json_schema.network_config_output.NetworkConfigOutputDict
     headers: schemas.Unset
 
 

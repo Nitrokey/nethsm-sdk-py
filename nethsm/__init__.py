@@ -39,6 +39,7 @@ from urllib3 import HTTPResponse, _collections
 if TYPE_CHECKING:
     from .client import ApiException
     from .client.apis.tags.default_api import DefaultApi
+    from .client.components.schema.cluster_member import ClusterMemberDict
     from .client.schemas import Unset
 
 
@@ -360,6 +361,17 @@ class NetworkConfig:
     gateway: str
     ip_address: str
     netmask: str
+
+
+@dataclass
+class ClusterMember:
+    id: str
+    name: str
+    urls: list[str]
+
+    @staticmethod
+    def _from_api(item: "ClusterMemberDict") -> "ClusterMember":
+        return ClusterMember(id=item.id, name=item.name, urls=list(item.urls))
 
 
 def _handle_exception(
@@ -1582,9 +1594,13 @@ class NetHSM:
             )
 
     def set_network_config(self, ip_address: str, netmask: str, gateway: str) -> None:
-        from .client.components.schema.network_config import NetworkConfigDict
+        from .client.components.schema.network_config_input import (
+            NetworkConfigInputDict,
+        )
 
-        body = NetworkConfigDict(ipAddress=ip_address, netmask=netmask, gateway=gateway)
+        body = NetworkConfigInputDict(
+            ipAddress=ip_address, netmask=netmask, gateway=gateway
+        )
         try:
             self._get_api().config_network_put(body=body)
         except Exception as e:
@@ -1863,6 +1879,87 @@ class NetHSM:
                 },
             )
         return Base64.from_encoded(response.body.signature)
+
+    def list_cluster_members(self) -> list[ClusterMember]:
+        try:
+            response = self._get_api().cluster_members_get()
+        except Exception as e:
+            _handle_exception(
+                e,
+                state=State.OPERATIONAL,
+                roles=[Role.ADMINISTRATOR],
+            )
+
+        return [ClusterMember._from_api(item) for item in response.body]
+
+    def add_cluster_member(self, urls: list[str]) -> list[ClusterMember]:
+        from .client.components.schema.cluster_add_req import ClusterAddReqDict
+
+        body = ClusterAddReqDict(urls=urls)
+        try:
+            response = self._get_api().cluster_members_post(body=body)
+        except Exception as e:
+            _handle_exception(
+                e,
+                state=State.OPERATIONAL,
+                roles=[Role.ADMINISTRATOR],
+            )
+
+        return [ClusterMember._from_api(item) for item in response.body]
+
+    def set_cluster_member_urls(self, member_id: str, urls: list[str]) -> None:
+        from .client.components.schema.cluster_add_req import ClusterAddReqDict
+        from .client.paths.cluster_members_member_id.put.path_parameters import (
+            PathParametersDict,
+        )
+
+        body = ClusterAddReqDict(urls=urls)
+        path_params = PathParametersDict(MemberID=member_id)
+        try:
+            self._get_api().cluster_members_member_id_put(
+                body=body, path_params=path_params
+            )
+        except Exception as e:
+            _handle_exception(
+                e,
+                state=State.OPERATIONAL,
+                roles=[Role.ADMINISTRATOR],
+            )
+
+    def remove_cluster_member(self, member_id: str) -> None:
+        from .client.paths.cluster_members_member_id.delete.path_parameters import (
+            PathParametersDict,
+        )
+
+        path_params = PathParametersDict(MemberID=member_id)
+        try:
+            self._get_api().cluster_members_member_id_delete(path_params=path_params)
+        except Exception as e:
+            _handle_exception(
+                e,
+                state=State.OPERATIONAL,
+                roles=[Role.ADMINISTRATOR],
+            )
+
+    def get_cluster_ca_certificate(self) -> str:
+        try:
+            response = self._get_api().config_tls_cluster_ca_pem_get(
+                skip_deserialization=True
+            )
+        except Exception as e:
+            _handle_exception(e, state=State.OPERATIONAL, roles=[Role.ADMINISTRATOR])
+        return response.response.data.decode("utf-8")
+
+    def set_cluster_ca_certificate(self, cert: Bytes) -> None:
+        try:
+            self._request(
+                "PUT",
+                "config/tls/ca.pem",
+                data=cert,
+                mime_type="application/x-pem-file",
+            )
+        except Exception as e:
+            _handle_exception(e, state=State.OPERATIONAL, roles=[Role.ADMINISTRATOR])
 
 
 @contextlib.contextmanager
