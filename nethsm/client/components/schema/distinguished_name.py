@@ -258,6 +258,8 @@ class DistinguishedName(
     Data used for creation of CSRs.
 If subjectAltNames is omitted, it is set to the same value as
 commonName. If it is set to an empty list, no SAN Extension is added.
+All SANs are considered DNS names, unless they start with "IP:" to signal
+IP names.
 
     """
     types: typing.FrozenSet[typing.Type] = frozenset({schemas.immutabledict})
