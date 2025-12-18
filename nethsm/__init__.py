@@ -419,6 +419,31 @@ class InitialClusterMember:
     name: str
     urls: list[str]
 
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "name": self.name,
+            "urls": self.urls,
+        }
+
+    @staticmethod
+    def from_dict(data: dict[object, object]) -> "InitialClusterMember":
+        if "name" not in data:
+            raise ValueError("Missing name field for initial cluster member")
+        if "urls" not in data:
+            raise ValueError("Missing urls field for initial cluster member")
+        name = data["name"]
+        urls = data["urls"]
+
+        if not isinstance(name, str):
+            raise ValueError("Name field for initial cluster member is not a string")
+        if not isinstance(urls, list):
+            raise ValueError("URLs field for initial cluster member is not a list")
+        for url in urls:
+            if not isinstance(url, str):
+                raise ValueError("URL for initial cluster member is not a string")
+
+        return InitialClusterMember(name=name, urls=urls)
+
     @staticmethod
     def _from_api(data: "ClusterInitialMemberDict") -> "InitialClusterMember":
         return InitialClusterMember(name=data.name, urls=list(data.urls))
@@ -428,6 +453,34 @@ class InitialClusterMember:
 class ClusterJoinData:
     members: list[InitialClusterMember]
     joiner_kit: str
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "members": [member.to_dict() for member in self.members],
+            "joiner_kit": self.joiner_kit,
+        }
+
+    @staticmethod
+    def from_dict(data: dict[object, object]) -> "ClusterJoinData":
+        if "members" not in data:
+            raise ValueError("Missing members field for cluster join data")
+        if "joiner_kit" not in data:
+            raise ValueError("Missing joiner_kit field for cluster join data")
+        members = data["members"]
+        joiner_kit = data["joiner_kit"]
+
+        if not isinstance(members, list):
+            raise ValueError("Members field for cluster join data is not a list")
+        for member in members:
+            if not isinstance(member, dict):
+                raise ValueError("Member for cluster join data is not a dict")
+        if not isinstance(joiner_kit, str):
+            raise ValueError("Joiner kit field for cluster join data is not a string")
+
+        return ClusterJoinData(
+            members=[InitialClusterMember.from_dict(member) for member in members],
+            joiner_kit=joiner_kit,
+        )
 
     @staticmethod
     def _from_api(response: "ClusterMemberAddResponseDict") -> "ClusterJoinData":
