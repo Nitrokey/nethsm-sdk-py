@@ -2,7 +2,7 @@
 
 ## Unreleased
 
--
+- Add support for backup format v1.
 
 [All Changes](https://github.com/Nitrokey/nethsm-sdk-py/compare/v2.0.1...HEAD)
 

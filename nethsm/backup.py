@@ -3,6 +3,7 @@
 import hashlib
 import struct
 from dataclasses import dataclass, field
+from typing import Optional
 
 from cryptography.exceptions import InvalidTag
 from cryptography.hazmat.backends import default_backend
@@ -49,6 +50,7 @@ class Backup:
     version: int
     domain_key: bytes
     data: dict[str, bytes] = field(default_factory=dict)
+    unlock_salt: Optional[bytes] = None
 
 
 @dataclass
@@ -58,6 +60,7 @@ class EncryptedBackup:
     encrypted_version: bytes
     encrypted_domain_key: bytes
     encrypted_data: list[bytes] = field(default_factory=list)
+    encrypted_unlock_salt: Optional[bytes] = None
 
     @classmethod
     def parse(cls, data: bytes) -> "EncryptedBackup":
@@ -68,20 +71,25 @@ class EncryptedBackup:
         version = data[header_len]
         data = data[header_len + 1 :]
 
-        if version != 0:
+        if version not in [0, 1]:
             raise ValueError(
-                f"Version mismatch on export, provided backup version is {version}, this tool expects 0"
+                f"Version mismatch on export, provided backup version is {version}, this tool expects 0 or 1"
             )
 
         salt, data = _get_field(data)
         encrypted_version, data = _get_field(data)
         encrypted_domain_key, data = _get_field(data)
 
+        encrypted_unlock_salt = None
+        if version > 0:
+            encrypted_unlock_salt, data = _get_field(data)
+
         backup = cls(
             version=version,
             salt=salt,
             encrypted_version=encrypted_version,
             encrypted_domain_key=encrypted_domain_key,
+            encrypted_unlock_salt=encrypted_unlock_salt,
         )
 
         while data:
@@ -106,8 +114,11 @@ class EncryptedBackup:
                 f"Internal and external version mismatch ({version} != {self.version})."
             )
         domain_key = _decrypt(key, b"domain-key", self.encrypted_domain_key)
+        unlock_salt = None
+        if self.encrypted_unlock_salt is not None:
+            unlock_salt = _decrypt(key, b"unlock-salt", self.encrypted_unlock_salt)
 
-        backup = Backup(version=version, domain_key=domain_key)
+        backup = Backup(version=version, domain_key=domain_key, unlock_salt=unlock_salt)
 
         for item in self.encrypted_data:
             key_value_pair = _decrypt(key, b"backup", item)
