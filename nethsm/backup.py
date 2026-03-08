@@ -50,7 +50,8 @@ class Backup:
     version: int
     domain_key: bytes
     data: dict[str, bytes] = field(default_factory=dict)
-    unlock_salt: Optional[bytes] = None
+    backup_device_id: Optional[bytes] = None
+    backup_config_store_key: Optional[bytes] = None
 
 
 @dataclass
@@ -60,7 +61,8 @@ class EncryptedBackup:
     encrypted_version: bytes
     encrypted_domain_key: bytes
     encrypted_data: list[bytes] = field(default_factory=list)
-    encrypted_unlock_salt: Optional[bytes] = None
+    encrypted_backup_device_id: Optional[bytes] = None
+    encrypted_backup_config_store_key: Optional[bytes] = None
 
     @classmethod
     def parse(cls, data: bytes) -> "EncryptedBackup":
@@ -80,16 +82,19 @@ class EncryptedBackup:
         encrypted_version, data = _get_field(data)
         encrypted_domain_key, data = _get_field(data)
 
-        encrypted_unlock_salt = None
+        encrypted_backup_device_id = None
+        encrypted_backup_config_store_key = None
         if version > 0:
-            encrypted_unlock_salt, data = _get_field(data)
+            encrypted_backup_device_id, data = _get_field(data)
+            encrypted_backup_config_store_key, data = _get_field(data)
 
         backup = cls(
             version=version,
             salt=salt,
             encrypted_version=encrypted_version,
             encrypted_domain_key=encrypted_domain_key,
-            encrypted_unlock_salt=encrypted_unlock_salt,
+            encrypted_backup_device_id=encrypted_backup_device_id,
+            encrypted_backup_config_store_key=encrypted_backup_config_store_key,
         )
 
         while data:
@@ -114,11 +119,23 @@ class EncryptedBackup:
                 f"Internal and external version mismatch ({version} != {self.version})."
             )
         domain_key = _decrypt(key, b"domain-key", self.encrypted_domain_key)
-        unlock_salt = None
-        if self.encrypted_unlock_salt is not None:
-            unlock_salt = _decrypt(key, b"unlock-salt", self.encrypted_unlock_salt)
+        backup_device_id = None
+        if self.encrypted_backup_device_id is not None:
+            backup_device_id = _decrypt(
+                key, b"backup-device-id", self.encrypted_backup_device_id
+            )
+        backup_config_store_key = None
+        if self.encrypted_backup_config_store_key is not None:
+            backup_config_store_key = _decrypt(
+                key, b"backup-config-store-key", self.encrypted_backup_config_store_key
+            )
 
-        backup = Backup(version=version, domain_key=domain_key, unlock_salt=unlock_salt)
+        backup = Backup(
+            version=version,
+            domain_key=domain_key,
+            backup_device_id=backup_device_id,
+            backup_config_store_key=backup_config_store_key,
+        )
 
         for item in self.encrypted_data:
             key_value_pair = _decrypt(key, b"backup", item)

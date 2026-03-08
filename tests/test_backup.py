@@ -12,14 +12,18 @@ def test_backup(version: int) -> None:
     encrypted = EncryptedBackup.parse(data)
     assert encrypted.version == version
     if version == 0:
-        assert encrypted.encrypted_unlock_salt is None
+        assert encrypted.encrypted_backup_device_id is None
+        assert encrypted.encrypted_backup_config_store_key is None
     else:
-        assert encrypted.encrypted_unlock_salt is not None
+        assert encrypted.encrypted_backup_device_id is not None
+        assert encrypted.encrypted_backup_config_store_key is not None
 
     decrypted = encrypted.decrypt("backupbackup")
     assert decrypted.version == version
     assert "/key/mykey" in decrypted.data
     if version == 0:
-        assert decrypted.unlock_salt is None
+        assert decrypted.backup_device_id is None
+        assert decrypted.backup_config_store_key is None
     else:
-        assert decrypted.unlock_salt is not None
+        assert decrypted.backup_device_id is not None
+        assert decrypted.backup_config_store_key is not None
