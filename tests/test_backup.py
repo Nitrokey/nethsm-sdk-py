@@ -3,11 +3,15 @@ import pytest
 from nethsm.backup import EncryptedBackup
 
 
-@pytest.mark.parametrize("version", [0, 1])
-def test_backup(version: int) -> None:
+def read_backup(version: int) -> bytes:
     file = f"./tests/backup/v{version}.bin"
     with open(file, "rb") as f:
-        data = f.read()
+        return f.read()
+
+
+@pytest.mark.parametrize("version", [0, 1])
+def test_backup(version: int) -> None:
+    data = read_backup(version)
 
     encrypted = EncryptedBackup.parse(data)
     assert encrypted.version == version
@@ -27,3 +31,18 @@ def test_backup(version: int) -> None:
     else:
         assert decrypted.backup_device_id is not None
         assert decrypted.backup_config_store_key is not None
+
+
+@pytest.mark.parametrize("version", [0, 1])
+def test_backup_no_header(version: int) -> None:
+    data = read_backup(version)
+    for n in [1, 5, 15, 42]:
+        with pytest.raises(ValueError, match=r"Data does not contain a NetHSM header"):
+            EncryptedBackup.parse(data[n:])
+
+
+def test_backup_v1_no_trailer() -> None:
+    data = read_backup(1)
+    for n in [1, 5, 22, 42]:
+        with pytest.raises(ValueError, match=r"Data is truncated"):
+            EncryptedBackup.parse(data[:-n])

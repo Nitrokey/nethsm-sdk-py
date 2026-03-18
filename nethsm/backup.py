@@ -78,6 +78,12 @@ class EncryptedBackup:
                 f"Version mismatch on export, provided backup version is {version}, this tool expects 0 or 1"
             )
 
+        if version > 0:
+            trailer = b"\x00\x00\x00_NETHSM_BACKUP_END_"
+            if not data.endswith(trailer):
+                raise ValueError("Data is truncated (missing NetHSM trailer)")
+            data = data[: -len(trailer)]
+
         salt, data = _get_field(data)
         encrypted_version, data = _get_field(data)
         encrypted_domain_key, data = _get_field(data)
