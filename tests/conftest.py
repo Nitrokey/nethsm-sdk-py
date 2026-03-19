@@ -4,15 +4,7 @@ from typing import TYPE_CHECKING, Iterator
 
 import pytest
 
-from nethsm import (
-    DecryptMode,
-    KeyMechanism,
-    KeyType,
-    LogLevel,
-    NetHSM,
-    Role,
-    UnattendedBootStatus,
-)
+from nethsm import DecryptMode, KeyMechanism, KeyType, LogLevel, NetHSM, Role, UnattendedBootStatus
 
 if TYPE_CHECKING:
     from utilities import Container
@@ -111,22 +103,12 @@ class Constants:
     ADMINISTRATOR_USER = UserData(
         user_id="UIAdministrator", real_name="RNAdministrator", role=Role.ADMINISTRATOR
     )
-    OPERATOR_USER = UserData(
-        user_id="UIOperator", real_name="RNOperator", role=Role.OPERATOR
-    )
-    METRICS_USER = UserData(
-        user_id="UIMetrics", real_name="RNMetrics", role=Role.METRICS
-    )
+    OPERATOR_USER = UserData(user_id="UIOperator", real_name="RNOperator", role=Role.OPERATOR)
+    METRICS_USER = UserData(user_id="UIMetrics", real_name="RNMetrics", role=Role.METRICS)
     BACKUP_USER = UserData(user_id="UIBackup", real_name="RNBackup", role=Role.BACKUP)
 
     DETAILS = ""
-    USERS_LIST = [
-        ADMINISTRATOR_USER,
-        BACKUP_USER,
-        METRICS_USER,
-        OPERATOR_USER,
-        ADMIN_USER,
-    ]
+    USERS_LIST = [ADMINISTRATOR_USER, BACKUP_USER, METRICS_USER, OPERATOR_USER, ADMIN_USER]
 
 
 @pytest.fixture(scope="module")

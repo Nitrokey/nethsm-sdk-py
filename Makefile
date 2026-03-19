@@ -1,7 +1,9 @@
+-include variables.mk
+
 CHECK_DIRS := nethsm/ tests/
 
 PYTHON ?= poetry run python
-BLACK ?= poetry run black
+RUFF ?= poetry run ruff
 ISORT ?= poetry run isort
 FLAKE8 ?= poetry run flake8
 MYPY ?= poetry run mypy
@@ -20,7 +22,7 @@ update:
 
 # code checks
 check-format:
-	$(BLACK) --check $(CHECK_DIRS)
+	$(RUFF) format --check $(CHECK_DIRS)
 
 check-import-sorting:
 	$(ISORT) --check-only $(CHECK_DIRS)
@@ -46,7 +48,7 @@ clean: semi-clean
 
 # automatic code fixes
 fix:
-	$(BLACK) $(BLACK_FLAGS) $(CHECK_DIRS)
+	$(RUFF) format $(CHECK_DIRS)
 	$(ISORT) $(ISORT_FLAGS) $(CHECK_DIRS)
 
 OPENAPI_OUTPUT_DIR=${PWD}/tmp/openapi-client

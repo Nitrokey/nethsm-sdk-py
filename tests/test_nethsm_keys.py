@@ -5,13 +5,7 @@ from Crypto.Cipher import AES
 from Crypto.Hash import SHA256
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import padding, rsa
-from utilities import (
-    add_user,
-    connect,
-    encrypt_rsa,
-    generate_rsa_key_pair,
-    verify_rsa_signature,
-)
+from utilities import add_user, connect, encrypt_rsa, generate_rsa_key_pair, verify_rsa_signature
 
 import nethsm as nethsm_module
 from nethsm import (
@@ -48,10 +42,7 @@ def add_key(nethsm: NetHSM) -> None:
     private_key = generate_rsa_key_pair(1024)
 
     nethsm.add_key(
-        key_id=C.KEY_ID_ADDED,
-        type=C.TYPE,
-        mechanisms=C.MECHANISM,
-        private_key=private_key,
+        key_id=C.KEY_ID_ADDED, type=C.TYPE, mechanisms=C.MECHANISM, private_key=private_key
     )
 
 
@@ -126,9 +117,7 @@ def test_add_key_pem(nethsm: NetHSM, generate_key_id: bool) -> None:
 
     key = rsa.generate_private_key(65537, 1024)
     pem = key.private_bytes(
-        serialization.Encoding.PEM,
-        serialization.PrivateFormat.PKCS8,
-        serialization.NoEncryption(),
+        serialization.Encoding.PEM, serialization.PrivateFormat.PKCS8, serialization.NoEncryption()
     ).decode()
 
     if generate_key_id:
@@ -139,18 +128,12 @@ def test_add_key_pem(nethsm: NetHSM, generate_key_id: bool) -> None:
             nethsm.delete_key(key_id)
 
     key_id = nethsm.add_key_pem(
-        key_id=key_id,
-        private_key=pem,
-        mechanisms=[KeyMechanism.RSA_SIGNATURE_PSS_SHA256],
+        key_id=key_id, private_key=pem, mechanisms=[KeyMechanism.RSA_SIGNATURE_PSS_SHA256]
     )
 
     h = SHA256.new(data=C.DATA.encode())
     with connect(C.OPERATOR_USER) as nethsm:
-        signature = nethsm.sign(
-            key_id,
-            Base64.encode(h.digest()),
-            SignMode.PSS_SHA256,
-        )
+        signature = nethsm.sign(key_id, Base64.encode(h.digest()), SignMode.PSS_SHA256)
 
     with connect(C.ADMIN_USER) as nethsm:
         nethsm.delete_key(key_id)
@@ -158,9 +141,7 @@ def test_add_key_pem(nethsm: NetHSM, generate_key_id: bool) -> None:
     key.public_key().verify(
         signature.decode(),
         C.DATA.encode(),
-        padding.PSS(
-            padding.MGF1(hashes.SHA256()), salt_length=padding.PSS.DIGEST_LENGTH
-        ),
+        padding.PSS(padding.MGF1(hashes.SHA256()), salt_length=padding.PSS.DIGEST_LENGTH),
         hashes.SHA256(),
     )
 
@@ -285,7 +266,6 @@ def test_delete_key(nethsm: NetHSM) -> None:
 
 
 def test_set_get_key_certificate(nethsm: NetHSM) -> None:
-
     add_key(nethsm)
     with open(C.CERTIFICATE_FILE, "rb") as f:
         nethsm.set_key_certificate(C.KEY_ID_ADDED, f)
@@ -296,7 +276,6 @@ def test_set_get_key_certificate(nethsm: NetHSM) -> None:
 
 
 def test_key_csr(nethsm: NetHSM) -> None:
-
     add_key(nethsm)
 
     csr = nethsm.key_csr(
@@ -340,9 +319,7 @@ def test_sign(nethsm: NetHSM) -> None:  # mit dem privaten schlüssel signieren
 
     with connect(C.OPERATOR_USER) as nethsm:
         signature = nethsm.sign(
-            C.KEY_ID_GENERATED,
-            Base64.encode(hash_object.digest()),
-            SignMode.PSS_SHA256,
+            C.KEY_ID_GENERATED, Base64.encode(hash_object.digest()), SignMode.PSS_SHA256
         )
         print(signature.data)
         verify_rsa_signature(key, hash_object, signature.decode())
@@ -359,16 +336,11 @@ def test_decrypt(nethsm: NetHSM) -> None:
     key = nethsm.get_key_public_key(C.KEY_ID_GENERATED)
     encrypted = encrypt_rsa(key, C.DATA)
     with connect(C.OPERATOR_USER) as nethsm:
-        decrypt = nethsm.decrypt(
-            C.KEY_ID_GENERATED,
-            Base64.encode(encrypted),
-            C.MODE,
-        )
+        decrypt = nethsm.decrypt(C.KEY_ID_GENERATED, Base64.encode(encrypted), C.MODE)
         assert decrypt.decode().decode() == C.DATA
 
 
 def test_encrypt_decrypt(nethsm: NetHSM) -> None:
-
     generate_key_aes(nethsm)
     add_user(nethsm, C.OPERATOR_USER)
     IV = Random.new().read(AES.block_size)
@@ -378,18 +350,7 @@ def test_encrypt_decrypt(nethsm: NetHSM) -> None:
     data_b64 = Base64.encode(C.DATA.encode())
 
     with connect(C.OPERATOR_USER) as nethsm:
-
-        encrypted = nethsm.encrypt(
-            C.KEY_ID_AES,
-            data_b64,
-            EncryptMode.AES_CBC,
-            iv_b64,
-        )
+        encrypted = nethsm.encrypt(C.KEY_ID_AES, data_b64, EncryptMode.AES_CBC, iv_b64)
         assert encrypted.iv == iv_b64
-        decrypt = nethsm.decrypt(
-            C.KEY_ID_AES,
-            encrypted.encrypted,
-            DecryptMode.AES_CBC,
-            iv_b64,
-        )
+        decrypt = nethsm.decrypt(C.KEY_ID_AES, encrypted.encrypted, DecryptMode.AES_CBC, iv_b64)
         assert decrypt == data_b64

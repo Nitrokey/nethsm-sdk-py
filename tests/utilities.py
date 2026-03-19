@@ -45,12 +45,10 @@ class Container(ABC):
             sleep(0.5)
 
     @abstractmethod
-    def start(self) -> None:
-        ...
+    def start(self) -> None: ...
 
     @abstractmethod
-    def kill(self) -> None:
-        ...
+    def kill(self) -> None: ...
 
 
 class DockerContainer(Container):
@@ -63,11 +61,7 @@ class DockerContainer(Container):
 
     def start(self) -> None:
         self.container = self.client.containers.run(
-            self.image,
-            "",
-            ports={"8443": 8443},
-            remove=True,
-            detach=True,
+            self.image, "", ports={"8443": 8443}, remove=True, detach=True
         )
 
     def kill(self) -> None:
@@ -89,11 +83,7 @@ class PodmanContainer(Container):
 
     def start(self) -> None:
         container = self.client.containers.run(
-            self.image,
-            "",
-            ports={"8443": 8443},
-            remove=True,
-            detach=True,
+            self.image, "", ports={"8443": 8443}, remove=True, detach=True
         )
         assert isinstance(container, podman.domain.containers.Container)
         self.container = container
@@ -120,13 +110,7 @@ class CIContainer(Container):
 
         os.system("rm -rf /data")
 
-        self.process = subprocess.Popen(
-            [
-                "/bin/sh",
-                "-c",
-                "/start.sh",
-            ]
-        )
+        self.process = subprocess.Popen(["/bin/sh", "-c", "/start.sh"])
 
     def kill(self) -> None:
         if self.process:
@@ -135,8 +119,7 @@ class CIContainer(Container):
 
 class KeyfenderManager(ABC):
     @abstractmethod
-    def spawn(self) -> Container:
-        ...
+    def spawn(self) -> Container: ...
 
     @staticmethod
     def get() -> "KeyfenderManager":
@@ -155,9 +138,7 @@ class KeyfenderDockerManager(KeyfenderManager):
         client = docker.from_env()
 
         while True:
-            containers = client.containers.list(
-                filters={"ancestor": C.IMAGE}, ignore_removed=True
-            )
+            containers = client.containers.list(filters={"ancestor": C.IMAGE}, ignore_removed=True)
             print(containers)
             if len(containers) == 0:
                 break
@@ -185,9 +166,7 @@ class KeyfenderPodmanManager(KeyfenderManager):
         client = podman.from_env()
 
         while True:
-            containers = client.containers.list(
-                filters={"ancestor": C.IMAGE}, ignore_removed=True
-            )
+            containers = client.containers.list(filters={"ancestor": C.IMAGE}, ignore_removed=True)
             print(containers)
             if len(containers) == 0:
                 break
@@ -258,15 +237,11 @@ def generate_rsa_key_pair(length_in_bit: int) -> RsaPrivateKey:
     q = key_pair.q.to_bytes(length_in_byte, "big")
     e = key_pair.e.to_bytes(length_in_byte, "big")
     return RsaPrivateKey(
-        prime_p=Base64.encode(p),
-        prime_q=Base64.encode(q),
-        public_exponent=Base64.encode(e),
+        prime_p=Base64.encode(p), prime_q=Base64.encode(q), public_exponent=Base64.encode(e)
     )
 
 
-def verify_rsa_signature(
-    public_key: str, message: SHA256.SHA256Hash, signature: bytes
-) -> bool:
+def verify_rsa_signature(public_key: str, message: SHA256.SHA256Hash, signature: bytes) -> bool:
     key = RSA.importKey(public_key)
     return PKCS1_PSS.new(key).verify(message, signature)
 
@@ -333,9 +308,7 @@ def self_sign_csr(csr: str) -> bytes:
         .not_valid_before(now)
         .not_valid_after(now + datetime.timedelta(days=365))
         .add_extension(x509.BasicConstraints(ca=False, path_length=None), critical=True)
-        .add_extension(
-            x509.SubjectKeyIdentifier.from_public_key(public_key), critical=False
-        )
+        .add_extension(x509.SubjectKeyIdentifier.from_public_key(public_key), critical=False)
         .add_extension(
             x509.AuthorityKeyIdentifier.from_issuer_public_key(public_key),  # type: ignore
             critical=False,

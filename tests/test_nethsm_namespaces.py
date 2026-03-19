@@ -34,26 +34,16 @@ def add_user(
 ) -> User:
     if passphrase is None:
         passphrase_len = random.randint(10, 40)
-        passphrase = "".join(
-            random.choices(string.ascii_letters + string.digits, k=passphrase_len)
-        )
+        passphrase = "".join(random.choices(string.ascii_letters + string.digits, k=passphrase_len))
     user_id = n.add_user(
-        user_id=user_id,
-        real_name=real_name,
-        role=role,
-        namespace=namespace,
-        passphrase=passphrase,
+        user_id=user_id, real_name=real_name, role=role, namespace=namespace, passphrase=passphrase
     )
     return User(user_id=user_id, passphrase=passphrase)
 
 
 def test_keys(nethsm: NetHSM) -> None:
     user = add_user(
-        nethsm,
-        user_id="test",
-        namespace="ns",
-        real_name="Test",
-        role=Role.ADMINISTRATOR,
+        nethsm, user_id="test", namespace="ns", real_name="Test", role=Role.ADMINISTRATOR
     )
 
     assert user.user_id == "ns~test"
@@ -69,16 +59,12 @@ def test_keys(nethsm: NetHSM) -> None:
     nethsm.add_namespace("ns")
     assert nethsm.list_namespaces() == ["ns"]
 
-    key_id_root = nethsm.generate_key(
-        KeyType.RSA, [KeyMechanism.RSA_DECRYPTION_RAW], 2048
-    )
+    key_id_root = nethsm.generate_key(KeyType.RSA, [KeyMechanism.RSA_DECRYPTION_RAW], 2048)
     assert nethsm.list_keys() == [key_id_root]
 
     with login(user) as nethsm_ns:
         assert nethsm_ns.list_keys() == []
-        key_id_ns = nethsm_ns.generate_key(
-            KeyType.RSA, [KeyMechanism.RSA_DECRYPTION_RAW], 2048
-        )
+        key_id_ns = nethsm_ns.generate_key(KeyType.RSA, [KeyMechanism.RSA_DECRYPTION_RAW], 2048)
         assert nethsm_ns.list_keys() == [key_id_ns]
 
         with pytest.raises(NetHSMError, match="Access denied"):
@@ -114,11 +100,7 @@ def test_config(nethsm: NetHSM) -> None:
 
     # N-Admin should not be able to access config
     user = add_user(
-        nethsm,
-        user_id="admin2",
-        namespace="ns",
-        real_name="N-Admin",
-        role=Role.ADMINISTRATOR,
+        nethsm, user_id="admin2", namespace="ns", real_name="N-Admin", role=Role.ADMINISTRATOR
     )
     with login(user) as nethsm:
         with pytest.raises(NetHSMError, match="Access denied"):
@@ -129,12 +111,7 @@ def test_add_user(nethsm: NetHSM) -> None:
     nethsm.add_namespace("ns1")
 
     # R-Admin can create users in R and new N, but not in existing N
-    user = add_user(
-        nethsm,
-        user_id="operator2",
-        real_name="R-Operator",
-        role=Role.OPERATOR,
-    )
+    user = add_user(nethsm, user_id="operator2", real_name="R-Operator", role=Role.OPERATOR)
     assert user.user_id == "operator2"
     user = add_user(
         nethsm,
@@ -159,11 +136,7 @@ def test_add_user(nethsm: NetHSM) -> None:
     nethsm.add_namespace("ns2")
     with login(n_admin) as nethsm:
         user = add_user(
-            nethsm,
-            user_id="operator",
-            namespace="ns2",
-            real_name="N-Operator",
-            role=Role.OPERATOR,
+            nethsm, user_id="operator", namespace="ns2", real_name="N-Operator", role=Role.OPERATOR
         )
         assert user.user_id == "ns2~operator"
         user = add_user(
@@ -177,29 +150,19 @@ def test_add_user(nethsm: NetHSM) -> None:
         for ns in [None, "ns1", "ns3"]:
             with pytest.raises(NetHSMError, match="Access denied"):
                 add_user(
-                    nethsm,
-                    user_id="operator3",
-                    namespace=ns,
-                    real_name="Test",
-                    role=Role.OPERATOR,
+                    nethsm, user_id="operator3", namespace=ns, real_name="Test", role=Role.OPERATOR
                 )
 
 
 def test_namespace_tag_delete(nethsm: NetHSM) -> None:
     user = add_user(
-        nethsm,
-        user_id="test",
-        namespace="ns",
-        real_name="Test",
-        role=Role.ADMINISTRATOR,
+        nethsm, user_id="test", namespace="ns", real_name="Test", role=Role.ADMINISTRATOR
     )
     nethsm.add_namespace("ns")
 
     tag = "nstag"
     with login(user) as nethsm_ns:
-        key_id_ns = nethsm_ns.generate_key(
-            KeyType.RSA, [KeyMechanism.RSA_DECRYPTION_RAW], 2048
-        )
+        key_id_ns = nethsm_ns.generate_key(KeyType.RSA, [KeyMechanism.RSA_DECRYPTION_RAW], 2048)
 
         nethsm_ns.add_key_tag(key_id_ns, tag)
         key = nethsm_ns.get_key(key_id_ns)
@@ -215,19 +178,13 @@ def test_namespace_tag_delete(nethsm: NetHSM) -> None:
 
 def test_namespace_tag_readd(nethsm: NetHSM) -> None:
     user = add_user(
-        nethsm,
-        user_id="test",
-        namespace="ns",
-        real_name="Test",
-        role=Role.ADMINISTRATOR,
+        nethsm, user_id="test", namespace="ns", real_name="Test", role=Role.ADMINISTRATOR
     )
     nethsm.add_namespace("ns")
 
     tag = "nstag"
     with login(user) as nethsm_ns:
-        key_id_ns = nethsm_ns.generate_key(
-            KeyType.RSA, [KeyMechanism.RSA_DECRYPTION_RAW], 2048
-        )
+        key_id_ns = nethsm_ns.generate_key(KeyType.RSA, [KeyMechanism.RSA_DECRYPTION_RAW], 2048)
 
         nethsm_ns.add_key_tag(key_id_ns, tag)
         key = nethsm_ns.get_key(key_id_ns)

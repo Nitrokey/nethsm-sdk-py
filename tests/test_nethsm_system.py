@@ -141,11 +141,7 @@ def test_state_restore(nethsm: NetHSM) -> None:
 
     # see test_decrypt in test_nethsm_keys
     with connect(C.OPERATOR_USER) as nethsm:
-        decrypt = nethsm.decrypt(
-            C.KEY_ID_GENERATED,
-            Base64.encode(encrypted),
-            C.MODE,
-        )
+        decrypt = nethsm.decrypt(C.KEY_ID_GENERATED, Base64.encode(encrypted), C.MODE)
         assert decrypt.decode().decode() == C.DATA
 
 
@@ -174,11 +170,7 @@ def test_factory_reset_provision_state_partial_restore(
 
     # see test_decrypt in test_nethsm_keys
     with connect(C.OPERATOR_USER) as nethsm:
-        decrypt = nethsm.decrypt(
-            C.KEY_ID_GENERATED,
-            Base64.encode(encrypted),
-            C.MODE,
-        )
+        decrypt = nethsm.decrypt(C.KEY_ID_GENERATED, Base64.encode(encrypted), C.MODE)
         assert decrypt.decode().decode() == C.DATA
 
 
@@ -194,9 +186,7 @@ def test_state_provision_update(container: Container, nethsm: NetHSM) -> None:
     update(nethsm)
 
 
-def test_state_provision_update_cancel_update(
-    container: Container, nethsm: NetHSM
-) -> None:
+def test_state_provision_update_cancel_update(container: Container, nethsm: NetHSM) -> None:
     """Cancel a queued update on a NetHSM instance.
 
     This command requires authentication as a user with the Administrator
@@ -234,9 +224,7 @@ def test_provision_reboot(container: Container, nethsm: NetHSM) -> None:
     nethsm.reboot()
 
 
-def test_unprovision_shutdown(
-    container: Container, nethsm_no_provision_no_auth: NetHSM
-) -> None:
+def test_unprovision_shutdown(container: Container, nethsm_no_provision_no_auth: NetHSM) -> None:
     """Shutdown a NetHSM instance."""
     container.restart()
 

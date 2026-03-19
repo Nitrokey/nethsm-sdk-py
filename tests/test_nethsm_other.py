@@ -71,9 +71,7 @@ def test_info(nethsm_no_provision: NetHSM) -> None:
     assert info.product == "NetHSM"
 
 
-def test_state_provision_add_user_metrics_get_metrics(
-    nethsm_no_provision: NetHSM,
-) -> None:
+def test_state_provision_add_user_metrics_get_metrics(nethsm_no_provision: NetHSM) -> None:
     """Query the metrics of a NetHSM.
 
     This command requires authentication as a user with the Metrics role.

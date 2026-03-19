@@ -8,3 +8,4 @@ backupNethsm.bin
 .coverage
 coverage.xml
 encrypted.bin
+variables.mk

@@ -63,7 +63,6 @@ def add_operator_tags(nethsm: NetHSM) -> None:
 
 
 def test_list_get_delete_add_users(nethsm: NetHSM) -> None:
-
     delete_users_not_admin(nethsm)
     add_users(nethsm)
     user_ids = nethsm.list_users()

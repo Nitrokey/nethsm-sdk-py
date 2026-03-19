@@ -18,12 +18,11 @@ from nethsm.client.schemas import classproperty
 
 class Enum(Protocol):
     @staticmethod
-    def from_string(s: str) -> "Enum":
-        ...
+    def from_string(s: str) -> "Enum": ...
 
 
 def check_enum(our_enum: Type[Enum], api_enum: Type[Any]) -> None:
-    for (key, cp) in api_enum.__dict__.items():
+    for key, cp in api_enum.__dict__.items():
         if "_" in key:
             continue
         assert isinstance(cp, classproperty)

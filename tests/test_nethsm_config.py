@@ -12,14 +12,7 @@ from cryptography.x509.oid import NameOID
 from utilities import Container, lock, self_sign_csr, unlock
 
 import nethsm as nethsm_module
-from nethsm import (
-    Authentication,
-    NetHSM,
-    NetHSMRequestError,
-    RequestErrorType,
-    State,
-    TlsKeyType,
-)
+from nethsm import Authentication, NetHSM, NetHSMRequestError, RequestErrorType, State, TlsKeyType
 
 """########## Preparation for the Tests ##########
 
@@ -84,11 +77,7 @@ class CA:
             decipher_only=False,
         )
 
-        name = x509.Name(
-            [
-                x509.NameAttribute(NameOID.COMMON_NAME, f"NetHSM Test CA {self.ca_id}"),
-            ]
-        )
+        name = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, f"NetHSM Test CA {self.ca_id}")])
         builder = x509.CertificateBuilder()
         builder = builder.subject_name(name)
         builder = builder.public_key(self.ca_key.public_key())
@@ -101,17 +90,12 @@ class CA:
         )
         builder = builder.add_extension(key_usage, critical=True)
         builder = builder.add_extension(
-            x509.SubjectKeyIdentifier.from_public_key(self.ca_key.public_key()),
-            critical=False,
+            x509.SubjectKeyIdentifier.from_public_key(self.ca_key.public_key()), critical=False
         )
         self.ca_cert = builder.sign(self.ca_key, hashes.SHA256())
 
         name = x509.Name(
-            [
-                x509.NameAttribute(
-                    NameOID.COMMON_NAME, f"NetHSM Intermediate CA {self.ca_id}"
-                ),
-            ]
+            [x509.NameAttribute(NameOID.COMMON_NAME, f"NetHSM Intermediate CA {self.ca_id}")]
         )
         builder = x509.CertificateBuilder()
         builder = builder.subject_name(name)
@@ -125,14 +109,11 @@ class CA:
         )
         builder = builder.add_extension(key_usage, critical=True)
         builder = builder.add_extension(
-            x509.SubjectKeyIdentifier.from_public_key(self.int_key.public_key()),
-            critical=False,
+            x509.SubjectKeyIdentifier.from_public_key(self.int_key.public_key()), critical=False
         )
         builder = builder.add_extension(
             x509.AuthorityKeyIdentifier.from_issuer_subject_key_identifier(
-                self.ca_cert.extensions.get_extension_for_class(
-                    x509.SubjectKeyIdentifier
-                ).value
+                self.ca_cert.extensions.get_extension_for_class(x509.SubjectKeyIdentifier).value
             ),
             critical=False,
         )
@@ -151,9 +132,7 @@ class CA:
         builder = builder.serial_number(x509.random_serial_number())
         builder = builder.not_valid_before(now)
         builder = builder.not_valid_after(now + datetime.timedelta(days=1))
-        builder = builder.add_extension(
-            x509.SubjectAlternativeName([ip]), critical=False
-        )
+        builder = builder.add_extension(x509.SubjectAlternativeName([ip]), critical=False)
         builder = builder.add_extension(
             x509.BasicConstraints(ca=False, path_length=None), critical=True
         )
@@ -173,22 +152,16 @@ class CA:
         )
         builder = builder.add_extension(
             x509.ExtendedKeyUsage(
-                [
-                    x509.oid.ExtendedKeyUsageOID.CLIENT_AUTH,
-                    x509.oid.ExtendedKeyUsageOID.SERVER_AUTH,
-                ]
+                [x509.oid.ExtendedKeyUsageOID.CLIENT_AUTH, x509.oid.ExtendedKeyUsageOID.SERVER_AUTH]
             ),
             critical=False,
         )
         builder = builder.add_extension(
-            x509.SubjectKeyIdentifier.from_public_key(csr.public_key()),
-            critical=False,
+            x509.SubjectKeyIdentifier.from_public_key(csr.public_key()), critical=False
         )
         builder = builder.add_extension(
             x509.AuthorityKeyIdentifier.from_issuer_subject_key_identifier(
-                self.int_cert.extensions.get_extension_for_class(
-                    x509.SubjectKeyIdentifier
-                ).value
+                self.int_cert.extensions.get_extension_for_class(x509.SubjectKeyIdentifier).value
             ),
             critical=False,
         )
@@ -196,14 +169,12 @@ class CA:
 
         # sanity check
         store = x509.verification.Store([self.ca_cert])
-        verifier = (
-            x509.verification.PolicyBuilder().store(store).build_server_verifier(ip)
-        )
+        verifier = x509.verification.PolicyBuilder().store(store).build_server_verifier(ip)
         verifier.verify(cert, [self.int_cert])
 
-        return cert.public_bytes(
+        return cert.public_bytes(serialization.Encoding.PEM) + self.int_cert.public_bytes(
             serialization.Encoding.PEM
-        ) + self.int_cert.public_bytes(serialization.Encoding.PEM)
+        )
 
     @property
     def ca_cert_pem(self) -> bytes:
@@ -329,7 +300,6 @@ def test_csr(nethsm: NetHSM) -> None:
 
 
 def test_set_certificate(nethsm: NetHSM) -> None:
-
     csr = nethsm.csr(
         country=C.COUNTRY,
         state_or_province=C.STATE_OR_PROVINCE,

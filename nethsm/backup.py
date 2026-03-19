@@ -30,9 +30,7 @@ def _decrypt(key: bytes, adata: bytes, data: bytes) -> bytes:
     tag = data[-16:]
     nonce = data[:iv_size]
 
-    cipher = Cipher(
-        algorithms.AES(key), modes.GCM(nonce, tag), backend=default_backend()
-    )
+    cipher = Cipher(algorithms.AES(key), modes.GCM(nonce, tag), backend=default_backend())
     decryptor = cipher.decryptor()
     decryptor.authenticate_additional_data(adata)
 
@@ -40,9 +38,7 @@ def _decrypt(key: bytes, adata: bytes, data: bytes) -> bytes:
         decrypted_data = decryptor.update(ciphertext) + decryptor.finalize()
         return decrypted_data
     except InvalidTag:
-        raise ValueError(
-            "Authentication tag verification failed. The data may be tampered."
-        )
+        raise ValueError("Authentication tag verification failed. The data may be tampered.")
 
 
 @dataclass
@@ -127,9 +123,7 @@ class EncryptedBackup:
         domain_key = _decrypt(key, b"domain-key", self.encrypted_domain_key)
         backup_device_id = None
         if self.encrypted_backup_device_id is not None:
-            backup_device_id = _decrypt(
-                key, b"backup-device-id", self.encrypted_backup_device_id
-            )
+            backup_device_id = _decrypt(key, b"backup-device-id", self.encrypted_backup_device_id)
         backup_config_store_key = None
         if self.encrypted_backup_config_store_key is not None:
             backup_config_store_key = _decrypt(
