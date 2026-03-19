@@ -1,27 +1,40 @@
-PACKAGE_NAME=nethsm
-VENV=venv
-PYTHON3=python3
-PYTHON3_VENV=venv/bin/python3
-CHECK_DIRS=$(PACKAGE_NAME)/ tests/
+CHECK_DIRS := nethsm/ tests/
 
-all: init
+PYTHON ?= poetry run python
+BLACK ?= poetry run black
+ISORT ?= poetry run isort
+FLAKE8 ?= poetry run flake8
+MYPY ?= poetry run mypy
 
-init: update-venv
+.PHONY: install
+install:
+	poetry sync --with dev
+
+.PHONY: lock
+lock:
+	poetry lock
+
+.PHONY: update
+update:
+	poetry update --with dev
 
 # code checks
 check-format:
-	$(PYTHON3_VENV) -m black --check $(CHECK_DIRS)
+	$(BLACK) --check $(CHECK_DIRS)
 
 check-import-sorting:
-	$(PYTHON3_VENV) -m isort --check-only $(CHECK_DIRS)
+	$(ISORT) --check-only $(CHECK_DIRS)
 
 check-style:
-	$(PYTHON3_VENV) -m flake8 $(CHECK_DIRS)
+	$(FLAKE8) $(CHECK_DIRS)
 
 check-typing:
-	$(PYTHON3_VENV) -m mypy $(CHECK_DIRS)
+	$(MYPY) $(CHECK_DIRS)
 
-check: check-format check-import-sorting check-style check-typing test 
+check-poetry:
+	poetry check
+
+check: check-format check-import-sorting check-style check-typing check-poetry
 
 semi-clean:
 	rm -rf ./**/__pycache__
@@ -33,18 +46,8 @@ clean: semi-clean
 
 # automatic code fixes
 fix:
-	$(PYTHON3_VENV) -m black $(BLACK_FLAGS) $(CHECK_DIRS)
-	$(PYTHON3_VENV) -m isort $(ISORT_FLAGS) $(CHECK_DIRS)
-
-$(VENV):
-	$(PYTHON3) -m venv $(VENV)
-	$(PYTHON3_VENV) -m pip install -U pip
-
-update-venv: $(VENV)
-	$(PYTHON3_VENV) -m pip install -U pip
-	$(PYTHON3_VENV) -m pip install flit
-	$(PYTHON3_VENV) -m flit install --symlink
-
+	$(BLACK) $(BLACK_FLAGS) $(CHECK_DIRS)
+	$(ISORT) $(ISORT_FLAGS) $(CHECK_DIRS)
 
 OPENAPI_OUTPUT_DIR=${PWD}/tmp/openapi-client
 
@@ -66,5 +69,5 @@ nethsm-client: nethsm-api.yaml
 
 .PHONY: test
 test:
-	$(PYTHON3_VENV) -m doctest nethsm/__init__.py
-	$(PYTHON3_VENV) -m pytest --cov nethsm --cov-report=xml $(PYTEST_FLAGS)
+	$(PYTHON) -m doctest nethsm/__init__.py
+	$(PYTHON) -m pytest --cov nethsm --cov-report=xml $(PYTEST_FLAGS)

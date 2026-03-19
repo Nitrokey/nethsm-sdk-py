@@ -8,11 +8,10 @@
 # copied, modified, or distributed except according to those terms.
 """Python Library to manage NetHSM(s)."""
 
-__version__ = "2.0.1"
-
 import binascii
 import contextlib
 import enum
+import importlib.metadata
 import json
 import string
 from base64 import b64decode, b64encode
@@ -40,6 +39,9 @@ if TYPE_CHECKING:
     from .client import ApiException
     from .client.apis.tags.default_api import DefaultApi
     from .client.schemas import Unset
+
+
+__version__ = importlib.metadata.version("nethsm")
 
 
 Bytes = Union[BufferedReader, FileIO, bytes]

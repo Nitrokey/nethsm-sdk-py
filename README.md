@@ -73,7 +73,8 @@ Trying to use them on older NetHSM versions may result in unexpected error messa
 
 ### Setting Up The Environment
 
-Use `make init` to set up the development environment.
+The NetHSM SDK uses `poetry` for dependency management.
+Use `make install` to set up the development environment.
 
 You can then run `make check` to run the checks on your changes and `make fix` to format the code.
 
