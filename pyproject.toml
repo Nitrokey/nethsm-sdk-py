@@ -35,7 +35,8 @@ ipython = "*"
 mypy = ">=1.4,<1.5"
 pytest = "<9"
 pytest-reporter-html1 = "*"
-ruff = ">= 0.14, <0.15"
+ruff = ">=0.14, <0.15"
+ty = "==0.0.23"
 docker = "*"
 podman = ">=5,<6"
 pycryptodome = "*"
@@ -67,6 +68,13 @@ max-complexity = 30
 
 [tool.ruff.lint.isort]
 split-on-trailing-comma = false
+
+[[tool.ty.overrides]]
+include = ["nethsm/client/*"]
+rules.all = "ignore"
+
+[tool.ty.rules]
+unused-type-ignore-comment = "ignore"
 
 [tool.mypy]
 show_error_codes = true

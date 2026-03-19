@@ -4,6 +4,7 @@ CHECK_DIRS := nethsm/ tests/
 
 PYTHON ?= poetry run python
 RUFF ?= poetry run ruff
+TY ?= poetry run ty
 MYPY ?= poetry run mypy
 
 .PHONY: install
@@ -26,6 +27,7 @@ check-style:
 	$(RUFF) check $(CHECK_DIRS)
 
 check-typing:
+	$(TY) check $(CHECK_DIRS)
 	$(MYPY) $(CHECK_DIRS)
 
 check-poetry:

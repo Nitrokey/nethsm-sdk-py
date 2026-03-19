@@ -7,7 +7,12 @@ from time import sleep
 from typing import Iterator, Optional
 
 import docker  # type: ignore
+import docker.errors  # type: ignore
+import docker.models.images  # type: ignore
 import podman
+import podman.domain.containers
+import podman.domain.images
+import podman.errors
 import urllib3
 from conftest import Constants as C
 from conftest import UserData
@@ -243,7 +248,7 @@ def generate_rsa_key_pair(length_in_bit: int) -> RsaPrivateKey:
 
 def verify_rsa_signature(public_key: str, message: SHA256.SHA256Hash, signature: bytes) -> bool:
     key = RSA.importKey(public_key)
-    return PKCS1_PSS.new(key).verify(message, signature)
+    return PKCS1_PSS.new(key).verify(message, signature)  # ty: ignore[invalid-argument-type]
 
 
 def encrypt_rsa(public_key: str, message: str) -> bytes:
