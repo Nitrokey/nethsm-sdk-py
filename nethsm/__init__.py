@@ -354,8 +354,8 @@ class NetworkConfig:
 
 def _handle_exception(
     e: Exception,
-    messages: dict[int, str] = {},
-    roles: list[Role] = [],
+    messages: Optional[dict[int, str]] = None,
+    roles: Optional[list[Role]] = None,
     state: Optional[State] = None,
 ) -> NoReturn:
     from .client import ApiException
@@ -372,13 +372,16 @@ def _handle_exception(
 
 def _handle_api_exception(
     e: "ApiException[Any]",
-    messages: dict[int, str] = {},
-    roles: list[Role] = [],
+    messages: Optional[dict[int, str]] = None,
+    roles: Optional[list[Role]] = None,
     state: Optional[State] = None,
 ) -> NoReturn:
     from .client.api_response import ApiResponseWithoutDeserialization
     from .client.components.schema.error_response import ErrorResponseDict
     from .client.schemas import Unset
+
+    if messages is None:
+        messages = {}
 
     if e.status in messages:
         message = messages[e.status]
@@ -969,7 +972,7 @@ class NetHSM:
         type: KeyType,
         mechanisms: list[KeyMechanism],
         private_key: PrivateKey,
-        tags: list[str] = [],
+        tags: list[str] = [],  # noqa: B006
     ) -> str:
         from .client.components.schema.key_mechanisms import KeyMechanismsTupleInput
         from .client.components.schema.key_private_data import KeyPrivateDataDict
@@ -995,7 +998,7 @@ class NetHSM:
                 type=type.value,
                 mechanisms=mechanism_tuple,
                 private=key_data,
-                restrictions=KeyRestrictionsDict(tags=TagListTuple([tag for tag in tags])),
+                restrictions=KeyRestrictionsDict(tags=TagListTuple(list(tags))),
             )
         else:
             body = PrivateKeyDict(type=type.value, mechanisms=mechanism_tuple, private=key_data)
@@ -1026,7 +1029,7 @@ class NetHSM:
         key_id: Optional[str],
         mechanisms: list[KeyMechanism],
         private_key: str,
-        tags: list[str] = [],
+        tags: list[str] = [],  # noqa: B006
     ) -> str:
         from .client.components.schema.key_mechanisms import KeyMechanismsTupleInput
         from .client.components.schema.key_restrictions import KeyRestrictionsDict
@@ -1038,7 +1041,7 @@ class NetHSM:
         if tags:
             arguments = ArgumentsDict(
                 mechanisms=mechanism_tuple,
-                restrictions=KeyRestrictionsDict(tags=TagListTuple([tag for tag in tags])),
+                restrictions=KeyRestrictionsDict(tags=TagListTuple(list(tags))),
             )
         else:
             arguments = ArgumentsDict(mechanisms=mechanism_tuple)

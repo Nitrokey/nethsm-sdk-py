@@ -4,8 +4,6 @@ CHECK_DIRS := nethsm/ tests/
 
 PYTHON ?= poetry run python
 RUFF ?= poetry run ruff
-ISORT ?= poetry run isort
-FLAKE8 ?= poetry run flake8
 MYPY ?= poetry run mypy
 
 .PHONY: install
@@ -24,11 +22,8 @@ update:
 check-format:
 	$(RUFF) format --check $(CHECK_DIRS)
 
-check-import-sorting:
-	$(ISORT) --check-only $(CHECK_DIRS)
-
 check-style:
-	$(FLAKE8) $(CHECK_DIRS)
+	$(RUFF) check $(CHECK_DIRS)
 
 check-typing:
 	$(MYPY) $(CHECK_DIRS)
@@ -36,7 +31,7 @@ check-typing:
 check-poetry:
 	poetry check
 
-check: check-format check-import-sorting check-style check-typing check-poetry
+check: check-format check-style check-typing check-poetry
 
 semi-clean:
 	rm -rf ./**/__pycache__
@@ -49,7 +44,7 @@ clean: semi-clean
 # automatic code fixes
 fix:
 	$(RUFF) format $(CHECK_DIRS)
-	$(ISORT) $(ISORT_FLAGS) $(CHECK_DIRS)
+	$(RUFF) check --fix $(CHECK_DIRS)
 
 OPENAPI_OUTPUT_DIR=${PWD}/tmp/openapi-client
 

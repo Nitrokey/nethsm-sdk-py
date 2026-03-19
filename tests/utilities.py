@@ -287,7 +287,7 @@ def update(nethsm: NetHSM) -> None:
             nethsm.update(f)
     except OSError as e:
         print(e, type(e))
-        assert False
+        raise AssertionError() from None
 
 
 def self_sign_csr(csr: str) -> bytes:

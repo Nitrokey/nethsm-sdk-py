@@ -79,12 +79,8 @@ def test_passphrase_add_user_retrieve_backup(nethsm: NetHSM) -> None:
         data = nethsm.backup()
         backup = EncryptedBackup.parse(data).decrypt(C.BACKUP_PASSPHRASE)
         assert f"/key/{C.KEY_ID_GENERATED}" in backup.data
-        try:
-            with open(C.FILENAME_BACKUP, "xb") as f:
-                f.write(data)
-        except OSError as e:
-            print(e, type(e))
-            assert False
+        with open(C.FILENAME_BACKUP, "xb") as f:
+            f.write(data)
 
 
 def test_factory_reset(container: Container, nethsm: NetHSM) -> None:

@@ -37,8 +37,8 @@ def _decrypt(key: bytes, adata: bytes, data: bytes) -> bytes:
     try:
         decrypted_data = decryptor.update(ciphertext) + decryptor.finalize()
         return decrypted_data
-    except InvalidTag:
-        raise ValueError("Authentication tag verification failed. The data may be tampered.")
+    except InvalidTag as e:
+        raise ValueError("Authentication tag verification failed. The data may be tampered.") from e
 
 
 @dataclass

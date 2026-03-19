@@ -185,7 +185,7 @@ def test_ca_certs_none(container: Container) -> None:
     nethsm = NetHSM(C.HOST, verify_tls=True, ca_certs=None)
     try:
         nethsm.get_state()
-        assert False
+        raise AssertionError()
     except NetHSMRequestError as e:
         assert e.type == RequestErrorType.SSL_ERROR
     finally:
@@ -203,7 +203,7 @@ def test_ca_certs_empty(container: Container) -> None:
         nethsm = NetHSM(C.HOST, verify_tls=True, ca_certs=f.name)
         try:
             nethsm.get_state()
-            assert False
+            raise AssertionError()
         except NetHSMRequestError as e:
             assert e.type == RequestErrorType.SSL_ERROR
         finally:
@@ -212,7 +212,7 @@ def test_ca_certs_empty(container: Container) -> None:
         nethsm = NetHSM(C.HOST, verify_tls=False, ca_certs=f.name)
         try:
             nethsm.get_state()
-            assert False
+            raise AssertionError()
         except NetHSMRequestError as e:
             assert e.type == RequestErrorType.SSL_ERROR
         finally:
@@ -229,7 +229,7 @@ def test_ca_certs_valid(container: Container) -> None:
         nethsm = NetHSM(C.HOST, verify_tls=True, ca_certs=f.name)
         try:
             nethsm.get_state()
-            assert False
+            raise AssertionError()
         except NetHSMRequestError as e:
             assert e.type == RequestErrorType.SSL_ERROR
         finally:
@@ -271,7 +271,7 @@ def test_ca_certs_valid(container: Container) -> None:
         nethsm = NetHSM(C.HOST, verify_tls=True)
         try:
             nethsm.get_state()
-            assert False
+            raise AssertionError()
         except NetHSMRequestError as e:
             assert e.type == RequestErrorType.SSL_ERROR
         finally:
