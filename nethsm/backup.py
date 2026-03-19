@@ -10,18 +10,18 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 
 
-def _get_length(data: bytes) -> tuple[int, bytes]:
+def _get_length(data: memoryview) -> tuple[int, memoryview]:
     if len(data) < 3:
         raise ValueError("Failed to read field length: unexpected EOF")
     high, low = struct.unpack(">B H", data[:3])
     return ((high << 16) + low, data[3:])
 
 
-def _get_field(data: bytes) -> tuple[bytes, bytes]:
+def _get_field(data: memoryview) -> tuple[bytes, memoryview]:
     n, data = _get_length(data)
     if len(data) < n:
         raise ValueError("Failed to extract field: unexpected EOF")
-    return data[:n], data[n:]
+    return data[:n].tobytes(), data[n:]
 
 
 def _decrypt(key: bytes, adata: bytes, data: bytes) -> bytes:
@@ -62,12 +62,13 @@ class EncryptedBackup:
 
     @classmethod
     def parse(cls, data: bytes) -> "EncryptedBackup":
+        mv = memoryview(data)
         header = b"_NETHSM_BACKUP_"
         header_len = len(header)
-        if len(data) < header_len + 1 or data[:header_len] != header:
+        if len(mv) < header_len + 1 or mv[:header_len] != header:
             raise ValueError("Data does not contain a NetHSM header")
-        version = data[header_len]
-        data = data[header_len + 1 :]
+        version = mv[header_len]
+        mv = mv[header_len + 1 :]
 
         if version not in [0, 1]:
             raise ValueError(
@@ -76,19 +77,20 @@ class EncryptedBackup:
 
         if version > 0:
             trailer = b"\x00\x00\x00_NETHSM_BACKUP_END_"
-            if not data.endswith(trailer):
+            trailer_len = len(trailer)
+            if len(mv) < trailer_len or mv[-trailer_len:] != trailer:
                 raise ValueError("Data is truncated (missing NetHSM trailer)")
-            data = data[: -len(trailer)]
+            mv = mv[:-trailer_len]
 
-        salt, data = _get_field(data)
-        encrypted_version, data = _get_field(data)
-        encrypted_domain_key, data = _get_field(data)
+        salt, mv = _get_field(mv)
+        encrypted_version, mv = _get_field(mv)
+        encrypted_domain_key, mv = _get_field(mv)
 
         encrypted_backup_device_id = None
         encrypted_backup_config_store_key = None
         if version > 0:
-            encrypted_backup_device_id, data = _get_field(data)
-            encrypted_backup_config_store_key, data = _get_field(data)
+            encrypted_backup_device_id, mv = _get_field(mv)
+            encrypted_backup_config_store_key, mv = _get_field(mv)
 
         backup = cls(
             version=version,
@@ -99,8 +101,8 @@ class EncryptedBackup:
             encrypted_backup_config_store_key=encrypted_backup_config_store_key,
         )
 
-        while data:
-            item, data = _get_field(data)
+        while mv:
+            item, mv = _get_field(mv)
             backup.encrypted_data.append(item)
 
         return backup
@@ -139,7 +141,7 @@ class EncryptedBackup:
 
         for item in self.encrypted_data:
             key_value_pair = _decrypt(key, b"backup", item)
-            k, v = _get_field(key_value_pair)
-            backup.data[k.decode()] = v
+            k, v = _get_field(memoryview(key_value_pair))
+            backup.data[k.decode()] = v.tobytes()
 
         return backup

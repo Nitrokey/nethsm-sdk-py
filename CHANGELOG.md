@@ -4,6 +4,7 @@
 
 - Add support for backup format v1.
 - Use `poetry` as build backend
+- Improve backup parsing speed
 
 [All Changes](https://github.com/Nitrokey/nethsm-sdk-py/compare/v2.0.1...HEAD)
 
