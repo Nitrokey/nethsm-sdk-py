@@ -81,7 +81,7 @@ jobs:
       - name: Check code with integration tests
         run: make test
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         if: ${{ failure() }}
         with:
           name: backup
