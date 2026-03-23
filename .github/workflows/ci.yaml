@@ -15,7 +15,7 @@ jobs:
     container: python:3.9-slim
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
       - name: Install required packages
         run: |
           apt update
@@ -32,7 +32,7 @@ jobs:
     container: python:3.9-slim
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
       - name: Install required packages
         run: |
           apt update
@@ -49,7 +49,7 @@ jobs:
     container: python:3.9-slim
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
       - name: Install required packages
         run: |
           apt update
@@ -65,7 +65,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
       - name: Install required packages
         run: |
           sudo apt-get update
@@ -81,7 +81,7 @@ jobs:
       - name: Check code with integration tests
         run: make test
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         if: ${{ failure() }}
         with:
           name: backup
@@ -107,7 +107,7 @@ jobs:
     container: python:3.9-slim
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
       - name: Create virtual environment
         run: python3 -m venv venv
       - name: Install package

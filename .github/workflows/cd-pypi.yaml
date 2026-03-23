@@ -16,7 +16,7 @@ jobs:
     container: python:3.9-slim
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Install Poetry
         run: pip install "${POETRY_SPEC}"
       - name: Check package version format
@@ -32,13 +32,13 @@ jobs:
     needs: check-package-version
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
       - name: Install Poetry
         run: pip install "${POETRY_SPEC}"
       - name: Build
         run: poetry build
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: nethsm-pypi
           path: dist
@@ -54,9 +54,9 @@ jobs:
       id-token: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Download artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: nethsm-pypi
           path: dist
@@ -72,7 +72,7 @@ jobs:
     if: github.event_name == 'release'
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Install Poetry
         run: pip install "${POETRY_SPEC}"
       - name: Check tag version
@@ -95,9 +95,9 @@ jobs:
       id-token: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Download artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: nethsm-pypi
           path: dist
