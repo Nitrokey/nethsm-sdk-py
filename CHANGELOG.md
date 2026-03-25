@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+-
+
+[All Changes](https://github.com/Nitrokey/nethsm-sdk-py/compare/v2.1.0...HEAD)
+
+## [v2.1.0](https://github.com/Nitrokey/nethsm-sdk-py/releases/tag/v2.1.0) (2026-03-25)
+
 ### Features
 
 - Add support for backup format v1.
@@ -18,7 +24,7 @@
 - Improve backup parsing speed
 - Use `poetry` as build backend
 
-[All Changes](https://github.com/Nitrokey/nethsm-sdk-py/compare/v2.0.1...HEAD)
+[All Changes](https://github.com/Nitrokey/nethsm-sdk-py/compare/v2.0.1...v2.1.0)
 
 ## [v2.0.1](https://github.com/Nitrokey/nethsm-sdk-py/releases/tag/v2.0.1) (2025-11-06)
 

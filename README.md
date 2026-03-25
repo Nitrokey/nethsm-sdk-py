@@ -60,14 +60,24 @@ The following table provides an overview of the SDK versions that added support 
 | :---------: | :------------: | ------------ |
 | [v1.0.0][sdk-v1.0.0] | [v1.0][nethsm-v1.0] |  |
 | [v1.2.0][sdk-v1.2.0] | [v2.0][nethsm-v2.0] | Namespaces |
+| [v2.0.0][sdk-v2.0.0] | [v3.0][nethsm-v3.0] | Moving Keys |
+| [v2.1.0][sdk-v2.1.0] | [v4.0][nethsm-v4.0] | Clustering, IPv6 |
 
 [nethsm-v1.0]: https://github.com/Nitrokey/nethsm/releases/tag/v1.0
 [nethsm-v2.0]: https://github.com/Nitrokey/nethsm/releases/tag/v2.0
+[nethsm-v3.0]: https://github.com/Nitrokey/nethsm/releases/tag/v3.0
+[nethsm-v4.0]: https://github.com/Nitrokey/nethsm/releases/tag/v4.0
 [sdk-v1.0.0]: https://github.com/Nitrokey/nethsm-sdk-py/releases/tag/v1.0.0
 [sdk-v1.2.0]: https://github.com/Nitrokey/nethsm-sdk-py/releases/tag/v1.2.0
+[sdk-v2.0.0]: https://github.com/Nitrokey/nethsm-sdk-py/releases/tag/v2.0.0
+[sdk-v2.1.0]: https://github.com/Nitrokey/nethsm-sdk-py/releases/tag/v2.1.0
+
+See the [changelog][] for more details.
 
 New features are added in a backwards-compatible way if possible.
 Trying to use them on older NetHSM versions may result in unexpected error messages.
+
+[changelog]: ./CHANGELOG.md
 
 ## Development
 
@@ -112,7 +122,7 @@ Therefore, the following functions manually deserialize the API response:
 
 ### Publishing a new version
 
-- change `__version__` in `nethsm/__init__.py`. Example : 0.1.0
+- change `version` in `pyproject.toml`. Example : 0.1.0
 - create a new tag, prepending `v` to the version. Example : v0.1.0
 - create a new release on GitHub to trigger the ci that will publish the new version.
 
