@@ -1392,9 +1392,9 @@ class NetHSM:
             )
 
     def set_network_config(self, ip_address: str, netmask: str, gateway: str) -> None:
-        from .client.components.schema.network_config import NetworkConfigDict
+        from .client.components.schema.network_config_input import NetworkConfigInputDict
 
-        body = NetworkConfigDict(ipAddress=ip_address, netmask=netmask, gateway=gateway)
+        body = NetworkConfigInputDict(ipAddress=ip_address, netmask=netmask, gateway=gateway)
         try:
             self._get_api().config_network_put(body=body)
         except Exception as e:
