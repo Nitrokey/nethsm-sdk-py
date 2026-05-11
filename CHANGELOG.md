@@ -2,11 +2,17 @@
 
 ## Unreleased
 
+-
+
+[All Changes](https://github.com/Nitrokey/nethsm-sdk-py/compare/v2.1.1...HEAD)
+
+## [v2.1.1](https://github.com/Nitrokey/nethsm-sdk-py/releases/tag/v2.1.1) (2026-05-11)
+
 ### Bugfixes
 
 - Fix endpoint path in `NetHSM.set_cluster_ca_certificate`
 
-[All Changes](https://github.com/Nitrokey/nethsm-sdk-py/compare/v2.1.0...HEAD)
+[All Changes](https://github.com/Nitrokey/nethsm-sdk-py/compare/v2.1.0...v2.1.1)
 
 ## [v2.1.0](https://github.com/Nitrokey/nethsm-sdk-py/releases/tag/v2.1.0) (2026-03-25)
 

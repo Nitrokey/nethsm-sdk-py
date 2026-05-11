@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [project]
 name = "nethsm"
-version = "2.1.0"
+version = "2.1.1"
 description = "Python Library to manage NetHSM(s)"
 authors = [{ name = "Nitrokey", email = "pypi@nitrokey.com" },]
 readme = "README.md"
