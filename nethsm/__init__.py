@@ -1803,7 +1803,9 @@ class NetHSM:
 
     def set_cluster_ca_certificate(self, cert: Bytes) -> None:
         try:
-            self._request("PUT", "config/tls/ca.pem", data=cert, mime_type="application/x-pem-file")
+            self._request(
+                "PUT", "config/tls/cluster-ca.pem", data=cert, mime_type="application/x-pem-file"
+            )
         except Exception as e:
             _handle_exception(e, state=State.OPERATIONAL, roles=[Role.ADMINISTRATOR])
 

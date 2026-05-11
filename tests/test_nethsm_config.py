@@ -1,6 +1,7 @@
 import datetime
 import ipaddress
 import secrets
+import time
 from tempfile import NamedTemporaryFile
 
 import pytest
@@ -119,15 +120,22 @@ class CA:
         )
         self.int_cert = builder.sign(self.ca_key, hashes.SHA256())
 
-    def sign(self, csr: x509.CertificateSigningRequest) -> bytes:
+    def sign(self, csr: x509.CertificateSigningRequest, intermediate: bool = True) -> bytes:
         import datetime
+
+        if intermediate:
+            issuer_cert = self.int_cert
+            issuer_key = self.int_key
+        else:
+            issuer_cert = self.ca_cert
+            issuer_key = self.ca_key
 
         now = datetime.datetime.now(datetime.timezone.utc)
         ip = x509.IPAddress(ipaddress.IPv4Address("127.0.0.1"))
 
         builder = x509.CertificateBuilder()
         builder = builder.subject_name(csr.subject)
-        builder = builder.issuer_name(self.int_cert.subject)
+        builder = builder.issuer_name(issuer_cert.subject)
         builder = builder.public_key(csr.public_key())
         builder = builder.serial_number(x509.random_serial_number())
         builder = builder.not_valid_before(now)
@@ -161,20 +169,25 @@ class CA:
         )
         builder = builder.add_extension(
             x509.AuthorityKeyIdentifier.from_issuer_subject_key_identifier(
-                self.int_cert.extensions.get_extension_for_class(x509.SubjectKeyIdentifier).value
+                issuer_cert.extensions.get_extension_for_class(x509.SubjectKeyIdentifier).value
             ),
             critical=False,
         )
-        cert = builder.sign(self.int_key, hashes.SHA256())
+        cert = builder.sign(issuer_key, hashes.SHA256())
 
         # sanity check
         store = x509.verification.Store([self.ca_cert])
         verifier = x509.verification.PolicyBuilder().store(store).build_server_verifier(ip)
-        verifier.verify(cert, [self.int_cert])
+        intermediates = []
+        if intermediate:
+            intermediates = [issuer_cert]
+        verifier.verify(cert, intermediates)
 
-        return cert.public_bytes(serialization.Encoding.PEM) + self.int_cert.public_bytes(
-            serialization.Encoding.PEM
-        )
+        cert_bytes = cert.public_bytes(serialization.Encoding.PEM)
+        if intermediate:
+            return cert_bytes + self.int_cert.public_bytes(serialization.Encoding.PEM)
+        else:
+            return cert_bytes
 
     @property
     def ca_cert_pem(self) -> bytes:
@@ -480,13 +493,51 @@ def test_set_unlock_passphrase_lock_unlock(nethsm: NetHSM) -> None:
         C.UNLOCK_PASSPHRASE_CHANGED, current_passphrase=C.UNLOCK_PASSPHRASE
     )
 
+    assert nethsm.get_state() == State.OPERATIONAL
     lock(nethsm)
+    assert nethsm.get_state() == State.LOCKED
     unlock(nethsm, C.UNLOCK_PASSPHRASE_CHANGED)
+    assert nethsm.get_state() == State.OPERATIONAL
 
-    with pytest.raises(nethsm_module.NetHSMError):
-        lock(nethsm)
+    lock(nethsm)
+    assert nethsm.get_state() == State.LOCKED
+
+    with pytest.raises(nethsm_module.NetHSMError, match="Access denied -- wrong unlock passphrase"):
         nethsm.unlock(C.UNLOCK_PASSPHRASE_WRONG)
+    assert nethsm.get_state() == State.LOCKED
 
-    with pytest.raises(nethsm_module.NetHSMError):
-        lock(nethsm)
+    time.sleep(1)
+
+    with pytest.raises(nethsm_module.NetHSMError, match="Access denied -- wrong unlock passphrase"):
         nethsm.unlock(C.UNLOCK_PASSPHRASE_WRONG_CASE)
+    assert nethsm.get_state() == State.LOCKED
+
+    time.sleep(1)
+
+    unlock(nethsm, C.UNLOCK_PASSPHRASE_CHANGED)
+    assert nethsm.get_state() == State.OPERATIONAL
+
+
+def test_cluster_ca_certificate(nethsm: NetHSM) -> None:
+    with pytest.raises(nethsm_module.NetHSMError, match="404: Not Found"):
+        ca_cert = nethsm.get_cluster_ca_certificate()
+
+    ca = CA()
+
+    csr_pem = nethsm.csr(
+        country=C.COUNTRY,
+        state_or_province=C.STATE_OR_PROVINCE,
+        locality=C.LOCALITY,
+        organization=C.ORGANIZATION,
+        organizational_unit=C.ORGANIZATIONAL_UNIT,
+        common_name=C.COMMON_NAME,
+        email_address=C.EMAIL_ADDRESS,
+    )
+    csr = x509.load_pem_x509_csr(csr_pem.encode())
+    cert = ca.sign(csr, intermediate=False)
+    nethsm.set_certificate(cert)
+
+    nethsm.set_cluster_ca_certificate(ca.ca_cert_pem)
+
+    ca_cert = nethsm.get_cluster_ca_certificate()
+    assert ca_cert == ca.ca_cert_pem.decode("utf-8")

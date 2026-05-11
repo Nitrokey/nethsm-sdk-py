@@ -2,7 +2,9 @@
 
 ## Unreleased
 
--
+### Bugfixes
+
+- Fix endpoint path in `NetHSM.set_cluster_ca_certificate`
 
 [All Changes](https://github.com/Nitrokey/nethsm-sdk-py/compare/v2.1.0...HEAD)
 
