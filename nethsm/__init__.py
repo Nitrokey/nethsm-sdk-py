@@ -29,8 +29,12 @@ if TYPE_CHECKING:
     from .client import ApiException
     from .client.apis.tags.default_api import DefaultApi
     from .client.components.schema.cluster_initial_member import ClusterInitialMemberDict
+    from .client.components.schema.cluster_log_item import ClusterLogItemDict
     from .client.components.schema.cluster_member import ClusterMemberDict
     from .client.components.schema.cluster_member_add_response import ClusterMemberAddResponseDict
+    from .client.components.schema.cluster_snapshot import ClusterSnapshotDict
+    from .client.components.schema.cluster_state import ClusterStateDict
+    from .client.components.schema.health_diagnose_data import HealthDiagnoseDataDict
     from .client.components.schema.ipv6_config import Ipv6ConfigDict
     from .client.components.schema.network_config_output import NetworkConfigOutputDict
     from .client.schemas import Unset
@@ -465,6 +469,69 @@ class ClusterJoinData:
     def _from_api(response: "ClusterMemberAddResponseDict") -> "ClusterJoinData":
         members = [InitialClusterMember._from_api(member) for member in response.members]
         return ClusterJoinData(members=members, joiner_kit=response.joinerKit)
+
+
+@dataclass
+class ClusterLogItem:
+    level: Optional[str]
+
+    @staticmethod
+    def _from_api(item: "ClusterLogItemDict") -> "ClusterLogItem":
+        return ClusterLogItem(level=_unset_to_optional(item.level))
+
+
+@dataclass
+class ClusterState:
+    running: bool
+    exited: Optional[int]
+    signaled: Optional[int]
+    stopped: Optional[int]
+
+    @staticmethod
+    def _from_api(data: "ClusterStateDict") -> "ClusterState":
+        return ClusterState(
+            running=data.running,
+            exited=_unset_to_optional(data.exited),
+            signaled=_unset_to_optional(data.signaled),
+            stopped=_unset_to_optional(data.stopped),
+        )
+
+
+@dataclass
+class ClusterSnapshot:
+    hash: Optional[int]
+    revision: Optional[int]
+    total_key: Optional[int]
+    total_size: Optional[int]
+    version: Optional[str]
+
+    @staticmethod
+    def _from_api(data: "ClusterSnapshotDict") -> "ClusterSnapshot":
+        return ClusterSnapshot(
+            hash=_unset_to_optional(data.hash),
+            revision=_unset_to_optional(data.revision),
+            total_key=_unset_to_optional(data.totalKey),
+            total_size=_unset_to_optional(data.totalSize),
+            version=_unset_to_optional(data.version),
+        )
+
+
+@dataclass
+class ClusterDiagnostics:
+    logs: list[ClusterLogItem]
+    state: ClusterState
+    snapshot: Optional[ClusterSnapshot]
+
+    @staticmethod
+    def _from_api(data: "HealthDiagnoseDataDict") -> "ClusterDiagnostics":
+        from .client.schemas import Unset
+
+        state = ClusterState._from_api(data.clusterState)
+        logs = [ClusterLogItem._from_api(item) for item in data.clusterLogs]
+        snapshot = None
+        if not isinstance(data.clusterSnapshot, Unset):
+            snapshot = ClusterSnapshot._from_api(data.clusterSnapshot)
+        return ClusterDiagnostics(logs=logs, state=state, snapshot=snapshot)
 
 
 def _handle_exception(
@@ -1817,6 +1884,13 @@ class NetHSM:
             )
         except Exception as e:
             _handle_exception(e, state=State.OPERATIONAL, roles=[Role.ADMINISTRATOR])
+
+    def get_cluster_diagnostics(self) -> ClusterDiagnostics:
+        try:
+            response = self._get_api().health_diagnose_get()
+        except Exception as e:
+            _handle_exception(e)
+        return ClusterDiagnostics._from_api(response.body)
 
 
 @contextlib.contextmanager

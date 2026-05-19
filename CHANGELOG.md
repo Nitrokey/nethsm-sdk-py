@@ -6,6 +6,10 @@
 
 - Add `State.FAILED` variant.
 
+### Features
+
+- Add `NetHSM.get_cluster_diagnostics` function and `ClusterDiagnostics`, `ClusterLogItem`, `ClusterState` and `ClusterSnapshot` classes.
+
 [All Changes](https://github.com/Nitrokey/nethsm-sdk-py/compare/v2.1.1...HEAD)
 
 ## [v2.1.1](https://github.com/Nitrokey/nethsm-sdk-py/releases/tag/v2.1.1) (2026-05-11)
