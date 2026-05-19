@@ -7,6 +7,7 @@
 from nethsm.client.paths.system_update.post.operation import SystemUpdatePost
 from nethsm.client.paths.config_tls_csr_pem.post.operation import ConfigTlsCsrPemPost
 from nethsm.client.paths.keys_key_id_decrypt.post.operation import KeysKeyIDDecryptPost
+from nethsm.client.paths.health_diagnose.get.operation import HealthDiagnoseGet
 from nethsm.client.paths.keys_key_id_sign.post.operation import KeysKeyIDSignPost
 from nethsm.client.paths.keys_key_id_cert.delete.operation import KeysKeyIDCertDelete
 from nethsm.client.paths.keys_key_id_cert.get.operation import KeysKeyIDCertGet
@@ -16,6 +17,7 @@ from nethsm.client.paths.cluster_members_member_id.delete.operation import Clust
 from nethsm.client.paths.cluster_members_member_id.put.operation import ClusterMembersMemberIDPut
 from nethsm.client.paths.namespaces_namespace_id.delete.operation import NamespacesNamespaceIDDelete
 from nethsm.client.paths.namespaces_namespace_id.put.operation import NamespacesNamespaceIDPut
+from nethsm.client.paths.cluster_force_new.post.operation import ClusterForceNewPost
 from nethsm.client.paths.system_reboot.post.operation import SystemRebootPost
 from nethsm.client.paths.keys_key_id_restrictions_tags_tag.delete.operation import KeysKeyIDRestrictionsTagsTagDelete
 from nethsm.client.paths.keys_key_id_restrictions_tags_tag.put.operation import KeysKeyIDRestrictionsTagsTagPut
@@ -81,6 +83,7 @@ class DefaultApi(
     SystemUpdatePost,
     ConfigTlsCsrPemPost,
     KeysKeyIDDecryptPost,
+    HealthDiagnoseGet,
     KeysKeyIDSignPost,
     KeysKeyIDCertDelete,
     KeysKeyIDCertGet,
@@ -90,6 +93,7 @@ class DefaultApi(
     ClusterMembersMemberIDPut,
     NamespacesNamespaceIDDelete,
     NamespacesNamespaceIDPut,
+    ClusterForceNewPost,
     SystemRebootPost,
     KeysKeyIDRestrictionsTagsTagDelete,
     KeysKeyIDRestrictionsTagsTagPut,

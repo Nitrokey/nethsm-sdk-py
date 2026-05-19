@@ -2,7 +2,9 @@
 
 ## Unreleased
 
--
+### Breaking Changes
+
+- Add `State.FAILED` variant.
 
 [All Changes](https://github.com/Nitrokey/nethsm-sdk-py/compare/v2.1.1...HEAD)
 
