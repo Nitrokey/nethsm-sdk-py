@@ -1892,6 +1892,12 @@ class NetHSM:
             _handle_exception(e)
         return ClusterDiagnostics._from_api(response.body)
 
+    def force_new_cluster(self) -> None:
+        try:
+            self._get_api().cluster_force_new_post()
+        except Exception as e:
+            _handle_exception(e, state=State.FAILED)
+
 
 @contextlib.contextmanager
 def connect(
