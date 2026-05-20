@@ -473,11 +473,12 @@ class ClusterJoinData:
 
 @dataclass
 class ClusterLogItem:
-    level: Optional[str]
+    level: str
+    msg: Optional[str]
 
     @staticmethod
     def _from_api(item: "ClusterLogItemDict") -> "ClusterLogItem":
-        return ClusterLogItem(level=_unset_to_optional(item.level))
+        return ClusterLogItem(level=item.level, msg=_unset_to_optional(item.msg))
 
 
 @dataclass
@@ -499,19 +500,19 @@ class ClusterState:
 
 @dataclass
 class ClusterSnapshot:
-    hash: Optional[int]
-    revision: Optional[int]
-    total_key: Optional[int]
-    total_size: Optional[int]
+    hash: int
+    revision: int
+    total_key: int
+    total_size: int
     version: Optional[str]
 
     @staticmethod
     def _from_api(data: "ClusterSnapshotDict") -> "ClusterSnapshot":
         return ClusterSnapshot(
-            hash=_unset_to_optional(data.hash),
-            revision=_unset_to_optional(data.revision),
-            total_key=_unset_to_optional(data.totalKey),
-            total_size=_unset_to_optional(data.totalSize),
+            hash=data.hash,
+            revision=data.revision,
+            total_key=data.totalKey,
+            total_size=data.totalSize,
             version=_unset_to_optional(data.version),
         )
 
