@@ -31,6 +31,7 @@ paths:
         - Locked
         - Operational
         - Unprovisioned
+        - Failed
       x-annotation-role:
         - Public
       x-annotation-caller-namespace:
@@ -92,6 +93,36 @@ paths:
         - Locked
         - Operational
         - Unprovisioned
+        - Failed
+      x-annotation-caller-namespace:
+        - Root
+        - Namespaced
+  /health/diagnose:
+    get:
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthDiagnoseData"
+        "401":
+          description: Authentication required but none provided. Only when outside of the Failed state.
+        "403":
+          description: Access denied. Only when outside the Failed state.
+        "406":
+          description: Content type in Accept header not supported.
+      description: Retrieve NetHSM cluster diagnostics. This is always available, requiring authentication when operational, and no authentication otherwise (Locked, Failed, Unprovisioned).
+      security:
+        - basic: []
+      x-annotation-role:
+        - Administrator
+        - Public
+      x-annotation-state:
+        - Locked
+        - Operational
+        - Unprovisioned
+        - Failed
       x-annotation-caller-namespace:
         - Root
         - Namespaced
@@ -1168,6 +1199,24 @@ paths:
         required: true
         schema:
           $ref: "#/components/schemas/ID"
+  /cluster/force-new:
+    post:
+      responses:
+        "204":
+          description: About to reboot NetHSM.
+        "412":
+          description: Precondition failed (NetHSM was not *Failed*).
+      description:
+        Rebuild etcd instance with the data on disk, switch to a single node cluster, and reboot.
+        **WARNING** this will restore data only up to the last snapshot, and will result in data loss for any unconfirmed writes, or writes that occured on other NetHSM nodes that are now unreachable.
+        This call is unauthenticated and available only in the Failed state. Before using this command it is recommended that you attempt to heal the cluster's network connectivity first and restore quorum.
+        To that end, use the /health/diagnose endpoint to understand to cause of the current failure.
+      x-annotation-role:
+        - Public
+      x-annotation-state:
+        - Failed
+      x-annotation-caller-namespace:
+        - Root
   /cluster/join:
     post:
       responses:
@@ -2492,7 +2541,7 @@ paths:
         "406":
           description: Content type in Accept header not supported.
         "412":
-          description: Precondition failed (NetHSM was not *Operational*).
+          description: Precondition failed (NetHSM was not *Operational* or *Failed*).
       description: Reboot NetHSM.
       security:
         - basic: []
@@ -2500,6 +2549,7 @@ paths:
         - Administrator
       x-annotation-state:
         - Operational
+        - Failed
       x-annotation-caller-namespace:
         - Root
   /system/shutdown:
@@ -2518,7 +2568,7 @@ paths:
 
         Authentication behavior varies by NetHSM state:
         - **Operational**: Requires Administrator authentication
-        - **Locked** or **Unprovisioned**: No authentication required
+        - **Locked**, **Unprovisioned** or **Failed**: No authentication required
       security:
         - basic: [] # when Operational
         - {} # when Unprovisioned or Locked
@@ -2529,6 +2579,7 @@ paths:
         - Operational
         - Unprovisioned
         - Locked
+        - Failed
       x-annotation-caller-namespace:
         - Root
   /system/factory-reset:
@@ -2543,7 +2594,7 @@ paths:
         "406":
           description: Content type in Accept header not supported.
         "412":
-          description: Precondition failed (NetHSM was not *Operational*).
+          description: Precondition failed (NetHSM was not *Operational* or *Failed*).
       description: Reset NetHSM to factory settings.
       security:
         - basic: []
@@ -2551,6 +2602,7 @@ paths:
         - Administrator
       x-annotation-state:
         - Operational
+        - Failed
       x-annotation-caller-namespace:
         - Root
   /system/update:
@@ -2755,6 +2807,7 @@ components:
         - Unprovisioned
         - Locked
         - Operational
+        - Failed
       type: string
     UserRole:
       enum:
@@ -2891,6 +2944,51 @@ components:
           $ref: "#/components/schemas/UserID"
       required:
         - user
+    ClusterLogItem:
+      description: |
+        A log message from etcd on the current node.
+        The level is warning or above.
+      example:
+        level: "error"
+        msg: "Mock: no etcd"
+      properties:
+        level:
+          type: string
+        msg:
+          type: string
+      type: object
+      required:
+        - level
+    ClusterLogList:
+      description: A list of recent log messages from etcd on the current node.
+      example:
+        - 
+          level: "error"
+          msg: "Mock: no etcd"
+      type: array
+      items:
+        $ref: "#/components/schemas/ClusterLogItem"
+    ClusterSnapshot:
+      description: |
+        Statistics about the local cluster database snapshot.
+        This is only present when etcd is not running.
+      type: object
+      properties:
+        hash:
+          type: integer
+        revision:
+          type: integer
+        totalKey:
+          type: integer
+        totalSize:
+          type: integer
+        version:
+          type: string
+      required:
+        - hash
+        - revision
+        - totalKey
+        - totalSize
     ClusterAddReq:
       example:
           urls:
@@ -2965,6 +3063,43 @@ components:
         - id
         - name
         - urls
+    ClusterState:
+      description: |
+        Status of etcd cluster process on the local node.
+      type: object
+      example:
+        exited: 1
+        running: false
+      properties:
+        exited:
+          description: |
+            Present when the cluster process has exited on the local node
+            with this exit code.
+            An exit code of 0 indicates success
+            (e.g. the node has cleanly left the cluster).
+          type: integer
+          minimum: 0
+          maximum: 255
+        signaled:
+          description: |
+            Present when the cluster process has been killed by
+            this signal.
+          type: integer
+          minimum: 0
+          maximum: 255
+        stopped:
+          description: |
+            Present when the cluster process has been stopped by
+            this signal.
+          type: integer
+          minimum: 0
+          maximum: 255
+        running:
+          description: |
+            Whether the cluster process is currently running.
+          type: boolean
+      required:
+        - running
     PeerURL:
       pattern: ^https://.+
       minLength: 1
@@ -3159,6 +3294,28 @@ components:
           $ref: "#/components/schemas/SystemState"
       required:
         - state
+    HealthDiagnoseData:
+      description: |
+        Information about the health of the etcd process on the current node,
+        including the process running state, exit code, and recent logs.
+      example:
+        clusterLogs:
+          -
+            level: "error"
+            msg: "Mock: no etcd"
+        clusterState:
+            running: false
+      type: object
+      properties:
+        clusterLogs:
+          $ref: '#/components/schemas/ClusterLogList'
+        clusterSnapshot:
+          $ref: '#/components/schemas/ClusterSnapshot'
+        clusterState:
+          $ref: '#/components/schemas/ClusterState'
+      required:
+        - clusterLogs
+        - clusterState
     MetricsData:
       example:
         keyOperations: 1132412

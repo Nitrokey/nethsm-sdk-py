@@ -1,6 +1,7 @@
 import typing
 import typing_extensions
 
+from nethsm.client.apis.paths.cluster_force_new import ClusterForceNew
 from nethsm.client.apis.paths.cluster_join import ClusterJoin
 from nethsm.client.apis.paths.cluster_members import ClusterMembers
 from nethsm.client.apis.paths.cluster_members_member_id import ClusterMembersMemberID
@@ -16,6 +17,7 @@ from nethsm.client.apis.paths.config_tls_public_pem import ConfigTlsPublicPem
 from nethsm.client.apis.paths.config_unattended_boot import ConfigUnattendedBoot
 from nethsm.client.apis.paths.config_unlock_passphrase import ConfigUnlockPassphrase
 from nethsm.client.apis.paths.health_alive import HealthAlive
+from nethsm.client.apis.paths.health_diagnose import HealthDiagnose
 from nethsm.client.apis.paths.health_ready import HealthReady
 from nethsm.client.apis.paths.health_state import HealthState
 from nethsm.client.apis.paths.info import Info
@@ -56,6 +58,7 @@ from nethsm.client.apis.paths.users_user_id_tags_tag import UsersUserIDTagsTag
 PathToApi = typing.TypedDict(
     'PathToApi',
     {
+    "/cluster/force-new": typing.Type[ClusterForceNew],
     "/cluster/join": typing.Type[ClusterJoin],
     "/cluster/members": typing.Type[ClusterMembers],
     "/cluster/members/{MemberID}": typing.Type[ClusterMembersMemberID],
@@ -71,6 +74,7 @@ PathToApi = typing.TypedDict(
     "/config/unattended-boot": typing.Type[ConfigUnattendedBoot],
     "/config/unlock-passphrase": typing.Type[ConfigUnlockPassphrase],
     "/health/alive": typing.Type[HealthAlive],
+    "/health/diagnose": typing.Type[HealthDiagnose],
     "/health/ready": typing.Type[HealthReady],
     "/health/state": typing.Type[HealthState],
     "/info": typing.Type[Info],
@@ -112,6 +116,7 @@ PathToApi = typing.TypedDict(
 
 path_to_api = PathToApi(
     {
+    "/cluster/force-new": ClusterForceNew,
     "/cluster/join": ClusterJoin,
     "/cluster/members": ClusterMembers,
     "/cluster/members/{MemberID}": ClusterMembersMemberID,
@@ -127,6 +132,7 @@ path_to_api = PathToApi(
     "/config/unattended-boot": ConfigUnattendedBoot,
     "/config/unlock-passphrase": ConfigUnlockPassphrase,
     "/health/alive": HealthAlive,
+    "/health/diagnose": HealthDiagnose,
     "/health/ready": HealthReady,
     "/health/state": HealthState,
     "/info": Info,

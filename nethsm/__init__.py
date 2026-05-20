@@ -29,8 +29,12 @@ if TYPE_CHECKING:
     from .client import ApiException
     from .client.apis.tags.default_api import DefaultApi
     from .client.components.schema.cluster_initial_member import ClusterInitialMemberDict
+    from .client.components.schema.cluster_log_item import ClusterLogItemDict
     from .client.components.schema.cluster_member import ClusterMemberDict
     from .client.components.schema.cluster_member_add_response import ClusterMemberAddResponseDict
+    from .client.components.schema.cluster_snapshot import ClusterSnapshotDict
+    from .client.components.schema.cluster_state import ClusterStateDict
+    from .client.components.schema.health_diagnose_data import HealthDiagnoseDataDict
     from .client.components.schema.ipv6_config import Ipv6ConfigDict
     from .client.components.schema.network_config_output import NetworkConfigOutputDict
     from .client.schemas import Unset
@@ -60,6 +64,7 @@ class State(enum.Enum):
     UNPROVISIONED = "Unprovisioned"
     LOCKED = "Locked"
     OPERATIONAL = "Operational"
+    FAILED = "Failed"
 
     @staticmethod
     def from_string(s: str) -> "State":
@@ -466,11 +471,75 @@ class ClusterJoinData:
         return ClusterJoinData(members=members, joiner_kit=response.joinerKit)
 
 
+@dataclass
+class ClusterLogItem:
+    level: str
+    msg: Optional[str]
+
+    @staticmethod
+    def _from_api(item: "ClusterLogItemDict") -> "ClusterLogItem":
+        return ClusterLogItem(level=item.level, msg=_unset_to_optional(item.msg))
+
+
+@dataclass
+class ClusterState:
+    running: bool
+    exited: Optional[int]
+    signaled: Optional[int]
+    stopped: Optional[int]
+
+    @staticmethod
+    def _from_api(data: "ClusterStateDict") -> "ClusterState":
+        return ClusterState(
+            running=data.running,
+            exited=_unset_to_optional(data.exited),
+            signaled=_unset_to_optional(data.signaled),
+            stopped=_unset_to_optional(data.stopped),
+        )
+
+
+@dataclass
+class ClusterSnapshot:
+    hash: int
+    revision: int
+    total_key: int
+    total_size: int
+    version: Optional[str]
+
+    @staticmethod
+    def _from_api(data: "ClusterSnapshotDict") -> "ClusterSnapshot":
+        return ClusterSnapshot(
+            hash=data.hash,
+            revision=data.revision,
+            total_key=data.totalKey,
+            total_size=data.totalSize,
+            version=_unset_to_optional(data.version),
+        )
+
+
+@dataclass
+class ClusterDiagnostics:
+    logs: list[ClusterLogItem]
+    state: ClusterState
+    snapshot: Optional[ClusterSnapshot]
+
+    @staticmethod
+    def _from_api(data: "HealthDiagnoseDataDict") -> "ClusterDiagnostics":
+        from .client.schemas import Unset
+
+        state = ClusterState._from_api(data.clusterState)
+        logs = [ClusterLogItem._from_api(item) for item in data.clusterLogs]
+        snapshot = None
+        if not isinstance(data.clusterSnapshot, Unset):
+            snapshot = ClusterSnapshot._from_api(data.clusterSnapshot)
+        return ClusterDiagnostics(logs=logs, state=state, snapshot=snapshot)
+
+
 def _handle_exception(
     e: Exception,
     messages: Optional[dict[int, str]] = None,
     roles: Optional[list[Role]] = None,
-    state: Optional[State] = None,
+    state: Optional[Union[State, list[State]]] = None,
 ) -> NoReturn:
     from .client import ApiException
 
@@ -488,7 +557,7 @@ def _handle_api_exception(
     e: "ApiException[Any]",
     messages: Optional[dict[int, str]] = None,
     roles: Optional[list[Role]] = None,
-    state: Optional[State] = None,
+    state: Optional[Union[State, list[State]]] = None,
 ) -> NoReturn:
     from .client.api_response import ApiResponseWithoutDeserialization
     from .client.components.schema.error_response import ErrorResponseDict
@@ -514,7 +583,11 @@ def _handle_api_exception(
     elif e.status == 406:
         message = "Invalid content type requested"
     elif e.status == 412 and state:
-        message = f"Precondition failed -- this operation can only be used on a NetHSM in the state {state.value}"
+        if isinstance(state, list):
+            state_str = " or ".join([s.value for s in state])
+        else:
+            state_str = state.value
+        message = f"Precondition failed -- this operation can only be used on a NetHSM in the state {state_str}"
     elif e.status == 429:
         message = "Too many requests -- you may have tried the wrong credentials too often"
     else:
@@ -1647,7 +1720,9 @@ class NetHSM:
         try:
             self._get_api().system_reboot_post()
         except Exception as e:
-            _handle_exception(e, state=State.OPERATIONAL, roles=[Role.ADMINISTRATOR])
+            _handle_exception(
+                e, state=[State.OPERATIONAL, State.FAILED], roles=[Role.ADMINISTRATOR]
+            )
 
     def shutdown(self) -> None:
         try:
@@ -1662,7 +1737,9 @@ class NetHSM:
         try:
             self._get_api().system_factory_reset_post()
         except Exception as e:
-            _handle_exception(e, state=State.OPERATIONAL, roles=[Role.ADMINISTRATOR])
+            _handle_exception(
+                e, state=[State.OPERATIONAL, State.FAILED], roles=[Role.ADMINISTRATOR]
+            )
 
     def encrypt(
         self, key_id: str, data: Base64, mode: EncryptMode, iv: Optional[Base64] = None
@@ -1808,6 +1885,19 @@ class NetHSM:
             )
         except Exception as e:
             _handle_exception(e, state=State.OPERATIONAL, roles=[Role.ADMINISTRATOR])
+
+    def get_cluster_diagnostics(self) -> ClusterDiagnostics:
+        try:
+            response = self._get_api().health_diagnose_get()
+        except Exception as e:
+            _handle_exception(e)
+        return ClusterDiagnostics._from_api(response.body)
+
+    def force_new_cluster(self) -> None:
+        try:
+            self._get_api().cluster_force_new_post()
+        except Exception as e:
+            _handle_exception(e, state=State.FAILED)
 
 
 @contextlib.contextmanager
