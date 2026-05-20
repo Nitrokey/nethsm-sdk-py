@@ -11,10 +11,12 @@ from __future__ import annotations
 from nethsm.client.shared_imports.schema_imports import *  # pyright: ignore [reportWildcardImportFromLibrary]
 
 Level: typing_extensions.TypeAlias = schemas.StrSchema
+Msg: typing_extensions.TypeAlias = schemas.StrSchema
 Properties = typing.TypedDict(
     'Properties',
     {
         "level": typing.Type[Level],
+        "msg": typing.Type[Msg],
     }
 )
 
@@ -22,24 +24,28 @@ Properties = typing.TypedDict(
 class ClusterLogItemDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES]):
 
     __required_keys__: typing.FrozenSet[str] = frozenset({
+        "level",
     })
     __optional_keys__: typing.FrozenSet[str] = frozenset({
-        "level",
+        "msg",
     })
     
     def __new__(
         cls,
         *,
-        level: typing.Union[
+        level: str,
+        msg: typing.Union[
             str,
             schemas.Unset
         ] = schemas.unset,
         configuration_: typing.Optional[schema_configuration.SchemaConfiguration] = None,
         **kwargs: schemas.INPUT_TYPES_ALL,
     ):
-        arg_: typing.Dict[str, typing.Any] = {}
+        arg_: typing.Dict[str, typing.Any] = {
+            "level": level,
+        }
         for key_, val in (
-            ("level", level),
+            ("msg", msg),
         ):
             if isinstance(val, schemas.Unset):
                 continue
@@ -59,8 +65,15 @@ class ClusterLogItemDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES]):
         return ClusterLogItem.validate(arg, configuration=configuration)
     
     @property
-    def level(self) -> typing.Union[str, schemas.Unset]:
-        val = self.get("level", schemas.unset)
+    def level(self) -> str:
+        return typing.cast(
+            str,
+            self.__getitem__("level")
+        )
+    
+    @property
+    def msg(self) -> typing.Union[str, schemas.Unset]:
+        val = self.get("msg", schemas.unset)
         if isinstance(val, schemas.Unset):
             return val
         return typing.cast(
@@ -82,8 +95,15 @@ class ClusterLogItem(
     Ref: https://github.com/openapi-json-schema-tools/openapi-json-schema-generator
 
     Do not edit the class manually.
+
+    A log message from etcd on the current node.
+The level is warning or above.
+
     """
     types: typing.FrozenSet[typing.Type] = frozenset({schemas.immutabledict})
+    required: typing.FrozenSet[str] = frozenset({
+        "level",
+    })
     properties: Properties = dataclasses.field(default_factory=lambda: schemas.typed_dict_to_instance(Properties)) # type: ignore
     type_to_output_cls: typing.Mapping[
         typing.Type,

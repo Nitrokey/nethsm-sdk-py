@@ -30,34 +30,22 @@ Properties = typing.TypedDict(
 class ClusterSnapshotDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES]):
 
     __required_keys__: typing.FrozenSet[str] = frozenset({
-    })
-    __optional_keys__: typing.FrozenSet[str] = frozenset({
         "hash",
         "revision",
         "totalKey",
         "totalSize",
+    })
+    __optional_keys__: typing.FrozenSet[str] = frozenset({
         "version",
     })
     
     def __new__(
         cls,
         *,
-        hash: typing.Union[
-            int,
-            schemas.Unset
-        ] = schemas.unset,
-        revision: typing.Union[
-            int,
-            schemas.Unset
-        ] = schemas.unset,
-        totalKey: typing.Union[
-            int,
-            schemas.Unset
-        ] = schemas.unset,
-        totalSize: typing.Union[
-            int,
-            schemas.Unset
-        ] = schemas.unset,
+        hash: int,
+        revision: int,
+        totalKey: int,
+        totalSize: int,
         version: typing.Union[
             str,
             schemas.Unset
@@ -65,12 +53,13 @@ class ClusterSnapshotDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES])
         configuration_: typing.Optional[schema_configuration.SchemaConfiguration] = None,
         **kwargs: schemas.INPUT_TYPES_ALL,
     ):
-        arg_: typing.Dict[str, typing.Any] = {}
+        arg_: typing.Dict[str, typing.Any] = {
+            "hash": hash,
+            "revision": revision,
+            "totalKey": totalKey,
+            "totalSize": totalSize,
+        }
         for key_, val in (
-            ("hash", hash),
-            ("revision", revision),
-            ("totalKey", totalKey),
-            ("totalSize", totalSize),
             ("version", version),
         ):
             if isinstance(val, schemas.Unset):
@@ -91,43 +80,31 @@ class ClusterSnapshotDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES])
         return ClusterSnapshot.validate(arg, configuration=configuration)
     
     @property
-    def hash(self) -> typing.Union[int, schemas.Unset]:
-        val = self.get("hash", schemas.unset)
-        if isinstance(val, schemas.Unset):
-            return val
+    def hash(self) -> int:
         return typing.cast(
             int,
-            val
+            self.__getitem__("hash")
         )
     
     @property
-    def revision(self) -> typing.Union[int, schemas.Unset]:
-        val = self.get("revision", schemas.unset)
-        if isinstance(val, schemas.Unset):
-            return val
+    def revision(self) -> int:
         return typing.cast(
             int,
-            val
+            self.__getitem__("revision")
         )
     
     @property
-    def totalKey(self) -> typing.Union[int, schemas.Unset]:
-        val = self.get("totalKey", schemas.unset)
-        if isinstance(val, schemas.Unset):
-            return val
+    def totalKey(self) -> int:
         return typing.cast(
             int,
-            val
+            self.__getitem__("totalKey")
         )
     
     @property
-    def totalSize(self) -> typing.Union[int, schemas.Unset]:
-        val = self.get("totalSize", schemas.unset)
-        if isinstance(val, schemas.Unset):
-            return val
+    def totalSize(self) -> int:
         return typing.cast(
             int,
-            val
+            self.__getitem__("totalSize")
         )
     
     @property
@@ -154,8 +131,18 @@ class ClusterSnapshot(
     Ref: https://github.com/openapi-json-schema-tools/openapi-json-schema-generator
 
     Do not edit the class manually.
+
+    Statistics about the local cluster database snapshot.
+This is only present when etcd is not running.
+
     """
     types: typing.FrozenSet[typing.Type] = frozenset({schemas.immutabledict})
+    required: typing.FrozenSet[str] = frozenset({
+        "hash",
+        "revision",
+        "totalKey",
+        "totalSize",
+    })
     properties: Properties = dataclasses.field(default_factory=lambda: schemas.typed_dict_to_instance(Properties)) # type: ignore
     type_to_output_cls: typing.Mapping[
         typing.Type,

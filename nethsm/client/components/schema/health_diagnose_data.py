@@ -115,6 +115,10 @@ class HealthDiagnoseData(
     Ref: https://github.com/openapi-json-schema-tools/openapi-json-schema-generator
 
     Do not edit the class manually.
+
+    Information about the health of the etcd process on the current node,
+including the process running state, exit code, and recent logs.
+
     """
     types: typing.FrozenSet[typing.Type] = frozenset({schemas.immutabledict})
     required: typing.FrozenSet[str] = frozenset({

@@ -48,6 +48,8 @@ class ClusterLogList(
     Ref: https://github.com/openapi-json-schema-tools/openapi-json-schema-generator
 
     Do not edit the class manually.
+
+    A list of recent log messages from etcd on the current node.
     """
     types: typing.FrozenSet[typing.Type] = frozenset({tuple})
     items: typing.Type[cluster_log_item.ClusterLogItem] = dataclasses.field(default_factory=lambda: cluster_log_item.ClusterLogItem) # type: ignore
