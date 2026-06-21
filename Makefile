@@ -65,6 +65,7 @@ nethsm-client: nethsm-api.yaml
 		-i=/out/nethsm-api.yaml \
 		-g=python -o=/out/python --package-name=nethsm.client
 	cp -r "${OPENAPI_OUTPUT_DIR}/python/src/nethsm/client" nethsm
+	patch -p1 < patches/01-replace-dateutil.diff
 
 .PHONY: test
 test:

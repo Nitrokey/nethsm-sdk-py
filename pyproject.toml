@@ -14,7 +14,6 @@ dynamic = ["classifiers"]
 dependencies = [
   "certifi",
   "cryptography >=41",
-  "python-dateutil >=2, <3",
   "typing_extensions >=4.3, <5",
   "urllib3 >=2, <3",
 ]
@@ -42,7 +41,6 @@ podman = ">=5,<6"
 pycryptodome = "*"
 # for compatibility with docker, see https://github.com/docker/docker-py/issues/3256
 requests = "<2.32.0"
-types-python-dateutil = "*"
 types-requests = "*"
 pytest-cov = "*"
 pyyaml = "*"

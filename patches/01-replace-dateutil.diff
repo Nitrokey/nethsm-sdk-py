@@ -1,0 +1,174 @@
+commit c50c4f34bc7aab1b32dfb8dc8fb5bab4f7cc8462
+Author: Zbigniew Jędrzejewski-Szmek <zbyszek@amutable.com>
+Date:   Sun Jun 21 19:42:44 2026 +0200
+
+    Replace dateutil with stdlib datetime in format.py
+    
+    dateutil is weakly maintained [1] with possibly unaddressed security
+    issues [2]. Fedora decided to drop it from the repo [3]. It is always
+    better to have one dependency less, and the existing use can be replaced
+    by what is available in the standard library with some simple wrapper
+    code.
+    
+    The schemas/format.py support file only used dateutil to parse ISO-8601
+    date and date-time strings. datetime.date.fromisoformat /
+    datetime.datetime.fromisoformat cover this since Python 3.7; a small shim
+    rewrites a trailing "Z" to "+00:00" so date-times parse on Python 3.9/3.10
+    (fromisoformat only accepts "Z" on 3.11+).
+    
+    Drop python-dateutil and types-python-dateutil from pyproject.toml and
+    regenerate poetry.lock.
+    
+    [1] https://github.com/dateutil/dateutil/issues/1404
+    [2] https://github.com/dateutil/dateutil/issues/1450
+    [3] https://fedoraproject.org/wiki/Changes/DeprecatePython-dateutil
+    
+    Signed-off-by: Zbigniew Jędrzejewski-Szmek <zbyszek@amutable.com>
+
+diff --git a/nethsm/client/schemas/format.py b/nethsm/client/schemas/format.py
+index bb61490..99a5872 100644
+--- a/nethsm/client/schemas/format.py
++++ b/nethsm/client/schemas/format.py
+@@ -1,85 +1,8 @@
+ import datetime
+ import decimal
+ import functools
+-import typing
+ import uuid
+ 
+-from dateutil import parser, tz
+-
+-
+-class CustomIsoparser(parser.isoparser):
+-    def __init__(self, sep: typing.Optional[str] = None):
+-        """
+-        :param sep:
+-            A single character that separates date and time portions. If
+-            ``None``, the parser will accept any single character.
+-            For strict ISO-8601 adherence, pass ``'T'``.
+-        """
+-        if sep is not None:
+-            if (len(sep) != 1 or ord(sep) >= 128 or sep in '0123456789'):
+-                raise ValueError('Separator must be a single, non-numeric ' +
+-                                 'ASCII character')
+-
+-            used_sep = sep.encode('ascii')
+-        else:
+-            used_sep = None
+-
+-        self._sep = used_sep
+-
+-    @staticmethod
+-    def __get_ascii_bytes(str_in: str) -> bytes:
+-        # If it's unicode, turn it into bytes, since ISO-8601 only covers ASCII
+-        # ASCII is the same in UTF-8
+-        try:
+-            return str_in.encode('ascii')
+-        except UnicodeEncodeError as e:
+-            msg = 'ISO-8601 strings should contain only ASCII characters'
+-            raise ValueError(msg) from e
+-
+-    def __parse_isodate(self, dt_str: str) -> typing.Tuple[typing.Tuple[int, int, int], int]:
+-        dt_str_ascii = self.__get_ascii_bytes(dt_str)
+-        values = self._parse_isodate(dt_str_ascii) # type: ignore
+-        values = typing.cast(typing.Tuple[typing.List[int], int], values)
+-        components = typing.cast( typing.Tuple[int, int, int], tuple(values[0]))
+-        pos = values[1]
+-        return components, pos
+-
+-    def __parse_isotime(self, dt_str: str) -> typing.Tuple[int, int, int, int, typing.Optional[typing.Union[tz.tzutc, tz.tzoffset]]]:
+-        dt_str_ascii = self.__get_ascii_bytes(dt_str)
+-        values = self._parse_isotime(dt_str_ascii) # type: ignore
+-        components: typing.Tuple[int, int, int, int, typing.Optional[typing.Union[tz.tzutc, tz.tzoffset]]] = tuple(values) # type: ignore
+-        return components
+-
+-    def parse_isodatetime(self, dt_str: str) -> datetime.datetime:
+-        date_components, pos = self.__parse_isodate(dt_str)
+-        if len(dt_str) <= pos:
+-            # len(components) <= 3
+-            raise ValueError('Value is not a datetime')
+-        if self._sep is None or dt_str[pos:pos + 1] == self._sep:
+-            hour, minute, second, microsecond, tzinfo = self.__parse_isotime(dt_str[pos + 1:])
+-            if hour == 24:
+-                hour = 0
+-                components = (*date_components, hour, minute, second, microsecond, tzinfo)
+-                return datetime.datetime(*components) + datetime.timedelta(days=1)
+-            else:
+-                components = (*date_components, hour, minute, second, microsecond, tzinfo)
+-        else:
+-            raise ValueError('String contains unknown ISO components')
+-
+-        return datetime.datetime(*components)
+-
+-    def parse_isodate_str(self, datestr: str) -> datetime.date:
+-        components, pos = self.__parse_isodate(datestr)
+-
+-        if len(datestr) > pos:
+-            raise ValueError('String contains invalid time components')
+-
+-        if len(components) > 3:
+-            raise ValueError('String contains invalid time components')
+-
+-        return datetime.date(*components)
+-
+-DEFAULT_ISOPARSER = CustomIsoparser()
+ 
+ @functools.lru_cache()
+ def as_date(arg: str) -> datetime.date:
+@@ -87,7 +10,7 @@ def as_date(arg: str) -> datetime.date:
+     type = "string"
+     format = "date"
+     """
+-    return DEFAULT_ISOPARSER.parse_isodate_str(arg)
++    return datetime.date.fromisoformat(arg)
+ 
+ @functools.lru_cache()
+ def as_datetime(arg: str) -> datetime.datetime:
+@@ -95,7 +18,10 @@ def as_datetime(arg: str) -> datetime.datetime:
+     type = "string"
+     format = "date-time"
+     """
+-    return DEFAULT_ISOPARSER.parse_isodatetime(arg)
++    # datetime.fromisoformat() only accepts a trailing "Z" on Python 3.11+.
++    if arg.endswith(("Z", "z")):
++        arg = arg[:-1] + "+00:00"
++    return datetime.datetime.fromisoformat(arg)
+ 
+ @functools.lru_cache()
+ def as_decimal(arg: str) -> decimal.Decimal:
+@@ -112,4 +38,4 @@ def as_uuid(arg: str) -> uuid.UUID:
+     type = "string"
+     format = "uuid"
+     """
+-    return uuid.UUID(arg)
+\ No newline at end of file
++    return uuid.UUID(arg)
+diff --git a/nethsm/client/schemas/validation.py b/nethsm/client/schemas/validation.py
+index a50757a..5ae69eb 100644
+--- a/nethsm/client/schemas/validation.py
++++ b/nethsm/client/schemas/validation.py
+@@ -626,7 +626,7 @@ def __validate_string_format(
+             )
+     elif format_value == 'date':
+         try:
+-            format.DEFAULT_ISOPARSER.parse_isodate_str(arg)
++            format.as_date(arg)
+             return None
+         except ValueError:
+             raise exceptions.ApiValueError(
+@@ -635,7 +635,7 @@ def __validate_string_format(
+             )
+     elif format_value == 'date-time':
+         try:
+-            format.DEFAULT_ISOPARSER.parse_isodatetime(arg)
++            format.as_datetime(arg)
+             return None
+         except ValueError:
+             raise exceptions.ApiValueError(
+@@ -1327,4 +1327,4 @@ json_schema_keyword_to_validator: typing.Mapping[str, validator_type] = {
+     'prefix_items': validate_prefix_items,
+     'unevaluated_items': validate_unevaluated_items,
+     'unevaluated_properties': validate_unevaluated_properties
+-}
+\ No newline at end of file
++}

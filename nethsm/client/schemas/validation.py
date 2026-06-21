@@ -626,7 +626,7 @@ def __validate_string_format(
             )
     elif format_value == 'date':
         try:
-            format.DEFAULT_ISOPARSER.parse_isodate_str(arg)
+            format.as_date(arg)
             return None
         except ValueError:
             raise exceptions.ApiValueError(
@@ -635,7 +635,7 @@ def __validate_string_format(
             )
     elif format_value == 'date-time':
         try:
-            format.DEFAULT_ISOPARSER.parse_isodatetime(arg)
+            format.as_datetime(arg)
             return None
         except ValueError:
             raise exceptions.ApiValueError(
