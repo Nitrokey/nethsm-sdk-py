@@ -1,6 +1,5 @@
 import contextlib
 import datetime
-import os
 import subprocess
 from abc import ABC, abstractmethod
 from time import sleep
@@ -107,13 +106,13 @@ class CIContainer(Container):
         self.process: Optional[subprocess.Popen[bytes]] = None
 
     def start(self) -> None:
-        os.system("pkill keyfender.unix")
-        os.system("pkill etcd")
+        subprocess.run(["pkill", "keyfender.unix"])
+        subprocess.run(["pkill", "etcd"])
 
         # Wait for everything to shut down, creates problems otherwise on the gitlab ci
         sleep(1)
 
-        os.system("rm -rf /data")
+        subprocess.run(["rm", "-rf", "/data"])
 
         self.process = subprocess.Popen(["/bin/sh", "-c", "/start.sh"])
 
