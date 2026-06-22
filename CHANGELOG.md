@@ -2,11 +2,17 @@
 
 ## Unreleased
 
+-
+
+[All Changes](https://github.com/Nitrokey/nethsm-sdk-py/compare/v2.1.2...HEAD)
+
+## [v2.1.2](https://github.com/Nitrokey/nethsm-sdk-py/releases/tag/v2.1.2) (2026-06-22)
+
 ### Changes
 
 - Patch generated client to remove the `python-dateutil` dependency.
 
-[All Changes](https://github.com/Nitrokey/nethsm-sdk-py/compare/v2.1.1...HEAD)
+[All Changes](https://github.com/Nitrokey/nethsm-sdk-py/compare/v2.1.1...v2.1.2)
 
 ## [v2.1.1](https://github.com/Nitrokey/nethsm-sdk-py/releases/tag/v2.1.1) (2026-05-11)
 
