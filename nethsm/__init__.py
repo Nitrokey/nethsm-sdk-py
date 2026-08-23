@@ -60,6 +60,7 @@ class State(enum.Enum):
     UNPROVISIONED = "Unprovisioned"
     LOCKED = "Locked"
     OPERATIONAL = "Operational"
+    FAILED = "Failed"
 
     @staticmethod
     def from_string(s: str) -> "State":
@@ -389,6 +390,9 @@ class ClusterMember:
     name: str
     urls: list[str]
 
+    def to_initial_cluster_member(self) -> "InitialClusterMember":
+        return InitialClusterMember(name=self.name, urls=self.urls)
+
     @staticmethod
     def _from_api(item: "ClusterMemberDict") -> "ClusterMember":
         return ClusterMember(id=item.id, name=item.name, urls=list(item.urls))
@@ -459,17 +463,29 @@ class ClusterJoinData:
             joiner_kit=joiner_kit,
         )
 
+
+@dataclass
+class FullClusterJoinData:
+    members: list[ClusterMember]
+    joiner_kit: str
+
+    def to_cluster_join_data(self) -> ClusterJoinData:
+        return ClusterJoinData(
+            members=[member.to_initial_cluster_member() for member in self.members],
+            joiner_kit=self.joiner_kit,
+        )
+
     @staticmethod
-    def _from_api(response: "ClusterMemberAddResponseDict") -> "ClusterJoinData":
-        members = [InitialClusterMember._from_api(member) for member in response.members]
-        return ClusterJoinData(members=members, joiner_kit=response.joinerKit)
+    def _from_api(response: "ClusterMemberAddResponseDict") -> "FullClusterJoinData":
+        members = [ClusterMember._from_api(member) for member in response.members]
+        return FullClusterJoinData(members=members, joiner_kit=response.joinerKit)
 
 
 def _handle_exception(
     e: Exception,
     messages: Optional[dict[int, str]] = None,
     roles: Optional[list[Role]] = None,
-    state: Optional[State] = None,
+    state: Optional[Union[list[State], State]] = None,
 ) -> NoReturn:
     from .client import ApiException
 
@@ -487,7 +503,7 @@ def _handle_api_exception(
     e: "ApiException[Any]",
     messages: Optional[dict[int, str]] = None,
     roles: Optional[list[Role]] = None,
-    state: Optional[State] = None,
+    state: Optional[Union[list[State], State]] = None,
 ) -> NoReturn:
     from .client.api_response import ApiResponseWithoutDeserialization
     from .client.components.schema.error_response import ErrorResponseDict
@@ -513,7 +529,11 @@ def _handle_api_exception(
     elif e.status == 406:
         message = "Invalid content type requested"
     elif e.status == 412 and state:
-        message = f"Precondition failed -- this operation can only be used on a NetHSM in the state {state.value}"
+        if isinstance(state, list):
+            state_str = " or ".join([s.value for s in state])
+        else:
+            state_str = state.value
+        message = f"Precondition failed -- this operation can only be used on a NetHSM in the state {state_str}"
     elif e.status == 429:
         message = "Too many requests -- you may have tried the wrong credentials too often"
     else:
@@ -1646,7 +1666,9 @@ class NetHSM:
         try:
             self._get_api().system_reboot_post()
         except Exception as e:
-            _handle_exception(e, state=State.OPERATIONAL, roles=[Role.ADMINISTRATOR])
+            _handle_exception(
+                e, state=[State.OPERATIONAL, State.FAILED], roles=[Role.ADMINISTRATOR]
+            )
 
     def shutdown(self) -> None:
         try:
@@ -1661,7 +1683,9 @@ class NetHSM:
         try:
             self._get_api().system_factory_reset_post()
         except Exception as e:
-            _handle_exception(e, state=State.OPERATIONAL, roles=[Role.ADMINISTRATOR])
+            _handle_exception(
+                e, state=[State.OPERATIONAL, State.FAILED], roles=[Role.ADMINISTRATOR]
+            )
 
     def encrypt(
         self, key_id: str, data: Base64, mode: EncryptMode, iv: Optional[Base64] = None
@@ -1745,7 +1769,7 @@ class NetHSM:
 
         return [ClusterMember._from_api(item) for item in response.body]
 
-    def add_cluster_member(self, urls: list[str]) -> ClusterJoinData:
+    def add_cluster_member(self, urls: list[str]) -> FullClusterJoinData:
         from .client.components.schema.cluster_add_req import ClusterAddReqDict
 
         body = ClusterAddReqDict(urls=urls)
@@ -1754,7 +1778,7 @@ class NetHSM:
         except Exception as e:
             _handle_exception(e, state=State.OPERATIONAL, roles=[Role.ADMINISTRATOR])
 
-        return ClusterJoinData._from_api(response.body)
+        return FullClusterJoinData._from_api(response.body)
 
     def set_cluster_member_urls(self, member_id: str, urls: list[str]) -> None:
         from .client.components.schema.cluster_add_req import ClusterAddReqDict
@@ -1778,9 +1802,14 @@ class NetHSM:
         except Exception as e:
             _handle_exception(e, state=State.OPERATIONAL, roles=[Role.ADMINISTRATOR])
 
-    def join_cluster(self, data: ClusterJoinData, backup_passphrase: str) -> None:
+    def join_cluster(
+        self, data: Union[ClusterJoinData, FullClusterJoinData], backup_passphrase: str
+    ) -> None:
         from .client.components.schema.cluster_initial_member import ClusterInitialMemberDict
         from .client.components.schema.cluster_join_req import ClusterJoinReqDict, MembersTupleInput
+
+        if isinstance(data, FullClusterJoinData):
+            data = data.to_cluster_join_data()
 
         members: MembersTupleInput = [
             ClusterInitialMemberDict(name=member.name, urls=member.urls) for member in data.members

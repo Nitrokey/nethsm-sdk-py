@@ -15,6 +15,7 @@ from .responses import (
     response_401,
     response_403,
     response_406,
+    response_409,
     response_412,
 )
 from . import request_body
@@ -33,6 +34,7 @@ __StatusCodeToResponse = typing.TypedDict(
         '401': typing.Type[response_401.ResponseFor401],
         '403': typing.Type[response_403.ResponseFor403],
         '406': typing.Type[response_406.ResponseFor406],
+        '409': typing.Type[response_409.ResponseFor409],
         '412': typing.Type[response_412.ResponseFor412],
     }
 )
@@ -42,6 +44,7 @@ _status_code_to_response: __StatusCodeToResponse = {
     '401': response_401.ResponseFor401,
     '403': response_403.ResponseFor403,
     '406': response_406.ResponseFor406,
+    '409': response_409.ResponseFor409,
     '412': response_412.ResponseFor412,
 }
 _non_error_status_codes = frozenset({
@@ -52,6 +55,7 @@ _error_status_codes = frozenset({
     '401',
     '403',
     '406',
+    '409',
     '412',
 })
 
@@ -168,6 +172,7 @@ class BaseApi(api_client.Api):
                     '401',
                     '403',
                     '406',
+                    '409',
                     '412',
                 ],
                 status

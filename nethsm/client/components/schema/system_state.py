@@ -26,6 +26,10 @@ class SystemStateEnums:
     def OPERATIONAL(cls) -> typing.Literal["Operational"]:
         return SystemState.validate("Operational")
 
+    @schemas.classproperty
+    def FAILED(cls) -> typing.Literal["Failed"]:
+        return SystemState.validate("Failed")
+
 
 @dataclasses.dataclass(frozen=True)
 class SystemState(
@@ -44,6 +48,7 @@ class SystemState(
             "Unprovisioned": "UNPROVISIONED",
             "Locked": "LOCKED",
             "Operational": "OPERATIONAL",
+            "Failed": "FAILED",
         }
     )
     enums = SystemStateEnums
@@ -73,9 +78,16 @@ class SystemState(
     @classmethod
     def validate(
         cls,
+        arg: typing.Literal["Failed"],
+        configuration: typing.Optional[schema_configuration.SchemaConfiguration] = None
+    ) -> typing.Literal["Failed"]: ...
+    @typing.overload
+    @classmethod
+    def validate(
+        cls,
         arg: str,
         configuration: typing.Optional[schema_configuration.SchemaConfiguration] = None
-    ) -> typing.Literal["Unprovisioned","Locked","Operational",]: ...
+    ) -> typing.Literal["Unprovisioned","Locked","Operational","Failed",]: ...
     @classmethod
     def validate(
         cls,
@@ -85,6 +97,7 @@ class SystemState(
         "Unprovisioned",
         "Locked",
         "Operational",
+        "Failed",
     ]:
         validated_arg = super().validate_base(
             arg,
@@ -94,6 +107,7 @@ class SystemState(
                 "Unprovisioned",
                 "Locked",
                 "Operational",
+                "Failed",
             ],
             validated_arg
         )

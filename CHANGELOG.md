@@ -2,7 +2,17 @@
 
 ## Unreleased
 
--
+### Breaking Changes
+
+- Return `FullClusterJoinData` instead of `ClusterJoinData` from `add_cluster_member` (requires NetHSM v5)
+
+### Changes
+
+- Update for NetHSM v5:
+  - Add `State.FAILED` variant
+  - Update clustering functionality:
+    - Add `FullClusterJoinData` class
+    - Change `NetHSM.join_cluster` to also accept `FullClusterJoinData`
 
 [All Changes](https://github.com/Nitrokey/nethsm-sdk-py/compare/v2.1.2...HEAD)
 

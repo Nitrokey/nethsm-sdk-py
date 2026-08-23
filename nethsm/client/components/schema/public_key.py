@@ -12,6 +12,7 @@ from nethsm.client.shared_imports.schema_imports import *  # pyright: ignore [re
 
 Operations: typing_extensions.TypeAlias = schemas.IntSchema
 
+from nethsm.client.components.schema import key_label
 from nethsm.client.components.schema import key_mechanisms
 from nethsm.client.components.schema import key_public_data
 from nethsm.client.components.schema import key_restrictions
@@ -24,6 +25,7 @@ Properties = typing.TypedDict(
         "restrictions": typing.Type[key_restrictions.KeyRestrictions],
         "public": typing.Type[key_public_data.KeyPublicData],
         "operations": typing.Type[Operations],
+        "label": typing.Type[key_label.KeyLabel],
     }
 )
 
@@ -38,6 +40,7 @@ class PublicKeyDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES]):
     })
     __optional_keys__: typing.FrozenSet[str] = frozenset({
         "public",
+        "label",
     })
     
     def __new__(
@@ -69,6 +72,10 @@ class PublicKeyDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES]):
             key_public_data.KeyPublicDataDict,
             schemas.Unset
         ] = schemas.unset,
+        label: typing.Union[
+            str,
+            schemas.Unset
+        ] = schemas.unset,
         configuration_: typing.Optional[schema_configuration.SchemaConfiguration] = None,
         **kwargs: schemas.INPUT_TYPES_ALL,
     ):
@@ -80,6 +87,7 @@ class PublicKeyDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES]):
         }
         for key_, val in (
             ("public", public),
+            ("label", label),
         ):
             if isinstance(val, schemas.Unset):
                 continue
@@ -133,6 +141,16 @@ class PublicKeyDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES]):
             return val
         return typing.cast(
             key_public_data.KeyPublicDataDict,
+            val
+        )
+    
+    @property
+    def label(self) -> typing.Union[str, schemas.Unset]:
+        val = self.get("label", schemas.unset)
+        if isinstance(val, schemas.Unset):
+            return val
+        return typing.cast(
+            str,
             val
         )
     

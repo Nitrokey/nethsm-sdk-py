@@ -110,12 +110,12 @@ class ClusterMemberAddResponse(
         )
 
 
-from nethsm.client.components.schema import cluster_initial_member
+from nethsm.client.components.schema import cluster_member
 
 
 class MembersTuple(
     typing.Tuple[
-        cluster_initial_member.ClusterInitialMemberDict,
+        cluster_member.ClusterMemberDict,
         ...
     ]
 ):
@@ -125,14 +125,14 @@ class MembersTuple(
 MembersTupleInput = typing.Union[
     typing.List[
         typing.Union[
-            cluster_initial_member.ClusterInitialMemberDictInput,
-            cluster_initial_member.ClusterInitialMemberDict,
+            cluster_member.ClusterMemberDictInput,
+            cluster_member.ClusterMemberDict,
         ],
     ],
     typing.Tuple[
         typing.Union[
-            cluster_initial_member.ClusterInitialMemberDictInput,
-            cluster_initial_member.ClusterInitialMemberDict,
+            cluster_member.ClusterMemberDictInput,
+            cluster_member.ClusterMemberDict,
         ],
         ...
     ]
@@ -144,7 +144,7 @@ class Members(
     schemas.Schema[schemas.immutabledict, MembersTuple]
 ):
     types: typing.FrozenSet[typing.Type] = frozenset({tuple})
-    items: typing.Type[cluster_initial_member.ClusterInitialMember] = dataclasses.field(default_factory=lambda: cluster_initial_member.ClusterInitialMember) # type: ignore
+    items: typing.Type[cluster_member.ClusterMember] = dataclasses.field(default_factory=lambda: cluster_member.ClusterMember) # type: ignore
     type_to_output_cls: typing.Mapping[
         typing.Type,
         typing.Type

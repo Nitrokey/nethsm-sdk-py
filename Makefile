@@ -51,7 +51,7 @@ fix:
 OPENAPI_OUTPUT_DIR=${PWD}/tmp/openapi-client
 
 nethsm-api.yaml:
-	curl "https://nethsmdemo.nitrokey.com/api_docs/nethsm-api.yaml" --output nethsm-api.yaml
+	curl "https://raw.githubusercontent.com/Nitrokey/nethsm/refs/heads/main/docs/nethsm-api.yaml" --output nethsm-api.yaml
 
 # Generates the OpenAPI client for the NetHSM REST API
 .PHONY: nethsm-client

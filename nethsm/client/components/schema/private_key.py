@@ -11,6 +11,7 @@ from __future__ import annotations
 from nethsm.client.shared_imports.schema_imports import *  # pyright: ignore [reportWildcardImportFromLibrary]
 
 
+from nethsm.client.components.schema import key_label
 from nethsm.client.components.schema import key_mechanisms
 from nethsm.client.components.schema import key_private_data
 from nethsm.client.components.schema import key_restrictions
@@ -22,6 +23,7 @@ Properties = typing.TypedDict(
         "type": typing.Type[key_type.KeyType],
         "private": typing.Type[key_private_data.KeyPrivateData],
         "restrictions": typing.Type[key_restrictions.KeyRestrictions],
+        "label": typing.Type[key_label.KeyLabel],
     }
 )
 
@@ -35,6 +37,7 @@ class PrivateKeyDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES]):
     })
     __optional_keys__: typing.FrozenSet[str] = frozenset({
         "restrictions",
+        "label",
     })
     
     def __new__(
@@ -65,6 +68,10 @@ class PrivateKeyDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES]):
             key_restrictions.KeyRestrictionsDict,
             schemas.Unset
         ] = schemas.unset,
+        label: typing.Union[
+            str,
+            schemas.Unset
+        ] = schemas.unset,
         configuration_: typing.Optional[schema_configuration.SchemaConfiguration] = None,
         **kwargs: schemas.INPUT_TYPES_ALL,
     ):
@@ -75,6 +82,7 @@ class PrivateKeyDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES]):
         }
         for key_, val in (
             ("restrictions", restrictions),
+            ("label", label),
         ):
             if isinstance(val, schemas.Unset):
                 continue
@@ -121,6 +129,16 @@ class PrivateKeyDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES]):
             return val
         return typing.cast(
             key_restrictions.KeyRestrictionsDict,
+            val
+        )
+    
+    @property
+    def label(self) -> typing.Union[str, schemas.Unset]:
+        val = self.get("label", schemas.unset)
+        if isinstance(val, schemas.Unset):
+            return val
+        return typing.cast(
+            str,
             val
         )
     

@@ -11,6 +11,7 @@ from __future__ import annotations
 from nethsm.client.shared_imports.schema_imports import *  # pyright: ignore [reportWildcardImportFromLibrary]
 
 Name: typing_extensions.TypeAlias = schemas.StrSchema
+Learner: typing_extensions.TypeAlias = schemas.BoolSchema
 
 from nethsm.client.components.schema import id
 from nethsm.client.components.schema import peer_urls
@@ -20,6 +21,7 @@ Properties = typing.TypedDict(
         "id": typing.Type[id.ID],
         "name": typing.Type[Name],
         "urls": typing.Type[peer_urls.PeerURLs],
+        "learner": typing.Type[Learner],
     }
 )
 
@@ -28,6 +30,7 @@ class ClusterMemberDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES]):
 
     __required_keys__: typing.FrozenSet[str] = frozenset({
         "id",
+        "learner",
         "name",
         "urls",
     })
@@ -38,6 +41,7 @@ class ClusterMemberDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES]):
         cls,
         *,
         id: str,
+        learner: bool,
         name: str,
         urls: typing.Union[
             peer_urls.PeerURLsTupleInput,
@@ -48,6 +52,7 @@ class ClusterMemberDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES]):
     ):
         arg_: typing.Dict[str, typing.Any] = {
             "id": id,
+            "learner": learner,
             "name": name,
             "urls": urls,
         }
@@ -70,6 +75,13 @@ class ClusterMemberDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES]):
         return typing.cast(
             str,
             self.__getitem__("id")
+        )
+    
+    @property
+    def learner(self) -> bool:
+        return typing.cast(
+            bool,
+            self.__getitem__("learner")
         )
     
     @property
@@ -104,6 +116,7 @@ class ClusterMember(
     types: typing.FrozenSet[typing.Type] = frozenset({schemas.immutabledict})
     required: typing.FrozenSet[str] = frozenset({
         "id",
+        "learner",
         "name",
         "urls",
     })

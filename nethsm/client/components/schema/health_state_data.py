@@ -34,7 +34,8 @@ class HealthStateDataDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES])
         state: typing.Literal[
             "Unprovisioned",
             "Locked",
-            "Operational"
+            "Operational",
+            "Failed"
         ],
         configuration_: typing.Optional[schema_configuration.SchemaConfiguration] = None,
         **kwargs: schemas.INPUT_TYPES_ALL,
@@ -57,9 +58,9 @@ class HealthStateDataDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES])
         return HealthStateData.validate(arg, configuration=configuration)
     
     @property
-    def state(self) -> typing.Literal["Unprovisioned", "Locked", "Operational"]:
+    def state(self) -> typing.Literal["Unprovisioned", "Locked", "Operational", "Failed"]:
         return typing.cast(
-            typing.Literal["Unprovisioned", "Locked", "Operational"],
+            typing.Literal["Unprovisioned", "Locked", "Operational", "Failed"],
             self.__getitem__("state")
         )
     

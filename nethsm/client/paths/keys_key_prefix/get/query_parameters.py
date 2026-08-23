@@ -13,20 +13,23 @@ from nethsm.client.shared_imports.schema_imports import *  # pyright: ignore [re
 AdditionalProperties: typing_extensions.TypeAlias = schemas.NotAnyTypeSchema
 
 from nethsm.client.paths.keys_key_prefix.get.parameters.parameter_0 import schema
+from nethsm.client.paths.keys_key_prefix.get.parameters.parameter_1 import schema as schema_2
 Properties = typing.TypedDict(
     'Properties',
     {
         "filter": typing.Type[schema.Schema],
+        "label": typing.Type[schema_2.Schema],
     }
 )
 
 
-class QueryParametersDict(schemas.immutabledict[str, str]):
+class QueryParametersDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES]):
 
     __required_keys__: typing.FrozenSet[str] = frozenset({
     })
     __optional_keys__: typing.FrozenSet[str] = frozenset({
         "filter",
+        "label",
     })
     
     def __new__(
@@ -36,11 +39,16 @@ class QueryParametersDict(schemas.immutabledict[str, str]):
             str,
             schemas.Unset
         ] = schemas.unset,
+        label: typing.Union[
+            str,
+            schemas.Unset
+        ] = schemas.unset,
         configuration_: typing.Optional[schema_configuration.SchemaConfiguration] = None,
     ):
         arg_: typing.Dict[str, typing.Any] = {}
         for key_, val in (
             ("filter", filter),
+            ("label", label),
         ):
             if isinstance(val, schemas.Unset):
                 continue
@@ -63,11 +71,25 @@ class QueryParametersDict(schemas.immutabledict[str, str]):
         val = self.get("filter", schemas.unset)
         if isinstance(val, schemas.Unset):
             return val
-        return val
+        return typing.cast(
+            str,
+            val
+        )
+    
+    @property
+    def label(self) -> typing.Union[str, schemas.Unset]:
+        val = self.get("label", schemas.unset)
+        if isinstance(val, schemas.Unset):
+            return val
+        return typing.cast(
+            str,
+            val
+        )
 QueryParametersDictInput = typing.TypedDict(
     'QueryParametersDictInput',
     {
         "filter": str,
+        "label": str,
     },
     total=False
 )

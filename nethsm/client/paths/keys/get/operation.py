@@ -15,11 +15,15 @@ from .responses import (
     response_406,
     response_412,
 )
-from .parameters import parameter_0
+from .parameters import (
+    parameter_0,
+    parameter_1,
+)
 from .security import security_requirement_object_0
 from .query_parameters import QueryParameters, QueryParametersDictInput, QueryParametersDict
 query_parameter_classes = (
     parameter_0.Parameter0,
+    parameter_1.Parameter1,
 )
 
 _security: typing.List[security_schemes.SecurityRequirementObject] = [
