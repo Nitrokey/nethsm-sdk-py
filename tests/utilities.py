@@ -97,6 +97,9 @@ class PodmanContainer(Container):
             try:
                 self.container.kill()
                 self.container.wait()
+                # without this sleep, we occasionally get a "port in use" error when restarting
+                # the container
+                sleep(0.1)
             except podman.errors.APIError:
                 pass
 
