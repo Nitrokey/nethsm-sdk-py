@@ -10,7 +10,7 @@ from cryptography import x509
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.x509.oid import NameOID
-from utilities import Container, lock, self_sign_csr, unlock
+from utilities import Container, Version, lock, self_sign_csr, unlock
 
 import nethsm as nethsm_module
 from nethsm import Authentication, NetHSM, NetHSMRequestError, RequestErrorType, State, TlsKeyType
@@ -519,6 +519,8 @@ def test_set_unlock_passphrase_lock_unlock(nethsm: NetHSM) -> None:
 
 
 def test_cluster_ca_certificate(nethsm: NetHSM) -> None:
+    Version(nethsm).require("clustering", major=4)
+
     with pytest.raises(nethsm_module.NetHSMError, match="404: Not Found"):
         ca_cert = nethsm.get_cluster_ca_certificate()
 

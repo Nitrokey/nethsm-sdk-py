@@ -419,8 +419,7 @@ class InitialClusterMember:
             if not isinstance(url, str):
                 raise ValueError("URL for initial cluster member is not a string")
 
-        # ty cannot infer from our checks above that urls is a list[str]
-        return InitialClusterMember(name=name, urls=urls)  # ty: ignore[invalid-argument-type]
+        return InitialClusterMember(name=name, urls=urls)
 
     @staticmethod
     def _from_api(data: "ClusterInitialMemberDict") -> "InitialClusterMember":
@@ -456,7 +455,7 @@ class ClusterJoinData:
             raise ValueError("Joiner kit field for cluster join data is not a string")
 
         return ClusterJoinData(
-            members=[InitialClusterMember.from_dict(member) for member in members],  # ty: ignore[invalid-argument-type]
+            members=[InitialClusterMember.from_dict(member) for member in members],
             joiner_kit=joiner_kit,
         )
 

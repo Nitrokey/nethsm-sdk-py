@@ -1,12 +1,12 @@
 import datetime
 import os
-from typing import Iterator
 
 import pytest
 from conftest import Constants as C
 from test_nethsm_keys import generate_key
 from utilities import (
     Container,
+    Version,
     add_user,
     connect,
     encrypt_rsa,
@@ -27,17 +27,6 @@ If you want to run these tests on Ubuntu like systems in Pycharm follow this
 instruction to run the script as root:
 https://stackoverflow.com/questions/36530082/running-pycharm-as-root-from-launcher
 """
-
-
-@pytest.fixture(scope="module")
-def nethsm_no_provision_no_auth(container: Container) -> Iterator[NetHSM]:
-    """Start Docker container with Nethsm image and connect to Nethsm
-
-    This Pytest Fixture will run before the tests to provide the tests with
-    a nethsm instance via Docker container"""
-
-    with nethsm_sdk.connect(C.HOST, verify_tls=C.VERIFY_TLS) as nethsm:
-        yield nethsm
 
 
 """######################### Start of Tests #########################"""
@@ -220,14 +209,21 @@ def test_provision_reboot(container: Container, nethsm: NetHSM) -> None:
     nethsm.reboot()
 
 
-def test_unprovision_shutdown(container: Container, nethsm_no_provision_no_auth: NetHSM) -> None:
+def test_unprovision_shutdown(container: Container, nethsm: NetHSM) -> None:
     """Shutdown a NetHSM instance."""
     container.restart()
+    provision(nethsm)
+    version = Version(nethsm)
+    container.restart()
 
-    assert nethsm_no_provision_no_auth.get_state().value == "Unprovisioned"
-    assert nethsm_no_provision_no_auth.auth is None
+    with nethsm_sdk.connect(C.HOST, verify_tls=C.VERIFY_TLS) as nethsm_no_auth:
+        assert nethsm_no_auth.get_state().value == "Unprovisioned"
 
-    nethsm_no_provision_no_auth.shutdown()
+        if version.is_greater_or_equals(major=3):
+            nethsm_no_auth.shutdown()
+        else:
+            with pytest.raises(NetHSMError, match=r"Precondition Failed"):
+                nethsm_no_auth.shutdown()
 
 
 def test_provision_shutdown(container: Container, nethsm: NetHSM) -> None:
@@ -247,8 +243,15 @@ def test_locked_shutdown(container: Container, nethsm: NetHSM) -> None:
     container.restart()
 
     provision(nethsm)
+
+    version = Version(nethsm)
+
     nethsm.auth = None
     assert nethsm.auth is None
     lock(nethsm)
 
-    nethsm.shutdown()
+    if version.is_greater_or_equals(major=3):
+        nethsm.shutdown()
+    else:
+        with pytest.raises(NetHSMError, match=r"Precondition Failed"):
+            nethsm.shutdown()

@@ -5,7 +5,14 @@ from Crypto.Cipher import AES
 from Crypto.Hash import SHA256
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import padding, rsa
-from utilities import add_user, connect, encrypt_rsa, generate_rsa_key_pair, verify_rsa_signature
+from utilities import (
+    Version,
+    add_user,
+    connect,
+    encrypt_rsa,
+    generate_rsa_key_pair,
+    verify_rsa_signature,
+)
 
 import nethsm as nethsm_module
 from nethsm import (
@@ -209,6 +216,8 @@ def test_delete_key_tag_get_key(nethsm: NetHSM) -> None:
 
 
 def test_move_key(nethsm: NetHSM) -> None:
+    Version(nethsm).require("moving keys", major=3)
+
     add_key(nethsm)
     generate_key(nethsm)
 
@@ -240,6 +249,8 @@ def test_list_get_keys(nethsm: nethsm_module.NetHSM) -> None:
 
 
 def test_list_keys_prefix(nethsm: NetHSM) -> None:
+    Version(nethsm).require("moving keys", major=3)
+
     add_key(nethsm)
     generate_key(nethsm)
 

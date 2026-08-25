@@ -12,6 +12,7 @@ import podman
 import podman.domain.containers
 import podman.domain.images
 import podman.errors
+import pytest
 import urllib3
 from conftest import Constants as C
 from conftest import UserData
@@ -323,3 +324,25 @@ def self_sign_csr(csr: str) -> bytes:
         .sign(private_key, hashes.SHA256())
     )
     return cert.public_bytes(Encoding.PEM)
+
+
+class Version:
+    def __init__(self, nethsm: NetHSM) -> None:
+        self.version = nethsm.get_system_info().software_version
+        (major, minor) = self.version.split(".")
+        self.major = int(major)
+        self.minor = int(minor)
+
+    def is_greater_or_equals(self, *, major: int = 0, minor: int = 0) -> bool:
+        if self.major > major:
+            return True
+        if self.major == major and self.minor >= minor:
+            return True
+        return False
+
+    def require(self, feature: str, *, major: int = 0, minor: int = 0) -> None:
+        if not self.is_greater_or_equals(major=major, minor=minor):
+            # annotations for pytest.skip are fixed in pytest v9
+            pytest.skip(
+                reason=f"v{major}.{minor} is required for {feature}, current version is v{self.version}"  # ty: ignore[unknown-argument]
+            )

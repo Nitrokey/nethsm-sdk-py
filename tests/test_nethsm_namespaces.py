@@ -6,6 +6,7 @@ from typing import Iterator, Optional
 
 import pytest
 from conftest import Constants as C
+from utilities import Version
 
 import nethsm
 from nethsm import Authentication, KeyMechanism, KeyType, NetHSM, NetHSMError, Role
@@ -155,6 +156,8 @@ def test_add_user(nethsm: NetHSM) -> None:
 
 
 def test_namespace_tag_delete(nethsm: NetHSM) -> None:
+    Version(nethsm).require("tag deletion in namespace", major=3)
+
     user = add_user(
         nethsm, user_id="test", namespace="ns", real_name="Test", role=Role.ADMINISTRATOR
     )
@@ -177,6 +180,8 @@ def test_namespace_tag_delete(nethsm: NetHSM) -> None:
 
 
 def test_namespace_tag_readd(nethsm: NetHSM) -> None:
+    Version(nethsm).require("tag deletion in namespace", major=3)
+
     user = add_user(
         nethsm, user_id="test", namespace="ns", real_name="Test", role=Role.ADMINISTRATOR
     )
