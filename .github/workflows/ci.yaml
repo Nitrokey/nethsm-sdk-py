@@ -63,6 +63,15 @@ jobs:
   integration-test:
     name: Run integration tests
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # to reduce the number of jobs, we test against the latest minor release for each major
+        # release (except for v1.0 because it would require too many changes)
+        tag:
+          - testing-v2.2
+          - testing-v3.1
+          - testing-v4.0
+          - testing
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -80,6 +89,8 @@ jobs:
         run: make install
       - name: Check code with integration tests
         run: make test
+        env:
+          NETHSM_IMAGE: nitrokey/nethsm:${{ matrix.tag }}
       - name: Upload artifacts
         uses: actions/upload-artifact@v6
         if: ${{ failure() }}
@@ -87,17 +98,18 @@ jobs:
           name: backup
           path: backupNethsm.bin
       - name: upload coverage
+        if: matrix.tag == 'testing'
         uses: codecov/codecov-action@v5
         with:
           files: ./coverage.xml
       - name: login to DockerHub
-        if: github.event_name == 'push' && github.ref_name == 'main'
+        if: github.event_name == 'push' && github.ref_name == 'main' && matrix.tag == 'testing'
         uses: docker/login-action@v4
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: push sdk tag
-        if: github.event_name == 'push' && github.ref_name == 'main'
+        if: github.event_name == 'push' && github.ref_name == 'main' && matrix.tag == 'testing'
         run: |
           docker tag docker.io/nitrokey/nethsm:testing docker.io/nitrokey/nethsm:latest-sdk
           docker push docker.io/nitrokey/nethsm:latest-sdk
