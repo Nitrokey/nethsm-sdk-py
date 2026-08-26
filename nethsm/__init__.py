@@ -336,6 +336,7 @@ class Key:
     operations: int
     tags: list[str]
     public_key: PublicKey
+    label: Optional[str] = None
 
 
 @dataclass
@@ -1003,7 +1004,12 @@ class NetHSM:
             _handle_exception(e, state=State.OPERATIONAL, roles=[Role.METRICS])
         return response.body
 
-    def list_keys(self, filter: Optional[str] = None, prefix: Optional[str] = None) -> list[str]:
+    def list_keys(
+        self,
+        filter: Optional[str] = None,
+        prefix: Optional[str] = None,
+        label: Optional[str] = None,
+    ) -> list[str]:
         from .client.paths.keys.get.query_parameters import QueryParametersDict
         from .client.paths.keys_key_prefix.get.path_parameters import (
             PathParametersDict as PrefixPathParametersDict,
@@ -1015,9 +1021,9 @@ class NetHSM:
         try:
             if prefix is not None:
                 prefix_path_params = PrefixPathParametersDict(KeyPrefix=prefix)
-                prefix_query_params = None
-                if filter is not None:
-                    prefix_query_params = PrefixQueryParametersDict(filter=filter)
+                prefix_query_params = PrefixQueryParametersDict(
+                    filter=_optional_to_unset(filter), label=_optional_to_unset(label)
+                )
                 response = (
                     self._get_api()
                     .keys_key_prefix_get(
@@ -1026,9 +1032,9 @@ class NetHSM:
                     .body
                 )
             else:
-                query_params = None
-                if filter is not None:
-                    query_params = QueryParametersDict(filter=filter)
+                query_params = QueryParametersDict(
+                    filter=_optional_to_unset(filter), label=_optional_to_unset(label)
+                )
                 response = self._get_api().keys_get(query_params=query_params).body
         except Exception as e:
             _handle_exception(e, state=State.OPERATIONAL, roles=[Role.ADMINISTRATOR, Role.OPERATOR])
@@ -1087,6 +1093,7 @@ class NetHSM:
             operations=key.operations,
             tags=tags,
             public_key=public_key,
+            label=_unset_to_optional(key.label),
         )
 
     # Get the public key file in PEM format
@@ -1114,12 +1121,14 @@ class NetHSM:
         mechanisms: list[KeyMechanism],
         private_key: PrivateKey,
         tags: list[str] = [],  # noqa: B006
+        label: Optional[str] = None,
     ) -> str:
         from .client.components.schema.key_mechanisms import KeyMechanismsTupleInput
         from .client.components.schema.key_private_data import KeyPrivateDataDict
         from .client.components.schema.key_restrictions import KeyRestrictionsDict
         from .client.components.schema.private_key import PrivateKeyDict
         from .client.components.schema.tag_list import TagListTuple
+        from .client.schemas import Unset
 
         if type == KeyType.RSA:
             assert isinstance(private_key, RsaPrivateKey)
@@ -1134,15 +1143,13 @@ class NetHSM:
 
         mechanism_tuple: KeyMechanismsTupleInput = [mechanism.value for mechanism in mechanisms]
 
-        if tags:
-            body = PrivateKeyDict(
-                type=type.value,
-                mechanisms=mechanism_tuple,
-                private=key_data,
-                restrictions=KeyRestrictionsDict(tags=TagListTuple(list(tags))),
-            )
-        else:
-            body = PrivateKeyDict(type=type.value, mechanisms=mechanism_tuple, private=key_data)
+        body = PrivateKeyDict(
+            type=type.value,
+            mechanisms=mechanism_tuple,
+            private=key_data,
+            label=_optional_to_unset(label),
+            restrictions=KeyRestrictionsDict(tags=TagListTuple(list(tags))) if tags else Unset(),
+        )
 
         try:
             if key_id:
@@ -1171,21 +1178,21 @@ class NetHSM:
         mechanisms: list[KeyMechanism],
         private_key: str,
         tags: list[str] = [],  # noqa: B006
+        label: Optional[str] = None,
     ) -> str:
         from .client.components.schema.key_mechanisms import KeyMechanismsTupleInput
         from .client.components.schema.key_restrictions import KeyRestrictionsDict
         from .client.components.schema.private_key_pem import ArgumentsDict, PrivateKeyPemDict
         from .client.components.schema.tag_list import TagListTuple
+        from .client.schemas import Unset
 
         mechanism_tuple: KeyMechanismsTupleInput = [mechanism.value for mechanism in mechanisms]
 
-        if tags:
-            arguments = ArgumentsDict(
-                mechanisms=mechanism_tuple,
-                restrictions=KeyRestrictionsDict(tags=TagListTuple(list(tags))),
-            )
-        else:
-            arguments = ArgumentsDict(mechanisms=mechanism_tuple)
+        arguments = ArgumentsDict(
+            mechanisms=mechanism_tuple,
+            restrictions=KeyRestrictionsDict(tags=TagListTuple(list(tags))) if tags else Unset(),
+            label=_optional_to_unset(label),
+        )
         body = PrivateKeyPemDict(arguments=arguments, key_file=private_key)
 
         try:
@@ -1252,20 +1259,20 @@ class NetHSM:
         mechanisms: list[KeyMechanism],
         length: int,
         key_id: Optional[str] = None,
+        label: Optional[str] = None,
     ) -> str:
         from .client.components.schema.key_generate_request_data import KeyGenerateRequestDataDict
         from .client.components.schema.key_mechanisms import KeyMechanismsTupleInput
 
         mechanism_tuple: KeyMechanismsTupleInput = [mechanism.value for mechanism in mechanisms]
 
-        if key_id:
-            body = KeyGenerateRequestDataDict(
-                type=type.value, mechanisms=mechanism_tuple, length=length, id=key_id
-            )
-        else:
-            body = KeyGenerateRequestDataDict(
-                type=type.value, mechanisms=mechanism_tuple, length=length
-            )
+        body = KeyGenerateRequestDataDict(
+            type=type.value,
+            mechanisms=mechanism_tuple,
+            length=length,
+            id=_optional_to_unset(key_id),
+            label=_optional_to_unset(label),
+        )
         try:
             response = self._get_api().keys_generate_post(body=body, skip_deserialization=True)
         except Exception as e:
@@ -1279,6 +1286,25 @@ class NetHSM:
                 },
             )
         return self._get_create_resource_id(response.response)
+
+    def set_key_label(self, key_id: str, label: Optional[str]) -> None:
+        from .client.components.schema.key_set_label import KeySetLabelDict
+        from .client.paths.keys_key_id_label.put.path_parameters import PathParametersDict
+
+        if label is None:
+            label = ""
+
+        body = KeySetLabelDict(label=label)
+        path_params = PathParametersDict(KeyID=key_id)
+        try:
+            self._get_api().keys_key_id_label_put(body=body, path_params=path_params)
+        except Exception as e:
+            _handle_exception(
+                e,
+                state=State.OPERATIONAL,
+                roles=[Role.ADMINISTRATOR],
+                messages={404: f"Key {key_id} not found"},
+            )
 
     def get_config_logging(self) -> LoggingConfig:
         try:

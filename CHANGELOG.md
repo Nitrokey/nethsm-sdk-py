@@ -13,6 +13,10 @@
   - Update clustering functionality:
     - Add `FullClusterJoinData` class
     - Change `NetHSM.join_cluster` to also accept `FullClusterJoinData`
+  - Add support for key labels:
+    - Add `label` argument to `add_key`, `add_key_pem`, `generate_key`, `list_keys` functions
+    - Add `NetHSM.set_key_label` function
+    - Add optional `label` field to `Key`
 
 [All Changes](https://github.com/Nitrokey/nethsm-sdk-py/compare/v2.1.2...HEAD)
 
