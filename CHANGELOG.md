@@ -17,6 +17,9 @@
     - Add `label` argument to `add_key`, `add_key_pem`, `generate_key`, `list_keys` functions
     - Add `NetHSM.set_key_label` function
     - Add optional `label` field to `Key`
+  - Add support for NTP configuration:
+    - Add `NtpConfig` class
+    - Add `get_config_ntp`, `set_ntp_config` functions to `NetHSM`
 
 [All Changes](https://github.com/Nitrokey/nethsm-sdk-py/compare/v2.1.2...HEAD)
 

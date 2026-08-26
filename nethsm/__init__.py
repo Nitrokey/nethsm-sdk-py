@@ -33,6 +33,7 @@ if TYPE_CHECKING:
     from .client.components.schema.cluster_member_add_response import ClusterMemberAddResponseDict
     from .client.components.schema.ipv6_config import Ipv6ConfigDict
     from .client.components.schema.network_config_output import NetworkConfigOutputDict
+    from .client.components.schema.ntp_config import NtpConfigDict
     from .client.schemas import Unset
 
 
@@ -382,6 +383,18 @@ class NetworkConfig:
             ip_address=item.ipAddress,
             netmask=item.netmask,
             ipv6=Ipv6Config._from_api(ipv6) if ipv6 is not None else None,
+        )
+
+
+@dataclass
+class NtpConfig:
+    ntp_ip: Optional[str] = None
+    nts_name: Optional[str] = None
+
+    @staticmethod
+    def _from_api(item: "NtpConfigDict") -> "NtpConfig":
+        return NtpConfig(
+            ntp_ip=_unset_to_optional(item.ntpIP), nts_name=_unset_to_optional(item.ntsName)
         )
 
 
@@ -1324,6 +1337,13 @@ class NetHSM:
             _handle_exception(e, state=State.OPERATIONAL, roles=[Role.ADMINISTRATOR])
         return NetworkConfig._from_api(response.body)
 
+    def get_config_ntp(self) -> NtpConfig:
+        try:
+            response = self._get_api().config_ntp_get()
+        except Exception as e:
+            _handle_exception(e, state=State.OPERATIONAL, roles=[Role.ADMINISTRATOR])
+        return NtpConfig._from_api(response.body)
+
     def get_config_time(self) -> datetime:
         try:
             response = self._get_api().config_time_get()
@@ -1568,6 +1588,20 @@ class NetHSM:
         )
         try:
             self._get_api().config_network_put(body=body)
+        except Exception as e:
+            _handle_exception(
+                e,
+                state=State.OPERATIONAL,
+                roles=[Role.ADMINISTRATOR],
+                messages={400: "Bad request -- invalid input data"},
+            )
+
+    def set_ntp_config(self, ntp_ip: Optional[str] = None, nts_name: Optional[str] = None) -> None:
+        from .client.components.schema.ntp_config import NtpConfigDict
+
+        body = NtpConfigDict(ntpIP=_optional_to_unset(ntp_ip), ntsName=_optional_to_unset(nts_name))
+        try:
+            self._get_api().config_ntp_put(body=body)
         except Exception as e:
             _handle_exception(
                 e,

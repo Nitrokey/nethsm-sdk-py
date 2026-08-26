@@ -364,6 +364,13 @@ def test_get_config_time(nethsm: NetHSM) -> None:
     get_config_time(nethsm)
 
 
+def test_get_config_ntp(nethsm: NetHSM) -> None:
+    Version(nethsm).require("NTP configuration", major=5)
+    config = nethsm.get_config_ntp()
+    assert config.ntp_ip is None
+    assert config.nts_name is None
+
+
 def test_get_config_unattended_boot(nethsm: NetHSM) -> None:
     """Query the configuration of a NetHSM.
 
@@ -460,6 +467,30 @@ def test_set_get_time(nethsm: NetHSM) -> None:
     time_now = datetime.datetime.now(datetime.timezone.utc)
     nethsm.set_time(time_now)
     get_config_time(nethsm)
+
+
+def test_set_get_ntp_config(nethsm: NetHSM) -> None:
+    Version(nethsm).require("NTP configuration", major=5)
+
+    nethsm.set_ntp_config(ntp_ip="127.0.0.1")
+    config = nethsm.get_config_ntp()
+    assert config.ntp_ip == "127.0.0.1"
+    assert config.nts_name is None
+
+    nethsm.set_ntp_config(nts_name="localhost")
+    config = nethsm.get_config_ntp()
+    assert config.ntp_ip is None
+    assert config.nts_name == "localhost"
+
+    nethsm.set_ntp_config(ntp_ip="127.0.0.1", nts_name="localhost")
+    config = nethsm.get_config_ntp()
+    assert config.ntp_ip == "127.0.0.1"
+    assert config.nts_name == "localhost"
+
+    nethsm.set_ntp_config()
+    config = nethsm.get_config_ntp()
+    assert config.ntp_ip is None
+    assert config.nts_name is None
 
 
 def test_set_get_unattended_boot(nethsm: NetHSM) -> None:
