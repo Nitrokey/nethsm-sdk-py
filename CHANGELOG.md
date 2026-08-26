@@ -11,8 +11,9 @@
 - Update for NetHSM v5:
   - Add `State.FAILED` variant
   - Update clustering functionality:
-    - Add `FullClusterJoinData` class
+    - Add `FullClusterJoinData`, `ClusterDiagnostics`, `ClusterLogItem`, `ClusterState` and `ClusterSnapshot` classes
     - Change `NetHSM.join_cluster` to also accept `FullClusterJoinData`
+    - Add `get_cluster_diagnostics` function to `NetHSM`
   - Add support for key labels:
     - Add `label` argument to `add_key`, `add_key_pem`, `generate_key`, `list_keys` functions
     - Add `NetHSM.set_key_label` function

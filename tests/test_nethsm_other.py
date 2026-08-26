@@ -2,7 +2,7 @@ from typing import Iterator
 
 import pytest
 from conftest import Constants as C
-from utilities import Container, add_user, connect, lock, provision, unlock
+from utilities import Container, Version, add_user, connect, lock, provision, unlock
 
 import nethsm as nethsm_sdk
 from nethsm import NetHSM
@@ -139,3 +139,9 @@ def test_state_provision_add_user_get_random_data(nethsm_no_provision: NetHSM) -
         assert random_data1 != random_data2
         assert random_data1 != random_data3
         assert random_data2 != random_data3
+
+
+def test_cluster_diagnostics(nethsm: NetHSM) -> None:
+    Version(nethsm).require("cluster diagnostics", major=5)
+    diagnostics = nethsm.get_cluster_diagnostics()
+    assert not diagnostics.state.running
