@@ -13,7 +13,8 @@
   - Update clustering functionality:
     - Add `FullClusterJoinData`, `ClusterDiagnostics`, `ClusterLogItem`, `ClusterState` and `ClusterSnapshot` classes
     - Change `NetHSM.join_cluster` to also accept `FullClusterJoinData`
-    - Add `get_cluster_diagnostics` function to `NetHSM`
+    - Add `force_new_cluster`, `get_cluster_diagnostics`, `promote_cluster_member` functions to `NetHSM`
+    - Add `learner` field to `ClusterMember`
   - Add support for key labels:
     - Add `label` argument to `add_key`, `add_key_pem`, `generate_key`, `list_keys` functions
     - Add `NetHSM.set_key_label` function

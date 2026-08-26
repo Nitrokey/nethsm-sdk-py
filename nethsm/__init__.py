@@ -407,13 +407,14 @@ class ClusterMember:
     id: str
     name: str
     urls: list[str]
+    learner: bool
 
     def to_initial_cluster_member(self) -> "InitialClusterMember":
         return InitialClusterMember(name=self.name, urls=self.urls)
 
     @staticmethod
     def _from_api(item: "ClusterMemberDict") -> "ClusterMember":
-        return ClusterMember(id=item.id, name=item.name, urls=list(item.urls))
+        return ClusterMember(id=item.id, name=item.name, urls=list(item.urls), learner=item.learner)
 
 
 @dataclass
@@ -1971,6 +1972,23 @@ class NetHSM:
         except Exception as e:
             _handle_exception(e)
         return ClusterDiagnostics._from_api(response.body)
+
+    def force_new_cluster(self) -> None:
+        try:
+            self._get_api().cluster_force_new_post()
+        except Exception as e:
+            _handle_exception(e, state=State.FAILED)
+
+    def promote_cluster_member(self, member_id: str) -> None:
+        from .client.paths.cluster_members_member_id_promote.post.path_parameters import (
+            PathParametersDict,
+        )
+
+        path_params = PathParametersDict(MemberID=member_id)
+        try:
+            self._get_api().cluster_members_member_id_promote_post(path_params=path_params)
+        except Exception as e:
+            _handle_exception(e, state=State.OPERATIONAL, roles=[Role.ADMINISTRATOR])
 
 
 @contextlib.contextmanager
