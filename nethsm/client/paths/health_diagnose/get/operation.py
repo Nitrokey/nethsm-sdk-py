@@ -14,10 +14,14 @@ from .responses import (
     response_403,
     response_406,
 )
-from .security import security_requirement_object_0
+from .security import (
+    security_requirement_object_0,
+    security_requirement_object_1,
+)
 
 _security: typing.List[security_schemes.SecurityRequirementObject] = [
     security_requirement_object_0.security_requirement_object,
+    security_requirement_object_1.security_requirement_object,
 ]
 
 

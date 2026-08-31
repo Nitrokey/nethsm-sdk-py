@@ -19,14 +19,59 @@ class Host(
     default: typing.Literal["nethsmdemo.nitrokey.com"] = "nethsmdemo.nitrokey.com"
 
 
+class VersionEnums:
+
+    @schemas.classproperty
+    def V1(cls) -> typing.Literal["v1"]:
+        return Version.validate("v1")
+
+
 @dataclasses.dataclass(frozen=True)
 class Version(
-    schemas.StrSchema
+    schemas.Schema
 ):
     types: typing.FrozenSet[typing.Type] = frozenset({
         str,
     })
     default: typing.Literal["v1"] = "v1"
+    enum_value_to_name: typing.Mapping[typing.Union[int, float, str, schemas.Bool, None], str] = dataclasses.field(
+        default_factory=lambda: {
+            "v1": "V1",
+        }
+    )
+    enums = VersionEnums
+
+    @typing.overload
+    @classmethod
+    def validate(
+        cls,
+        arg: typing.Literal["v1"],
+        configuration: typing.Optional[schema_configuration.SchemaConfiguration] = None
+    ) -> typing.Literal["v1"]: ...
+    @typing.overload
+    @classmethod
+    def validate(
+        cls,
+        arg: str,
+        configuration: typing.Optional[schema_configuration.SchemaConfiguration] = None
+    ) -> typing.Literal["v1",]: ...
+    @classmethod
+    def validate(
+        cls,
+        arg,
+        configuration: typing.Optional[schema_configuration.SchemaConfiguration] = None
+    ) -> typing.Literal[
+        "v1",
+    ]:
+        validated_arg = super().validate_base(
+            arg,
+            configuration=configuration,
+        )
+        return typing.cast(typing.Literal[
+                "v1",
+            ],
+            validated_arg
+        )
 Properties = typing.TypedDict(
     'Properties',
     {
@@ -49,7 +94,9 @@ class VariablesDict(schemas.immutabledict[str, str]):
         cls,
         *,
         host: str,
-        version: str,
+        version: typing.Literal[
+            "v1"
+        ],
         configuration_: typing.Optional[schema_configuration.SchemaConfiguration] = None,
     ):
         arg_: typing.Dict[str, typing.Any] = {
@@ -74,13 +121,18 @@ class VariablesDict(schemas.immutabledict[str, str]):
         return self.__getitem__("host")
     
     @property
-    def version(self) -> str:
-        return self.__getitem__("version")
+    def version(self) -> typing.Literal["v1"]:
+        return typing.cast(
+            typing.Literal["v1"],
+            self.__getitem__("version")
+        )
 VariablesDictInput = typing.TypedDict(
     'VariablesDictInput',
     {
         "host": str,
-        "version": str,
+        "version": typing.Literal[
+            "v1"
+        ],
     }
 )
 

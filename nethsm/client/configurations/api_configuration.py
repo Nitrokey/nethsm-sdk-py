@@ -38,6 +38,7 @@ class SecurityIndexInfoRequired(typing.TypedDict):
 SecurityIndexInfoOptional = typing.TypedDict(
     'SecurityIndexInfoOptional',
     {
+        "paths//cluster/force-new/post/security": typing.Literal[0],
         "paths//cluster/join/post/security": typing.Literal[0],
         "paths//cluster/members/get/security": typing.Literal[0],
         "paths//cluster/members/post/security": typing.Literal[0],
@@ -63,7 +64,7 @@ SecurityIndexInfoOptional = typing.TypedDict(
         "paths//config/unattended-boot/get/security": typing.Literal[0],
         "paths//config/unattended-boot/put/security": typing.Literal[0],
         "paths//config/unlock-passphrase/put/security": typing.Literal[0],
-        "paths//health/diagnose/get/security": typing.Literal[0],
+        "paths//health/diagnose/get/security": typing.Literal[0, 1],
         "paths//keys/get/security": typing.Literal[0],
         "paths//keys/post/security": typing.Literal[0],
         "paths//keys/generate/post/security": typing.Literal[0],
@@ -391,6 +392,7 @@ class ApiConfiguration(object):
         self,
         key_prefix: typing.Literal[
             "security",
+            "paths//cluster/force-new/post/security",
             "paths//cluster/join/post/security",
             "paths//cluster/members/get/security",
             "paths//cluster/members/post/security",
