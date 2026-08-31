@@ -4,9 +4,9 @@
 
 -
 
-[All Changes](https://github.com/Nitrokey/nethsm-sdk-py/compare/v3.0.0-rc.1...HEAD)
+[All Changes](https://github.com/Nitrokey/nethsm-sdk-py/compare/v3.0.0...HEAD)
 
-## [v3.0.0-rc.1](https://github.com/Nitrokey/nethsm-sdk-py/releases/tag/v3.0.0-rc.1) (2026-08-26)
+## [v3.0.0](https://github.com/Nitrokey/nethsm-sdk-py/releases/tag/v3.0.0) (2026-08-31)
 
 ### Breaking Changes
 
@@ -29,7 +29,7 @@
     - Add `NtpConfig` class
     - Add `get_config_ntp`, `set_ntp_config` functions to `NetHSM`
 
-[All Changes](https://github.com/Nitrokey/nethsm-sdk-py/compare/v2.1.2...v3.0.0-rc.1)
+[All Changes](https://github.com/Nitrokey/nethsm-sdk-py/compare/v2.1.2...v3.0.0)
 
 ## [v2.1.2](https://github.com/Nitrokey/nethsm-sdk-py/releases/tag/v2.1.2) (2026-06-22)
 
