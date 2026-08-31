@@ -435,8 +435,10 @@ def test_list_keys_by_label(nethsm: NetHSM) -> None:
 
     key_id1 = nethsm.generate_key(C.TYPE, C.MECHANISM, C.LENGTH, label="testlabel1")
     key_id2 = nethsm.generate_key(C.TYPE, C.MECHANISM, C.LENGTH, label="testlabel2")
+    key_id3 = nethsm.generate_key(C.TYPE, C.MECHANISM, C.LENGTH)
 
-    assert set(nethsm.list_keys()) >= {key_id1, key_id2}
+    assert set(nethsm.list_keys()) >= {key_id1, key_id2, key_id3}
+    assert set(nethsm.list_keys(label="")) & {key_id1, key_id2, key_id3} == {key_id3}
     assert nethsm.list_keys(label="testlabel1") == [key_id1]
     assert nethsm.list_keys(label="testlabel2") == [key_id2]
     assert nethsm.list_keys(label="testlabel") == []
@@ -458,3 +460,4 @@ def test_list_keys_by_prefix_and_label(nethsm: NetHSM) -> None:
     assert set(nethsm.list_keys(label="testprefixlabel1")) == {key_id1, key_id2}
     assert set(nethsm.list_keys(prefix="prefixlabel1")) == {key_id1, key_id3}
     assert nethsm.list_keys(label="testprefixlabel1", prefix="prefixlabel1") == [key_id1]
+    assert nethsm.list_keys(label="", prefix="prefixlabel1") == []
