@@ -269,6 +269,9 @@ class Base64:
     def encode(cls, data: bytes) -> "Base64":
         return cls(data=b64encode(data).decode())
 
+    def __str__(self) -> str:
+        return self.data
+
 
 @dataclass
 class Authentication:
