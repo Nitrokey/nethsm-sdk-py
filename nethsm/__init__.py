@@ -1953,7 +1953,7 @@ class NetHSM:
 
     def get_cluster_ca_certificate(self) -> str:
         try:
-            response = self._get_api().config_tls_cluster_ca_pem_get(skip_deserialization=True)
+            response = self._get_api().cluster_tls_cert_pem_get(skip_deserialization=True)
         except Exception as e:
             _handle_exception(e, state=State.OPERATIONAL, roles=[Role.ADMINISTRATOR])
         return response.response.data.decode("utf-8")
