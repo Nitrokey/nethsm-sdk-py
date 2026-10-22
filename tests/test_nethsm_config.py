@@ -550,7 +550,7 @@ def test_set_unlock_passphrase_lock_unlock(nethsm: NetHSM) -> None:
 
 
 def test_cluster_ca_certificate(nethsm: NetHSM) -> None:
-    Version(nethsm).require("clustering", major=4)
+    Version(nethsm).require("clustering", major=5, minor=1)
 
     with pytest.raises(nethsm_module.NetHSMError, match="404: Not Found"):
         ca_cert = nethsm.get_cluster_ca_certificate()

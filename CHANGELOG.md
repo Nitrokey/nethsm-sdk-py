@@ -2,7 +2,9 @@
 
 ## Unreleased
 
--
+### Changes
+
+- Update for NetHSM v5.1-pre1
 
 [All Changes](https://github.com/Nitrokey/nethsm-sdk-py/compare/v3.0.0...HEAD)
 

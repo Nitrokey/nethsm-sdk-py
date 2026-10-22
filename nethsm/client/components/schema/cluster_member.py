@@ -30,32 +30,40 @@ class ClusterMemberDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES]):
 
     __required_keys__: typing.FrozenSet[str] = frozenset({
         "id",
-        "learner",
         "name",
         "urls",
     })
     __optional_keys__: typing.FrozenSet[str] = frozenset({
+        "learner",
     })
     
     def __new__(
         cls,
         *,
         id: str,
-        learner: bool,
         name: str,
         urls: typing.Union[
             peer_urls.PeerURLsTupleInput,
             peer_urls.PeerURLsTuple
         ],
+        learner: typing.Union[
+            bool,
+            schemas.Unset
+        ] = schemas.unset,
         configuration_: typing.Optional[schema_configuration.SchemaConfiguration] = None,
         **kwargs: schemas.INPUT_TYPES_ALL,
     ):
         arg_: typing.Dict[str, typing.Any] = {
             "id": id,
-            "learner": learner,
             "name": name,
             "urls": urls,
         }
+        for key_, val in (
+            ("learner", learner),
+        ):
+            if isinstance(val, schemas.Unset):
+                continue
+            arg_[key_] = val
         arg_.update(kwargs)
         used_arg_ = typing.cast(ClusterMemberDictInput, arg_)
         return ClusterMember.validate(used_arg_, configuration=configuration_)
@@ -78,13 +86,6 @@ class ClusterMemberDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES]):
         )
     
     @property
-    def learner(self) -> bool:
-        return typing.cast(
-            bool,
-            self.__getitem__("learner")
-        )
-    
-    @property
     def name(self) -> str:
         return typing.cast(
             str,
@@ -96,6 +97,16 @@ class ClusterMemberDict(schemas.immutabledict[str, schemas.OUTPUT_BASE_TYPES]):
         return typing.cast(
             peer_urls.PeerURLsTuple,
             self.__getitem__("urls")
+        )
+    
+    @property
+    def learner(self) -> typing.Union[bool, schemas.Unset]:
+        val = self.get("learner", schemas.unset)
+        if isinstance(val, schemas.Unset):
+            return val
+        return typing.cast(
+            bool,
+            val
         )
     
     def get_additional_property_(self, name: str) -> typing.Union[schemas.OUTPUT_BASE_TYPES, schemas.Unset]:
@@ -116,7 +127,6 @@ class ClusterMember(
     types: typing.FrozenSet[typing.Type] = frozenset({schemas.immutabledict})
     required: typing.FrozenSet[str] = frozenset({
         "id",
-        "learner",
         "name",
         "urls",
     })

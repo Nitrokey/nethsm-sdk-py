@@ -417,7 +417,12 @@ class ClusterMember:
 
     @staticmethod
     def _from_api(item: "ClusterMemberDict") -> "ClusterMember":
-        return ClusterMember(id=item.id, name=item.name, urls=list(item.urls), learner=item.learner)
+        from .client.schemas import Unset
+
+        learner = False
+        if not isinstance(item.learner, Unset):
+            learner = item.learner
+        return ClusterMember(id=item.id, name=item.name, urls=list(item.urls), learner=learner)
 
 
 @dataclass
@@ -1956,7 +1961,7 @@ class NetHSM:
 
     def get_cluster_ca_certificate(self) -> str:
         try:
-            response = self._get_api().config_tls_cluster_ca_pem_get(skip_deserialization=True)
+            response = self._get_api().cluster_tls_ca_pem_get(skip_deserialization=True)
         except Exception as e:
             _handle_exception(e, state=State.OPERATIONAL, roles=[Role.ADMINISTRATOR])
         return response.response.data.decode("utf-8")
@@ -1964,7 +1969,7 @@ class NetHSM:
     def set_cluster_ca_certificate(self, cert: Bytes) -> None:
         try:
             self._request(
-                "PUT", "config/tls/cluster-ca.pem", data=cert, mime_type="application/x-pem-file"
+                "PUT", "cluster/tls/ca.pem", data=cert, mime_type="application/x-pem-file"
             )
         except Exception as e:
             _handle_exception(e, state=State.OPERATIONAL, roles=[Role.ADMINISTRATOR])
