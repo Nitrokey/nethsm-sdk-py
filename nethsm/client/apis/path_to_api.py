@@ -6,13 +6,17 @@ from nethsm.client.apis.paths.cluster_join import ClusterJoin
 from nethsm.client.apis.paths.cluster_members import ClusterMembers
 from nethsm.client.apis.paths.cluster_members_member_id import ClusterMembersMemberID
 from nethsm.client.apis.paths.cluster_members_member_id_promote import ClusterMembersMemberIDPromote
+from nethsm.client.apis.paths.cluster_tls_ca_pem import ClusterTlsCaPem
+from nethsm.client.apis.paths.cluster_tls_cert_pem import ClusterTlsCertPem
+from nethsm.client.apis.paths.cluster_tls_csr_pem import ClusterTlsCsrPem
+from nethsm.client.apis.paths.cluster_tls_generate import ClusterTlsGenerate
+from nethsm.client.apis.paths.cluster_tls_public_pem import ClusterTlsPublicPem
 from nethsm.client.apis.paths.config_backup_passphrase import ConfigBackupPassphrase
 from nethsm.client.apis.paths.config_logging import ConfigLogging
 from nethsm.client.apis.paths.config_network import ConfigNetwork
 from nethsm.client.apis.paths.config_ntp import ConfigNtp
 from nethsm.client.apis.paths.config_time import ConfigTime
 from nethsm.client.apis.paths.config_tls_cert_pem import ConfigTlsCertPem
-from nethsm.client.apis.paths.config_tls_cluster_ca_pem import ConfigTlsClusterCaPem
 from nethsm.client.apis.paths.config_tls_csr_pem import ConfigTlsCsrPem
 from nethsm.client.apis.paths.config_tls_generate import ConfigTlsGenerate
 from nethsm.client.apis.paths.config_tls_public_pem import ConfigTlsPublicPem
@@ -66,13 +70,17 @@ PathToApi = typing.TypedDict(
     "/cluster/members": typing.Type[ClusterMembers],
     "/cluster/members/{MemberID}": typing.Type[ClusterMembersMemberID],
     "/cluster/members/{MemberID}/promote": typing.Type[ClusterMembersMemberIDPromote],
+    "/cluster/tls/ca.pem": typing.Type[ClusterTlsCaPem],
+    "/cluster/tls/cert.pem": typing.Type[ClusterTlsCertPem],
+    "/cluster/tls/csr.pem": typing.Type[ClusterTlsCsrPem],
+    "/cluster/tls/generate": typing.Type[ClusterTlsGenerate],
+    "/cluster/tls/public.pem": typing.Type[ClusterTlsPublicPem],
     "/config/backup-passphrase": typing.Type[ConfigBackupPassphrase],
     "/config/logging": typing.Type[ConfigLogging],
     "/config/network": typing.Type[ConfigNetwork],
     "/config/ntp": typing.Type[ConfigNtp],
     "/config/time": typing.Type[ConfigTime],
     "/config/tls/cert.pem": typing.Type[ConfigTlsCertPem],
-    "/config/tls/cluster-ca.pem": typing.Type[ConfigTlsClusterCaPem],
     "/config/tls/csr.pem": typing.Type[ConfigTlsCsrPem],
     "/config/tls/generate": typing.Type[ConfigTlsGenerate],
     "/config/tls/public.pem": typing.Type[ConfigTlsPublicPem],
@@ -127,13 +135,17 @@ path_to_api = PathToApi(
     "/cluster/members": ClusterMembers,
     "/cluster/members/{MemberID}": ClusterMembersMemberID,
     "/cluster/members/{MemberID}/promote": ClusterMembersMemberIDPromote,
+    "/cluster/tls/ca.pem": ClusterTlsCaPem,
+    "/cluster/tls/cert.pem": ClusterTlsCertPem,
+    "/cluster/tls/csr.pem": ClusterTlsCsrPem,
+    "/cluster/tls/generate": ClusterTlsGenerate,
+    "/cluster/tls/public.pem": ClusterTlsPublicPem,
     "/config/backup-passphrase": ConfigBackupPassphrase,
     "/config/logging": ConfigLogging,
     "/config/network": ConfigNetwork,
     "/config/ntp": ConfigNtp,
     "/config/time": ConfigTime,
     "/config/tls/cert.pem": ConfigTlsCertPem,
-    "/config/tls/cluster-ca.pem": ConfigTlsClusterCaPem,
     "/config/tls/csr.pem": ConfigTlsCsrPem,
     "/config/tls/generate": ConfigTlsGenerate,
     "/config/tls/public.pem": ConfigTlsPublicPem,

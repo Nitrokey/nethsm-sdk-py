@@ -12,6 +12,7 @@ from nethsm.client.paths.health_diagnose.get.operation import HealthDiagnoseGet
 from nethsm.client.paths.keys_key_id_sign.post.operation import KeysKeyIDSignPost
 from nethsm.client.paths.config_ntp.get.operation import ConfigNtpGet
 from nethsm.client.paths.config_ntp.put.operation import ConfigNtpPut
+from nethsm.client.paths.cluster_tls_public_pem.get.operation import ClusterTlsPublicPemGet
 from nethsm.client.paths.keys_key_id_cert.delete.operation import KeysKeyIDCertDelete
 from nethsm.client.paths.keys_key_id_cert.get.operation import KeysKeyIDCertGet
 from nethsm.client.paths.keys_key_id_cert.put.operation import KeysKeyIDCertPut
@@ -28,6 +29,8 @@ from nethsm.client.paths.unlock.post.operation import UnlockPost
 from nethsm.client.paths.keys_generate.post.operation import KeysGeneratePost
 from nethsm.client.paths.config_tls_public_pem.get.operation import ConfigTlsPublicPemGet
 from nethsm.client.paths.cluster_join.post.operation import ClusterJoinPost
+from nethsm.client.paths.cluster_tls_cert_pem.get.operation import ClusterTlsCertPemGet
+from nethsm.client.paths.cluster_tls_cert_pem.put.operation import ClusterTlsCertPemPut
 from nethsm.client.paths.config_backup_passphrase.put.operation import ConfigBackupPassphrasePut
 from nethsm.client.paths.config_time.get.operation import ConfigTimeGet
 from nethsm.client.paths.config_time.put.operation import ConfigTimePut
@@ -45,13 +48,17 @@ from nethsm.client.paths.system_factory_reset.post.operation import SystemFactor
 from nethsm.client.paths.system_commit_update.post.operation import SystemCommitUpdatePost
 from nethsm.client.paths.system_info.get.operation import SystemInfoGet
 from nethsm.client.paths.config_tls_generate.post.operation import ConfigTlsGeneratePost
+from nethsm.client.paths.cluster_tls_generate.post.operation import ClusterTlsGeneratePost
 from nethsm.client.paths.users_user_id_tags.get.operation import UsersUserIDTagsGet
 from nethsm.client.paths.config_tls_cert_pem.get.operation import ConfigTlsCertPemGet
 from nethsm.client.paths.config_tls_cert_pem.put.operation import ConfigTlsCertPemPut
 from nethsm.client.paths.keys_key_id_move.post.operation import KeysKeyIDMovePost
 from nethsm.client.paths.system_backup.post.operation import SystemBackupPost
 from nethsm.client.paths.provision.post.operation import ProvisionPost
+from nethsm.client.paths.cluster_tls_ca_pem.get.operation import ClusterTlsCaPemGet
+from nethsm.client.paths.cluster_tls_ca_pem.put.operation import ClusterTlsCaPemPut
 from nethsm.client.paths.health_state.get.operation import HealthStateGet
+from nethsm.client.paths.cluster_tls_csr_pem.post.operation import ClusterTlsCsrPemPost
 from nethsm.client.paths.keys_key_id_encrypt.post.operation import KeysKeyIDEncryptPost
 from nethsm.client.paths.system_cancel_update.post.operation import SystemCancelUpdatePost
 from nethsm.client.paths.config_unlock_passphrase.put.operation import ConfigUnlockPassphrasePut
@@ -65,8 +72,6 @@ from nethsm.client.paths.config_unattended_boot.put.operation import ConfigUnatt
 from nethsm.client.paths.info.get.operation import InfoGet
 from nethsm.client.paths.health_ready.get.operation import HealthReadyGet
 from nethsm.client.paths.keys_key_prefix.get.operation import KeysKeyPrefixGet
-from nethsm.client.paths.config_tls_cluster_ca_pem.get.operation import ConfigTlsClusterCaPemGet
-from nethsm.client.paths.config_tls_cluster_ca_pem.put.operation import ConfigTlsClusterCaPemPut
 from nethsm.client.paths.config_network.get.operation import ConfigNetworkGet
 from nethsm.client.paths.config_network.put.operation import ConfigNetworkPut
 from nethsm.client.paths.cluster_members.get.operation import ClusterMembersGet
@@ -93,6 +98,7 @@ class DefaultApi(
     KeysKeyIDSignPost,
     ConfigNtpGet,
     ConfigNtpPut,
+    ClusterTlsPublicPemGet,
     KeysKeyIDCertDelete,
     KeysKeyIDCertGet,
     KeysKeyIDCertPut,
@@ -109,6 +115,8 @@ class DefaultApi(
     KeysGeneratePost,
     ConfigTlsPublicPemGet,
     ClusterJoinPost,
+    ClusterTlsCertPemGet,
+    ClusterTlsCertPemPut,
     ConfigBackupPassphrasePut,
     ConfigTimeGet,
     ConfigTimePut,
@@ -126,13 +134,17 @@ class DefaultApi(
     SystemCommitUpdatePost,
     SystemInfoGet,
     ConfigTlsGeneratePost,
+    ClusterTlsGeneratePost,
     UsersUserIDTagsGet,
     ConfigTlsCertPemGet,
     ConfigTlsCertPemPut,
     KeysKeyIDMovePost,
     SystemBackupPost,
     ProvisionPost,
+    ClusterTlsCaPemGet,
+    ClusterTlsCaPemPut,
     HealthStateGet,
+    ClusterTlsCsrPemPost,
     KeysKeyIDEncryptPost,
     SystemCancelUpdatePost,
     ConfigUnlockPassphrasePut,
@@ -146,8 +158,6 @@ class DefaultApi(
     InfoGet,
     HealthReadyGet,
     KeysKeyPrefixGet,
-    ConfigTlsClusterCaPemGet,
-    ConfigTlsClusterCaPemPut,
     ConfigNetworkGet,
     ConfigNetworkPut,
     ClusterMembersGet,
