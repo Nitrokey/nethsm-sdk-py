@@ -103,6 +103,10 @@ jobs:
         uses: codecov/codecov-action@v5
         with:
           files: ./coverage.xml
+      - name: analyze coverage
+        uses: irongut/CodeCoverageSummary@v1.3.0
+        with:
+          filename: ./coverage.xml
       - name: login to DockerHub
         if: github.event_name == 'push' && github.ref_name == 'main' && matrix.tag == 'testing'
         uses: docker/login-action@v4
