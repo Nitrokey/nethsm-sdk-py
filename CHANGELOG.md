@@ -4,7 +4,9 @@
 
 ### Changes
 
-- Update for NetHSM v5.1-pre1
+- Update for NetHSM v5.1-pre1:
+  - Add support for separate cluster TLS certificates:
+    - Add `get_cluster_certificate`, `set_cluster_certificate`, `get_cluster_public_key`, `generate_cluster_key` and `cluster_csr` functions to `NetHSM`.
 
 [All Changes](https://github.com/Nitrokey/nethsm-sdk-py/compare/v3.0.0...HEAD)
 

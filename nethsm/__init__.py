@@ -1959,6 +1959,21 @@ class NetHSM:
         except Exception as e:
             _handle_exception(e, state=State.OPERATIONAL, roles=[Role.ADMINISTRATOR])
 
+    def get_cluster_certificate(self) -> str:
+        try:
+            response = self._get_api().cluster_tls_cert_pem_get(skip_deserialization=True)
+        except Exception as e:
+            _handle_exception(e, state=State.OPERATIONAL, roles=[Role.ADMINISTRATOR])
+        return response.response.data.decode("utf-8")
+
+    def set_cluster_certificate(self, cert: Bytes) -> None:
+        try:
+            self._request(
+                "PUT", "cluster/tls/cert.pem", data=cert, mime_type="application/x-pem-file"
+            )
+        except Exception as e:
+            _handle_exception(e, state=State.OPERATIONAL, roles=[Role.ADMINISTRATOR])
+
     def get_cluster_ca_certificate(self) -> str:
         try:
             response = self._get_api().cluster_tls_ca_pem_get(skip_deserialization=True)
@@ -1973,6 +1988,57 @@ class NetHSM:
             )
         except Exception as e:
             _handle_exception(e, state=State.OPERATIONAL, roles=[Role.ADMINISTRATOR])
+
+    def get_cluster_public_key(self) -> str:
+        try:
+            response = self._get_api().cluster_tls_public_pem_get(skip_deserialization=True)
+        except Exception as e:
+            _handle_exception(e, state=State.OPERATIONAL, roles=[Role.ADMINISTRATOR])
+        return response.response.data.decode("utf-8")
+
+    def generate_cluster_key(self, type: TlsKeyType, length: Optional[int] = None) -> None:
+        from .client.components.schema.tls_key_generate_request_data import (
+            TlsKeyGenerateRequestDataDict,
+        )
+
+        body = TlsKeyGenerateRequestDataDict(type=type.value, length=_optional_to_unset(length))
+
+        try:
+            self._get_api().cluster_tls_generate_post(body=body)
+        except Exception as e:
+            _handle_exception(e, state=State.OPERATIONAL, roles=[Role.ADMINISTRATOR])
+
+    def cluster_csr(
+        self,
+        *,
+        common_name: str,
+        country: Optional[str] = None,
+        state_or_province: Optional[str] = None,
+        locality: Optional[str] = None,
+        organization: Optional[str] = None,
+        organizational_unit: Optional[str] = None,
+        email_address: Optional[str] = None,
+        subject_alt_names: Optional[list[str]] = None,
+    ) -> str:
+        from .client.components.schema.distinguished_name import DistinguishedNameDict
+
+        body = DistinguishedNameDict(
+            commonName=common_name,
+            countryName=_optional_to_unset(country),
+            stateOrProvinceName=_optional_to_unset(state_or_province),
+            localityName=_optional_to_unset(locality),
+            organizationName=_optional_to_unset(organization),
+            organizationalUnitName=_optional_to_unset(organizational_unit),
+            emailAddress=_optional_to_unset(email_address),
+            subjectAltNames=_optional_to_unset(subject_alt_names),
+        )
+        try:
+            response = self._get_api().cluster_tls_csr_pem_post(
+                body=body, skip_deserialization=True
+            )
+        except Exception as e:
+            _handle_exception(e, state=State.OPERATIONAL, roles=[Role.ADMINISTRATOR])
+        return response.response.data.decode("utf-8")
 
     def get_cluster_diagnostics(self) -> ClusterDiagnostics:
         try:

@@ -8,7 +8,7 @@ import pytest
 from conftest import Constants as C
 from cryptography import x509
 from cryptography.hazmat.primitives import hashes, serialization
-from cryptography.hazmat.primitives.asymmetric import ec
+from cryptography.hazmat.primitives.asymmetric import ec, rsa
 from cryptography.x509.oid import NameOID
 from utilities import Container, Version, lock, self_sign_csr, unlock
 
@@ -549,6 +549,22 @@ def test_set_unlock_passphrase_lock_unlock(nethsm: NetHSM) -> None:
     assert nethsm.get_state() == State.OPERATIONAL
 
 
+def test_cluster_generate_key(nethsm: NetHSM) -> None:
+    Version(nethsm).require("clustering", major=5, minor=1)
+
+    old_key_pem = nethsm.get_cluster_public_key()
+    old_key = serialization.load_pem_public_key(old_key_pem.encode())
+
+    nethsm.generate_cluster_key(TlsKeyType.RSA, 4096)
+
+    new_key_pem = nethsm.get_cluster_public_key()
+    new_key = serialization.load_pem_public_key(new_key_pem.encode())
+
+    assert new_key != old_key
+    assert isinstance(new_key, rsa.RSAPublicKey)
+    assert new_key.key_size == 4096
+
+
 def test_cluster_ca_certificate(nethsm: NetHSM) -> None:
     Version(nethsm).require("clustering", major=5, minor=1)
 
@@ -557,7 +573,10 @@ def test_cluster_ca_certificate(nethsm: NetHSM) -> None:
 
     ca = CA()
 
-    csr_pem = nethsm.csr(
+    public_key_pem = nethsm.get_cluster_public_key()
+    public_key = serialization.load_pem_public_key(public_key_pem.encode())
+
+    csr_pem = nethsm.cluster_csr(
         country=C.COUNTRY,
         state_or_province=C.STATE_OR_PROVINCE,
         locality=C.LOCALITY,
@@ -567,8 +586,9 @@ def test_cluster_ca_certificate(nethsm: NetHSM) -> None:
         email_address=C.EMAIL_ADDRESS,
     )
     csr = x509.load_pem_x509_csr(csr_pem.encode())
+    assert csr.public_key() == public_key
     cert = ca.sign(csr, intermediate=False)
-    nethsm.set_certificate(cert)
+    nethsm.set_cluster_certificate(cert)
 
     nethsm.set_cluster_ca_certificate(ca.ca_cert_pem)
 
