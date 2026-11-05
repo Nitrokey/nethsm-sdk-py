@@ -18,7 +18,7 @@ from base64 import b64decode, b64encode
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from io import BufferedReader, FileIO
-from typing import TYPE_CHECKING, Any, Dict, Iterator, Mapping, NoReturn, Optional, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Iterator, Mapping, NoReturn, TypeVar
 from urllib.parse import urlencode
 
 import urllib3
@@ -44,7 +44,7 @@ if TYPE_CHECKING:
 __version__ = importlib.metadata.version("nethsm")
 
 
-Bytes = Union[BufferedReader, FileIO, bytes]
+Bytes = BufferedReader | FileIO | bytes
 
 
 class Role(enum.Enum):
@@ -227,7 +227,7 @@ class Base64:
         return b64decode(self.data)
 
     @classmethod
-    def from_encoded(cls, data: Union[bytes, str], ignore_whitespace: bool = False) -> "Base64":
+    def from_encoded(cls, data: bytes | str, ignore_whitespace: bool = False) -> "Base64":
         """
         >>> Base64.from_encoded("dGVzdAo=")
         Base64(data='dGVzdAo=')
@@ -287,8 +287,8 @@ class Info:
 
 @dataclass
 class Tpm:
-    attestation_keys: Dict[str, Any]
-    platform_configuration_registers: Dict[str, Any]
+    attestation_keys: dict[str, Any]
+    platform_configuration_registers: dict[str, Any]
 
 
 @dataclass
@@ -318,7 +318,7 @@ class EcPublicKey:
     data: Base64
 
 
-PublicKey = Union[RsaPublicKey, EcPublicKey, None]
+PublicKey = RsaPublicKey | EcPublicKey | None
 
 
 @dataclass
@@ -333,7 +333,7 @@ class GenericPrivateKey:
     data: Base64
 
 
-PrivateKey = Union[RsaPrivateKey, GenericPrivateKey]
+PrivateKey = RsaPrivateKey | GenericPrivateKey
 
 
 @dataclass
@@ -344,7 +344,7 @@ class Key:
     operations: int
     tags: list[str]
     public_key: PublicKey
-    label: Optional[str] = None
+    label: str | None = None
 
 
 @dataclass
@@ -363,7 +363,7 @@ class LoggingConfig:
 @dataclass
 class Ipv6Config:
     cidr: str
-    gateway: Optional[str] = None
+    gateway: str | None = None
 
     def _to_api(self) -> "Ipv6ConfigDict":
         from .client.components.schema.ipv6_config import Ipv6ConfigDict
@@ -380,7 +380,7 @@ class NetworkConfig:
     gateway: str
     ip_address: str
     netmask: str
-    ipv6: Optional[Ipv6Config] = None
+    ipv6: Ipv6Config | None = None
 
     @staticmethod
     def _from_api(item: "NetworkConfigOutputDict") -> "NetworkConfig":
@@ -395,8 +395,8 @@ class NetworkConfig:
 
 @dataclass
 class NtpConfig:
-    ntp_ip: Optional[str] = None
-    nts_name: Optional[str] = None
+    ntp_ip: str | None = None
+    nts_name: str | None = None
 
     @staticmethod
     def _from_api(item: "NtpConfigDict") -> "NtpConfig":
@@ -511,7 +511,7 @@ class FullClusterJoinData:
 @dataclass
 class ClusterLogItem:
     level: str
-    msg: Optional[str] = None
+    msg: str | None = None
 
     @staticmethod
     def _from_api(item: "ClusterLogItemDict") -> "ClusterLogItem":
@@ -524,7 +524,7 @@ class ClusterSnapshot:
     revision: int
     total_key: int
     total_size: int
-    version: Optional[str] = None
+    version: str | None = None
 
     @staticmethod
     def _from_api(data: "ClusterSnapshotDict") -> "ClusterSnapshot":
@@ -540,9 +540,9 @@ class ClusterSnapshot:
 @dataclass
 class ClusterState:
     running: bool
-    exited: Optional[int] = None
-    signaled: Optional[int] = None
-    stopped: Optional[int] = None
+    exited: int | None = None
+    signaled: int | None = None
+    stopped: int | None = None
 
     @staticmethod
     def _from_api(data: "ClusterStateDict") -> "ClusterState":
@@ -558,7 +558,7 @@ class ClusterState:
 class ClusterDiagnostics:
     logs: list[ClusterLogItem]
     state: ClusterState
-    snapshot: Optional[ClusterSnapshot]
+    snapshot: ClusterSnapshot | None
 
     @staticmethod
     def _from_api(data: "HealthDiagnoseDataDict") -> "ClusterDiagnostics":
@@ -574,9 +574,9 @@ class ClusterDiagnostics:
 
 def _handle_exception(
     e: Exception,
-    messages: Optional[dict[int, str]] = None,
-    roles: Optional[list[Role]] = None,
-    state: Optional[Union[list[State], State]] = None,
+    messages: dict[int, str] | None = None,
+    roles: list[Role] | None = None,
+    state: list[State] | State | None = None,
 ) -> NoReturn:
     from .client import ApiException
 
@@ -592,9 +592,9 @@ def _handle_exception(
 
 def _handle_api_exception(
     e: "ApiException[Any]",
-    messages: Optional[dict[int, str]] = None,
-    roles: Optional[list[Role]] = None,
-    state: Optional[Union[list[State], State]] = None,
+    messages: dict[int, str] | None = None,
+    roles: list[Role] | None = None,
+    state: list[State] | State | None = None,
 ) -> NoReturn:
     from .client.api_response import ApiResponseWithoutDeserialization
     from .client.components.schema.error_response import ErrorResponseDict
@@ -671,7 +671,7 @@ class NetHSMRequestError(Exception):
 _T = TypeVar("_T")
 
 
-def _optional_to_unset(value: Optional[_T]) -> Union[_T, "Unset"]:
+def _optional_to_unset(value: _T | None) -> _T | "Unset":
     from .client.schemas import Unset
 
     if value is None:
@@ -679,7 +679,7 @@ def _optional_to_unset(value: Optional[_T]) -> Union[_T, "Unset"]:
     return value
 
 
-def _unset_to_optional(value: Union[_T, "Unset"]) -> Optional[_T]:
+def _unset_to_optional(value: _T | "Unset") -> _T | None:
     from .client.schemas import Unset
 
     if isinstance(value, Unset):
@@ -691,9 +691,9 @@ class NetHSM:
     def __init__(
         self,
         host: str,
-        auth: Optional[Authentication] = None,
+        auth: Authentication | None = None,
         verify_tls: bool = True,
-        ca_certs: Optional[str] = None,
+        ca_certs: str | None = None,
     ) -> None:
         from .client import ApiClient, ApiConfiguration
         from .client.components.security_schemes import security_scheme_basic
@@ -734,10 +734,10 @@ class NetHSM:
         self,
         method: str,
         endpoint: str,
-        params: Optional[dict[str, str]] = None,
-        data: Optional[Bytes] = None,
-        mime_type: Optional[str] = "application/json",
-        json_obj: Optional[Any] = None,
+        params: dict[str, str] | None = None,
+        data: Bytes | None = None,
+        mime_type: str | None = "application/json",
+        json_obj: Any | None = None,
     ) -> HTTPResponse:
         from .client import ApiException
         from .client.api_response import ApiResponseWithoutDeserialization
@@ -757,7 +757,7 @@ class NetHSM:
                 f"Basic {b64encode(f'{self.auth.username}:{self.auth.password}'.encode('latin-1')).decode()}"
             )
 
-        body: Union[str, bytes, None] = None
+        body: str | bytes | None = None
         if data:
             if isinstance(data, bytes):
                 body = data
@@ -820,7 +820,7 @@ class NetHSM:
         self,
         unlock_passphrase: str,
         admin_passphrase: str,
-        system_time: Optional[Union[str, datetime]] = None,
+        system_time: str | datetime | None = None,
     ) -> None:
         from .client.components.schema.provision_request_data import ProvisionRequestDataDict
 
@@ -872,8 +872,8 @@ class NetHSM:
         real_name: str,
         role: Role,
         passphrase: str,
-        user_id: Optional[str] = None,
-        namespace: Optional[str] = None,
+        user_id: str | None = None,
+        namespace: str | None = None,
     ) -> str:
         from .client.components.schema.user_post_data import UserPostDataDict
 
@@ -1095,10 +1095,7 @@ class NetHSM:
         return response.body
 
     def list_keys(
-        self,
-        filter: Optional[str] = None,
-        prefix: Optional[str] = None,
-        label: Optional[str] = None,
+        self, filter: str | None = None, prefix: str | None = None, label: str | None = None
     ) -> list[str]:
         from .client.paths.keys.get.query_parameters import QueryParametersDict
         from .client.paths.keys_key_prefix.get.path_parameters import (
@@ -1206,12 +1203,12 @@ class NetHSM:
 
     def add_key(
         self,
-        key_id: Optional[str],
+        key_id: str | None,
         type: KeyType,
         mechanisms: list[KeyMechanism],
         private_key: PrivateKey,
         tags: list[str] = [],  # noqa: B006
-        label: Optional[str] = None,
+        label: str | None = None,
     ) -> str:
         from .client.components.schema.key_mechanisms import KeyMechanismsTupleInput
         from .client.components.schema.key_private_data import KeyPrivateDataDict
@@ -1264,11 +1261,11 @@ class NetHSM:
 
     def add_key_pem(
         self,
-        key_id: Optional[str],
+        key_id: str | None,
         mechanisms: list[KeyMechanism],
         private_key: str,
         tags: list[str] = [],  # noqa: B006
-        label: Optional[str] = None,
+        label: str | None = None,
     ) -> str:
         from .client.components.schema.key_mechanisms import KeyMechanismsTupleInput
         from .client.components.schema.key_restrictions import KeyRestrictionsDict
@@ -1348,8 +1345,8 @@ class NetHSM:
         type: KeyType,
         mechanisms: list[KeyMechanism],
         length: int,
-        key_id: Optional[str] = None,
-        label: Optional[str] = None,
+        key_id: str | None = None,
+        label: str | None = None,
     ) -> str:
         from .client.components.schema.key_generate_request_data import KeyGenerateRequestDataDict
         from .client.components.schema.key_mechanisms import KeyMechanismsTupleInput
@@ -1377,7 +1374,7 @@ class NetHSM:
             )
         return self._get_create_resource_id(response.response)
 
-    def set_key_label(self, key_id: str, label: Optional[str]) -> None:
+    def set_key_label(self, key_id: str, label: str | None) -> None:
         from .client.components.schema.key_set_label import KeySetLabelDict
         from .client.paths.keys_key_id_label.put.path_parameters import PathParametersDict
 
@@ -1525,13 +1522,13 @@ class NetHSM:
         self,
         *,
         common_name: str,
-        country: Optional[str] = None,
-        state_or_province: Optional[str] = None,
-        locality: Optional[str] = None,
-        organization: Optional[str] = None,
-        organizational_unit: Optional[str] = None,
-        email_address: Optional[str] = None,
-        subject_alt_names: Optional[list[str]] = None,
+        country: str | None = None,
+        state_or_province: str | None = None,
+        locality: str | None = None,
+        organization: str | None = None,
+        organizational_unit: str | None = None,
+        email_address: str | None = None,
+        subject_alt_names: list[str] | None = None,
     ) -> str:
         from .client.components.schema.distinguished_name import DistinguishedNameDict
 
@@ -1551,7 +1548,7 @@ class NetHSM:
             _handle_exception(e, state=State.OPERATIONAL, roles=[Role.ADMINISTRATOR])
         return response.response.data.decode("utf-8")
 
-    def generate_tls_key(self, type: TlsKeyType, length: Optional[int] = None) -> None:
+    def generate_tls_key(self, type: TlsKeyType, length: int | None = None) -> None:
         from .client.components.schema.tls_key_generate_request_data import (
             TlsKeyGenerateRequestDataDict,
         )
@@ -1568,13 +1565,13 @@ class NetHSM:
         key_id: str,
         *,
         common_name: str,
-        country: Optional[str] = None,
-        state_or_province: Optional[str] = None,
-        locality: Optional[str] = None,
-        organization: Optional[str] = None,
-        organizational_unit: Optional[str] = None,
-        email_address: Optional[str] = None,
-        subject_alt_names: Optional[list[str]] = None,
+        country: str | None = None,
+        state_or_province: str | None = None,
+        locality: str | None = None,
+        organization: str | None = None,
+        organizational_unit: str | None = None,
+        email_address: str | None = None,
+        subject_alt_names: list[str] | None = None,
     ) -> str:
         from .client.components.schema.distinguished_name import DistinguishedNameDict
         from .client.paths.keys_key_id_csr_pem.post.path_parameters import PathParametersDict
@@ -1604,7 +1601,7 @@ class NetHSM:
         return response.response.data.decode("utf-8")
 
     def set_backup_passphrase(
-        self, new_passphrase: str, current_passphrase: Optional[str] = None
+        self, new_passphrase: str, current_passphrase: str | None = None
     ) -> None:
         from .client.components.schema.backup_passphrase_config import BackupPassphraseConfigDict
 
@@ -1652,7 +1649,7 @@ class NetHSM:
             )
 
     def set_network_config(
-        self, ip_address: str, netmask: str, gateway: str, ipv6: Optional[Ipv6Config] = None
+        self, ip_address: str, netmask: str, gateway: str, ipv6: Ipv6Config | None = None
     ) -> None:
         from .client.components.schema.network_config_input import NetworkConfigInputDict
 
@@ -1673,7 +1670,7 @@ class NetHSM:
                 messages={400: "Bad request -- invalid input data"},
             )
 
-    def set_ntp_config(self, ntp_ip: Optional[str] = None, nts_name: Optional[str] = None) -> None:
+    def set_ntp_config(self, ntp_ip: str | None = None, nts_name: str | None = None) -> None:
         from .client.components.schema.ntp_config import NtpConfigDict
 
         body = NtpConfigDict(ntpIP=_optional_to_unset(ntp_ip), ntsName=_optional_to_unset(nts_name))
@@ -1687,7 +1684,7 @@ class NetHSM:
                 messages={400: "Bad request -- invalid input data"},
             )
 
-    def set_time(self, time: Union[str, datetime]) -> None:
+    def set_time(self, time: str | datetime) -> None:
         from .client.components.schema.time_config import TimeConfigDict
 
         body = TimeConfigDict(time=time)
@@ -1743,7 +1740,7 @@ class NetHSM:
             )
         return response.response.data
 
-    def restore(self, backup: Bytes, passphrase: str, time: Optional[datetime]) -> None:
+    def restore(self, backup: Bytes, passphrase: str, time: datetime | None) -> None:
         try:
             from .client.components.schema.restore_request import ArgumentsDict, RestoreRequestDict
 
@@ -1825,7 +1822,7 @@ class NetHSM:
             )
 
     def encrypt(
-        self, key_id: str, data: Base64, mode: EncryptMode, iv: Optional[Base64] = None
+        self, key_id: str, data: Base64, mode: EncryptMode, iv: Base64 | None = None
     ) -> EncryptionResult:
         from .client.components.schema.encrypt_request_data import EncryptRequestDataDict
         from .client.paths.keys_key_id_encrypt.post.path_parameters import PathParametersDict
@@ -1853,7 +1850,7 @@ class NetHSM:
         )
 
     def decrypt(
-        self, key_id: str, data: Base64, mode: DecryptMode, iv: Optional[Base64] = None
+        self, key_id: str, data: Base64, mode: DecryptMode, iv: Base64 | None = None
     ) -> Base64:
         from .client.components.schema.decrypt_request_data import DecryptRequestDataDict
         from .client.paths.keys_key_id_decrypt.post.path_parameters import PathParametersDict
@@ -1940,7 +1937,7 @@ class NetHSM:
             _handle_exception(e, state=State.OPERATIONAL, roles=[Role.ADMINISTRATOR])
 
     def join_cluster(
-        self, data: Union[ClusterJoinData, FullClusterJoinData], backup_passphrase: str
+        self, data: ClusterJoinData | FullClusterJoinData, backup_passphrase: str
     ) -> None:
         from .client.components.schema.cluster_initial_member import ClusterInitialMemberDict
         from .client.components.schema.cluster_join_req import ClusterJoinReqDict, MembersTupleInput
@@ -1996,7 +1993,7 @@ class NetHSM:
             _handle_exception(e, state=State.OPERATIONAL, roles=[Role.ADMINISTRATOR])
         return response.response.data.decode("utf-8")
 
-    def generate_cluster_key(self, type: TlsKeyType, length: Optional[int] = None) -> None:
+    def generate_cluster_key(self, type: TlsKeyType, length: int | None = None) -> None:
         from .client.components.schema.tls_key_generate_request_data import (
             TlsKeyGenerateRequestDataDict,
         )
@@ -2012,13 +2009,13 @@ class NetHSM:
         self,
         *,
         common_name: str,
-        country: Optional[str] = None,
-        state_or_province: Optional[str] = None,
-        locality: Optional[str] = None,
-        organization: Optional[str] = None,
-        organizational_unit: Optional[str] = None,
-        email_address: Optional[str] = None,
-        subject_alt_names: Optional[list[str]] = None,
+        country: str | None = None,
+        state_or_province: str | None = None,
+        locality: str | None = None,
+        organization: str | None = None,
+        organizational_unit: str | None = None,
+        email_address: str | None = None,
+        subject_alt_names: list[str] | None = None,
     ) -> str:
         from .client.components.schema.distinguished_name import DistinguishedNameDict
 
@@ -2067,7 +2064,7 @@ class NetHSM:
 
 @contextlib.contextmanager
 def connect(
-    host: str, auth: Optional[Authentication] = None, verify_tls: bool = True
+    host: str, auth: Authentication | None = None, verify_tls: bool = True
 ) -> Iterator[NetHSM]:
     nethsm = NetHSM(host, auth, verify_tls)
     try:

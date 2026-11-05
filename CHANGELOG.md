@@ -2,7 +2,7 @@
 
 ## Unreleased
 
--
+- Bump minimum Python version to 3.11.
 
 [All Changes](https://github.com/Nitrokey/nethsm-sdk-py/compare/v3.1.0-rc.1...HEAD)
 
