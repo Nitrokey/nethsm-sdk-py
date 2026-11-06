@@ -569,7 +569,7 @@ def test_cluster_ca_certificate(nethsm: NetHSM) -> None:
     Version(nethsm).require("clustering", major=5, minor=1)
 
     with pytest.raises(nethsm_module.NetHSMError, match="404: Not Found"):
-        ca_cert = nethsm.get_cluster_ca_certificate()
+        nethsm.get_cluster_ca_certificate()
 
     ca = CA()
 
@@ -594,3 +594,35 @@ def test_cluster_ca_certificate(nethsm: NetHSM) -> None:
 
     ca_cert = nethsm.get_cluster_ca_certificate()
     assert ca_cert == ca.ca_cert_pem.decode("utf-8")
+
+    # it is not possible to change the cluster CA or use a cluster cert that was signed by a
+    # different CA
+
+    new_ca = CA()
+    new_cert = new_ca.sign(csr, intermediate=False)
+
+    with pytest.raises(
+        nethsm_module.NetHSMError,
+        match="the cluster CA is set, and the given cert is not signed by it",
+    ):
+        nethsm.set_cluster_certificate(new_cert)
+
+    with pytest.raises(
+        nethsm_module.NetHSMError, match="the installed TLS cert is not signed by this CA"
+    ):
+        nethsm.set_cluster_ca_certificate(new_ca.ca_cert_pem)
+
+    # the API cert can be set without restrictions
+
+    csr_pem = nethsm.csr(
+        country=C.COUNTRY,
+        state_or_province=C.STATE_OR_PROVINCE,
+        locality=C.LOCALITY,
+        organization=C.ORGANIZATION,
+        organizational_unit=C.ORGANIZATIONAL_UNIT,
+        common_name=C.COMMON_NAME,
+        email_address=C.EMAIL_ADDRESS,
+    )
+    csr = x509.load_pem_x509_csr(csr_pem.encode())
+    new_cert = new_ca.sign(csr)
+    nethsm.set_certificate(new_cert)
