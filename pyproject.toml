@@ -8,7 +8,7 @@ version = "3.1.0-rc.1"
 description = "Python Library to manage NetHSM(s)"
 authors = [{ name = "Nitrokey", email = "pypi@nitrokey.com" },]
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.11"
 license = "Apache-2.0"
 dynamic = ["classifiers"]
 dependencies = [
@@ -73,7 +73,7 @@ unused-type-ignore-comment = "ignore"
 [tool.mypy]
 show_error_codes = true
 strict = true
-python_version = "3.9"
+python_version = "3.11"
 
 # disable strict checks for the auto-generated code, see
 # - https://github.com/python/mypy/issues/11401
