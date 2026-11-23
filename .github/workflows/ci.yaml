@@ -9,13 +9,25 @@ env:
   POETRY_SPEC: poetry >=2, <2.3
 
 jobs:
+  verify-lockfile:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - run: gh extension install github/gh-actions-lock --pin v0.4.1
+      - run: gh actions-lock --verify
   format-code:
     name: Check code format
     runs-on: ubuntu-latest
     container: python:3.11-slim
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Install required packages
         run: |
           apt update
@@ -32,7 +44,7 @@ jobs:
     container: python:3.11-slim
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Install required packages
         run: |
           apt update
@@ -49,7 +61,7 @@ jobs:
     container: python:3.11-slim
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Install required packages
         run: |
           apt update
@@ -76,13 +88,13 @@ jobs:
           - testing
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Install required packages
         run: |
           sudo apt-get update
           sudo apt-get install -y make
       - name: Set up Python 3.11
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version: "3.11"
       - name: Install Poetry
@@ -94,14 +106,14 @@ jobs:
         env:
           NETHSM_IMAGE: nitrokey/nethsm:${{ matrix.tag }}
       - name: Upload artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         if: ${{ failure() }}
         with:
           name: backup
           path: backupNethsm.bin
       - name: upload coverage
         if: matrix.tag == 'testing'
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v7
         with:
           files: ./coverage.xml
       - name: login to DockerHub
@@ -121,7 +133,7 @@ jobs:
     container: python:3.11-slim
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Create virtual environment
         run: python3 -m venv venv
       - name: Install package
