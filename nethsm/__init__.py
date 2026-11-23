@@ -18,7 +18,7 @@ from base64 import b64decode, b64encode
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from io import BufferedReader, FileIO
-from typing import TYPE_CHECKING, Any, Iterator, Mapping, NoReturn, TypeVar
+from typing import TYPE_CHECKING, Any, Generator, Mapping, NoReturn, TypeVar
 from urllib.parse import urlencode
 
 import urllib3
@@ -2065,7 +2065,7 @@ class NetHSM:
 @contextlib.contextmanager
 def connect(
     host: str, auth: Authentication | None = None, verify_tls: bool = True
-) -> Iterator[NetHSM]:
+) -> Generator[NetHSM, None, None]:
     nethsm = NetHSM(host, auth, verify_tls)
     try:
         yield nethsm

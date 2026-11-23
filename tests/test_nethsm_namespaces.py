@@ -2,7 +2,7 @@ import random
 import string
 from contextlib import contextmanager
 from dataclasses import dataclass
-from typing import Iterator, Optional
+from typing import Generator, Optional
 
 import pytest
 from conftest import Constants as C
@@ -19,7 +19,7 @@ class User:
 
 
 @contextmanager
-def login(user: User) -> Iterator[NetHSM]:
+def login(user: User) -> Generator[NetHSM, None, None]:
     auth = Authentication(user.user_id, user.passphrase)
     with nethsm.connect(C.HOST, auth, C.VERIFY_TLS) as n:
         yield n

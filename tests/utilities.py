@@ -3,7 +3,7 @@ import datetime
 import subprocess
 from abc import ABC, abstractmethod
 from time import sleep
-from typing import Iterator, Optional
+from typing import Generator, Optional
 
 import docker  # type: ignore
 import docker.errors  # type: ignore
@@ -204,7 +204,7 @@ class KeyfenderCIManager(KeyfenderManager):
 
 
 @contextlib.contextmanager
-def connect(user: UserData, password: Optional[str] = None) -> Iterator[NetHSM]:
+def connect(user: UserData, password: Optional[str] = None) -> Generator[NetHSM, None, None]:
     password = password or C.PASSWORD
     auth = Authentication(user.user_id, password)
     with nethsm_module.connect(C.HOST, auth, C.VERIFY_TLS) as nethsm_out:
