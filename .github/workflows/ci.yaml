@@ -24,14 +24,10 @@ jobs:
   format-code:
     name: Check code format
     runs-on: ubuntu-latest
-    container: python:3.11-slim
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
-      - name: Install required packages
-        run: |
-          apt update
-          apt install -y make
+      - uses: actions/setup-python@v7
       - name: Install Poetry
         run: pip install "${POETRY_SPEC}"
       - name: Create virtual environment
@@ -41,14 +37,10 @@ jobs:
   lint-style:
     name: Check code style
     runs-on: ubuntu-latest
-    container: python:3.11-slim
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
-      - name: Install required packages
-        run: |
-          apt update
-          apt install -y make
+      - uses: actions/setup-python@v7
       - name: Install Poetry
         run: pip install "${POETRY_SPEC}"
       - name: Create virtual environment
@@ -58,14 +50,10 @@ jobs:
   lint-typing:
     name: Check static typing
     runs-on: ubuntu-latest
-    container: python:3.11-slim
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
-      - name: Install required packages
-        run: |
-          apt update
-          apt install -y make
+      - uses: actions/setup-python@v7
       - name: Install Poetry
         run: pip install "${POETRY_SPEC}"
       - name: Create virtual environment
@@ -89,14 +77,7 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
-      - name: Install required packages
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y make
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v7
-        with:
-          python-version: "3.11"
+      - uses: actions/setup-python@v7
       - name: Install Poetry
         run: pip install "${POETRY_SPEC}"
       - name: Create virtual environment
@@ -130,10 +111,10 @@ jobs:
   clean-install:
     name: Try a clean install with pip
     runs-on: ubuntu-latest
-    container: python:3.11-slim
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
       - name: Create virtual environment
         run: python3 -m venv venv
       - name: Install package
