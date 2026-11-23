@@ -7,6 +7,8 @@ on:
 
 env:
   POETRY_SPEC: poetry >=2, <2.3
+  PIP_UPLOADED_PRIOR_TO: P0D
+  POETRY_SOLVER_MIN_RELEASE_AGE: 0
 
 jobs:
   verify-lockfile:
