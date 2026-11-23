@@ -11,6 +11,7 @@ from nethsm.client.components.schema import distinguished_name
 from .. import path
 from .responses import (
     response_200,
+    response_400,
     response_401,
     response_403,
     response_406,
@@ -28,6 +29,7 @@ __StatusCodeToResponse = typing.TypedDict(
     '__StatusCodeToResponse',
     {
         '200': typing.Type[response_200.ResponseFor200],
+        '400': typing.Type[response_400.ResponseFor400],
         '401': typing.Type[response_401.ResponseFor401],
         '403': typing.Type[response_403.ResponseFor403],
         '406': typing.Type[response_406.ResponseFor406],
@@ -36,6 +38,7 @@ __StatusCodeToResponse = typing.TypedDict(
 )
 _status_code_to_response: __StatusCodeToResponse = {
     '200': response_200.ResponseFor200,
+    '400': response_400.ResponseFor400,
     '401': response_401.ResponseFor401,
     '403': response_403.ResponseFor403,
     '406': response_406.ResponseFor406,
@@ -45,6 +48,7 @@ _non_error_status_codes = frozenset({
     '200',
 })
 _error_status_codes = frozenset({
+    '400',
     '401',
     '403',
     '406',
@@ -53,6 +57,7 @@ _error_status_codes = frozenset({
 
 _all_accept_content_types = (
     "application/x-pem-file",
+    "application/json",
 )
 
 
@@ -160,6 +165,7 @@ class BaseApi(api_client.Api):
         elif status in _error_status_codes:
             error_status_code = typing.cast(
                 typing.Literal[
+                    '400',
                     '401',
                     '403',
                     '406',
